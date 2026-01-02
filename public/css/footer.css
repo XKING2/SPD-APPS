@@ -1,0 +1,31 @@
+/* Sidebar full height */
+#accordionSidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+/* Konten geser biar tidak ketutup sidebar */
+#content-wrapper {
+    margin-left: 224px;
+}
+
+/* Tambah ruang agar footer tidak nempel konten */
+#content {
+    padding-bottom: 80px;
+}
+
+/* Footer rapih dan tidak tabrakan sidebar */
+footer.sticky-footer {
+    margin-left: 224px;
+    padding: 20px 0;
+    background: #fff;
+    border-top: 1px solid #eaeaea;
+}
+
+/* Wrapper full height */
+#wrapper {
+    min-height: 100vh;
+}

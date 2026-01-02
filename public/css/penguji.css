@@ -1,0 +1,79 @@
+/* KECAMATAN CARD */
+.kecamatan-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px ;
+    background: #fff;
+    cursor: pointer;
+    transition: all .25s ease;
+    margin-bottom: 5px;
+}
+
+.kecamatan-btn .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kecamatan-btn .icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(13,110,253,.1);
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kecamatan-btn .name {
+    font-weight: 600;
+}
+
+.kecamatan-btn small {
+    color: #6b7280;
+}
+
+/* Hover */
+.kecamatan-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+/* Active */
+.kecamatan-btn.active {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: #fff;
+}
+
+.kecamatan-btn.active small {
+    color: rgba(255,255,255,.8);
+}
+
+.kecamatan-btn.active .icon {
+    background: rgba(255,255,255,.2);
+    color: #fff;
+}
+
+.kecamatan-btn .arrow {
+    color: #adb5bd;
+    transition: transform .2s;
+}
+
+.kecamatan-btn.active .arrow {
+    color: #fff;
+    transform: translateX(6px);
+}
+
+/* DESA CARD */
+.desa-card {
+    transition: all .2s ease;
+}
+
+.desa-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}

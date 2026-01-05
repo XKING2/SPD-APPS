@@ -11,7 +11,7 @@
     <div class="card shadow-sm rounded-3">
         <div class="card-body">
 
-            <form action="{{ route('nilaiprakstore', ['seleksi' => $seleksiId, 'user' => $user->id]) }}" method="POST">
+           <form method="POST" action="{{ route('nilaiprakstore', ['seleksiHash' => $seleksiHash,'userHash' => $userHash]) }}"enctype="multipart/form-data"class="modal-content">
                 @csrf
                 <div class="row">
                     <!-- Kiri -->
@@ -55,7 +55,7 @@
 
                 <!-- Tombol -->
                 <div class="d-flex justify-content-end gap-3">
-                    <a href="{{ route('showpraktik', ['seleksi' => $seleksiId, 'desa' => $user->desas->id]) }}" class="btn btn-secondary px-4">
+                    <a href="{{ route('showpraktik', ['seleksiHash' => $seleksiHash,'desaHash' => $desaHash]) }}" class="btn btn-secondary px-4">
                         <i class="bi bi-arrow-left-circle"></i> Kembali
                     </a>
 

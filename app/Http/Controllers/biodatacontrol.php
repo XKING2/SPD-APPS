@@ -58,18 +58,18 @@ class biodatacontrol extends Controller
     {
         $admin = Auth::user();
 
-        // 🔒 Pastikan admin punya desa
+        // 🔒 Pastikan admin terikat desa
         if (!$admin->id_desas) {
             abort(403, 'Admin tidak terikat dengan desa');
         }
 
-        $biodatas = Biodata::where('is_validated', false)
-        ->whereHas('user', function ($q) use ($admin) {
-            $q->where('id_desas', $admin->id_desas);
-        })
-        ->with('user')
-        ->orderBy('id')
-        ->get();
+        $biodatas = Biodata::whereIn('status', ['draft', 'valid'])
+            ->whereHas('user', function ($q) use ($admin) {
+                $q->where('id_desas', $admin->id_desas);
+            })
+            ->with('user')
+            ->orderBy('id', 'asc')
+            ->get();
 
         return view('admin.validasi.index', compact('biodatas'));
     }

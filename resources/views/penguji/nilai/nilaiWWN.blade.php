@@ -16,7 +16,7 @@
 
             <!-- Search -->
             <div class="d-flex justify-content-between mb-3">
-                <form action="{{ route('ShowWWN', ['seleksi' => $seleksi->id, 'desa' => $desa->id]) }}" method="GET">
+                <form action="{{ route('ShowWWN', ['seleksiHash' => $seleksiHash,'desaHash'    => $desaHash]) }}" method="GET">
                     <input type="text" name="search"
                         class="form-control form-control-sm mr-2"
                         placeholder="Cari nama..."
@@ -34,7 +34,6 @@
                             <th>No Peserta</th>
                             <th>Nama</th>
                             <th>Score</th>
-                            <th style="width: 200px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,11 +45,6 @@
                                 <td class="text-left">{{ $user->name }}</td>
                                 <td class="text-center">
                                     {{ $user->score_raw ?? '-' }}
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-success">
-                                        <i class="fas fa-edit"></i> Beri Nilai Praktek
-                                    </a>
                                 </td>
                             </tr>
                         @empty

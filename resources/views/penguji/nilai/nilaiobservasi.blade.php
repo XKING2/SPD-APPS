@@ -1,7 +1,7 @@
 @extends('layouts.main2')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Nilai Praktik Peserta</h1>
+    <h1 class="h3 mb-4 text-gray-800">Nilai Observasi Peserta</h1>
 @endsection
 
 @section('content')
@@ -16,7 +16,7 @@
 
             <!-- Search -->
             <div class="d-flex justify-content-between mb-3">
-                <form action="{{ route('showobservasi', ['seleksi' => $seleksi->id, 'desa' => $desa->id]) }}" method="GET">
+                <form action="{{ route('showobservasi', ['seleksiHash' => $seleksiHash,'desaHash' => $desaHash]) }}" method="GET">
                     <input type="text" name="search"
                         class="form-control form-control-sm mr-2"
                         placeholder="Cari nama..."
@@ -38,15 +38,26 @@
                     </thead>
                     <tbody>
 
+                        @php
+                            $seleksiHash = Hashids::encode($seleksi->id);
+                        @endphp
+
                         @forelse ($users as $user)
+                            @php
+                                $userHash = Hashids::encode($user->id);
+                            @endphp
+
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $user->no_peserta ?? $user->id }}</td>
                                 <td class="text-left">{{ $user->name }}</td>
                                 <td>
-                                    <a href="{{ route('add.observasi', [$seleksi->id, $user->id]) }}"
-                                    class="btn btn-sm btn-success">
-                                    <i class="fas fa-edit"></i> Beri Nilai Praktek
+                                    <a href="{{ route('add.observasi', [
+                                        'seleksiHash' => $seleksiHash,
+                                        'userHash'    => $userHash
+                                    ]) }}"
+                                    class="btn btn-primary">
+                                        <i class="fas fa-edit"></i> Beri Nilai Praktek
                                     </a>
                                 </td>
                             </tr>

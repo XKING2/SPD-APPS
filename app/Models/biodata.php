@@ -11,7 +11,7 @@ class biodata extends Model
     protected $table = 'biodata';
 
     protected $fillable = [
-        'id_user','kartu_keluarga','ktp','ijazah','cv','surat_pendaftaran','profile_img','is_validated','validated_at','status'
+        'id_user','kartu_keluarga','ktp','ijazah','cv','surat_pendaftaran','profile_img','validated_at','status'
     ];
 
     public function user() {

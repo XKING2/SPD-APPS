@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class exams extends Model
 {
@@ -64,4 +65,7 @@ class exams extends Model
         'tpu' => 'TPU',
         'wwn' => 'Wawancara',
     ];
+
+
+
 }

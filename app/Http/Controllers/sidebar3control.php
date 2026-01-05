@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Desas;
 use Illuminate\Http\Request;
-use App\Models\ExamQuestion;
-use App\Models\exams;
 use App\Models\Kecamatans;
 use App\Models\seleksi;
 use App\Models\User;
-use App\Models\wawancaraquest;
 use Illuminate\Support\Facades\DB;
 use App\Charts\PendaftaranKecamatanChart;
+
+use Vinkla\Hashids\Facades\Hashids;
 
 class sidebar3control extends Controller
 {
@@ -32,7 +31,6 @@ class sidebar3control extends Controller
             });
         }
 
-        // ===== STATISTIK =====
         $totalPeserta = (clone $query)->count();
         $lulus = (clone $query)->where('role', 'penguji')->count();
         $belum = (clone $query)->where('role', 'users')->count();
@@ -91,7 +89,6 @@ class sidebar3control extends Controller
             'id_desas'      => 'required|exists:desas,id',
         ]);
 
-        // VALIDASI RELASI DESA ↔ KECAMATAN
         $desaValid = Desas::where('id', $request->id_desas)
             ->where('id_kecamatans', $request->id_kecamatans)
             ->exists();
@@ -156,39 +153,15 @@ class sidebar3control extends Controller
                 ->back()
                 ->with('error', 'Seleksi untuk desa ini belum tersedia.');
         }
+       
 
         return redirect()->route('showtpu', [
-            'seleksi' => $seleksi->id,
-            'desa'    => $desaId
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desaId),
         ]);
     }
 
-    public function shownilaiTPU(Request $request, $seleksiId, $desaId)
-    {
-
-        // Ambil desa
-        $desa = Desas::findOrFail($desaId);
-
-        // Ambil seleksi DAN pastikan seleksi itu memang milik desa ini
-        $seleksi = Seleksi::where('id', $seleksiId)
-            ->where('id_desas', $desaId)
-            ->firstOrFail();
-
-        $users = User::where('users.id_desas', $desaId)
-            ->leftJoin('fuzzy_scores', function ($join) use ($seleksiId) {
-                $join->on('users.id', '=', 'fuzzy_scores.user_id')
-                    ->where('fuzzy_scores.id_seleksi', $seleksiId)
-                    ->where('fuzzy_scores.type', 'TPU');
-            })
-            ->select(
-                'users.id',
-                'users.name',
-                'fuzzy_scores.score_raw'
-            )
-            ->orderBy('users.name')
-            ->get();
-        return view('penguji.nilai.nilaiTPU', compact('users', 'desa', 'seleksi'));
-    }
+    
 
     public function showMainWWN()
     {
@@ -203,36 +176,11 @@ class sidebar3control extends Controller
             ->firstOrFail();
 
         return redirect()->route('ShowWWN', [
-            'seleksi' => $seleksi->id,
-            'desa'    => $desaId
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desaId),
         ]);
     }
 
-    public function shownilaiWWN(Request $request, $seleksiId, $desaId)
-    {
-        // Ambil desa
-        $desa = Desas::findOrFail($desaId);
-
-        // Ambil seleksi DAN pastikan seleksi itu memang milik desa ini
-        $seleksi = Seleksi::where('id', $seleksiId)
-            ->where('id_desas', $desaId)
-            ->firstOrFail();
-
-        $users = User::where('users.id_desas', $desaId)
-            ->leftJoin('fuzzy_scores', function ($join) use ($seleksiId) {
-                $join->on('users.id', '=', 'fuzzy_scores.user_id')
-                    ->where('fuzzy_scores.id_seleksi', $seleksiId)
-                    ->where('fuzzy_scores.type', 'WWN');
-            })
-            ->select(
-                'users.id',
-                'users.name',
-                'fuzzy_scores.score_raw'
-            )
-            ->orderBy('users.name')
-            ->get();
-        return view('penguji.nilai.nilaiWWN',compact('users', 'desa', 'seleksi'));
-    }
 
     public function showMainPrak()
     {
@@ -248,10 +196,13 @@ class sidebar3control extends Controller
             ->firstOrFail();
 
         return redirect()->route('showpraktik', [
-            'seleksi' => $seleksi->id,
-            'desa'    => $desaId
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desaId),
         ]);
     }
+
+
+   
 
     public function resolveSeleksiByDesa2($desaId)
     {
@@ -260,37 +211,9 @@ class sidebar3control extends Controller
             ->firstOrFail();
 
         return redirect()->route('showobservasi', [
-            'seleksi' => $seleksi->id,
-            'desa'    => $desaId
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desaId),
         ]);
-    }
-
-    
-
-    
-
-    public function shownilaipraktik(Request $request, $seleksiId, $desaId)
-    {
-        // Ambil desa
-        $desa = Desas::findOrFail($desaId);
-
-        // Ambil seleksi DAN pastikan seleksi itu memang milik desa ini
-        $seleksi = Seleksi::where('id', $seleksiId)
-            ->where('id_desas', $desaId)
-            ->firstOrFail();
-
-        // Ambil user berdasarkan desa
-        $users = User::where('id_desas', $desaId)
-            ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            })
-            ->orderBy('name')
-            ->get();
-
-        return view(
-            'penguji.nilai.nilaipraktik',
-            compact('users', 'desa', 'seleksi')
-        );
     }
 
     public function showMainOrb()
@@ -300,35 +223,11 @@ class sidebar3control extends Controller
         return view('penguji.nilaiorbmain',compact('kecamatans'));
     }
 
-    public function shownilaiobservasi(Request $request, $seleksiId, $desaId)
-    {
-
-        $desa = Desas::findOrFail($desaId);
-
-        // Ambil seleksi DAN pastikan seleksi itu memang milik desa ini
-        $seleksi = Seleksi::where('id', $seleksiId)
-            ->where('id_desas', $desaId)
-            ->firstOrFail();
-
-        // Ambil user berdasarkan desa
-        $users = User::where('id_desas', $desaId)
-            ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            })
-            ->orderBy('name')
-            ->get();
-
-        return view(
-            'penguji.nilai.nilaiobservasi',
-            compact('users', 'desa', 'seleksi')
-        );
-    }
-
 
     public function showtambahTPUMain(Seleksi $seleksi, Desas $desa)
     {
         $kecamatans = Kecamatans::orderBy('nama_kecamatan')->get();
-            // 🔒 VALIDASI: desa HARUS milik seleksi
+            
         if ($seleksi->id_desas !== $desa->id) {
             abort(403, 'Desa tidak sesuai dengan seleksi');
         }
@@ -348,46 +247,15 @@ class sidebar3control extends Controller
             ->firstOrFail();
 
         return redirect()->route('addTPU', [
-            'seleksi' => $seleksi->id,
-            'desa'    => $desaId
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desaId),
         ]);
     }
 
-    public function showtambahTPU(Seleksi $seleksi, Desas $desa)
-    {
-        // 🔒 Validasi desa milik seleksi
-        if ($seleksi->id_desas !== $desa->id) {
-            abort(403, 'Desa tidak sesuai dengan seleksi');
-        }
-
-        // 1️⃣ Cari exam TPU untuk desa + seleksi ini
-        $exam = Exams::where('id_seleksi', $seleksi->id)
-            ->where('id_desas', $desa->id)
-            ->where('type', 'TPU')
-            ->first();
-
-        // 2️⃣ Jika exam ada → ambil soalnya
-        $questions = [];
-        if ($exam) {
-            $questions = ExamQuestion::where('id_exam', $exam->id)
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('penguji.tambahsoal.tambahTPU', [
-            'seleksi'   => $seleksi,
-            'desa'      => $desa,
-            'exam'      => $exam,        // penting untuk view
-            'questions' => $questions,
-            'types'     => Exams::TYPES,
-            'kecamatans'=> Kecamatans::orderBy('nama_kecamatan')->get(),
-        ]);
-    }
-
+    
     public function showtambahWWNMain(Seleksi $seleksi, Desas $desa)
     {
         $kecamatans = Kecamatans::orderBy('nama_kecamatan')->get();
-            // 🔒 VALIDASI: desa HARUS milik seleksi
         if ($seleksi->id_desas !== $desa->id) {
             abort(403, 'Desa tidak sesuai dengan seleksi');
         }
@@ -407,44 +275,10 @@ class sidebar3control extends Controller
             ->firstOrFail();
 
         return redirect()->route('addWWN', [
-            'seleksi' => $seleksi->id,
-            'desa'    => $desaId
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desaId),
+            
         ]);
-    }
-
-
-
-    public function showtambahwawancara(Seleksi $seleksi, Desas $desa)
-    {
-
-         // 🔒 Validasi desa milik seleksi
-        if ($seleksi->id_desas !== $desa->id) {
-            abort(403, 'Desa tidak sesuai dengan seleksi');
-        }
-
-        // 1️⃣ Cari exam TPU untuk desa + seleksi ini
-        $exam = Exams::where('id_seleksi', $seleksi->id)
-            ->where('id_desas', $desa->id)
-            ->where('type', 'WWN')
-            ->first();
-
-        // 2️⃣ Jika exam ada → ambil soalnya
-        $questions = [];
-        if ($exam) {
-            $questions = wawancaraquest::where('id_exams', $exam->id)
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('penguji.tambahsoal.tambahwawancara', [
-            'seleksi'   => $seleksi,
-            'desa'      => $desa,
-            'exam'      => $exam,        // penting untuk view
-            'questions' => $questions,
-            'types'     => Exams::TYPES,
-            'kecamatans'=> Kecamatans::orderBy('nama_kecamatan')->get(),
-        ]);
-
     }
 
     public function generatePage(Request $request)
@@ -459,4 +293,5 @@ class sidebar3control extends Controller
 
         return view('penguji.generateSaw', compact('seleksis', 'selectedSeleksi'));
     }
+    
 }

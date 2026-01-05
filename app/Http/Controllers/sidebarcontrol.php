@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\biodata;
 use App\Models\exams;
+use App\Models\ResultExam;
 
 class sidebarcontrol extends Controller
 {
@@ -55,6 +56,7 @@ class sidebarcontrol extends Controller
             ->where('status', 'active')
             ->first();
 
+        
         $examWWN = exams::where('id_desas', $user->id_desas)
             ->where('type', 'wwn')
             ->where('status', 'active')
@@ -62,14 +64,31 @@ class sidebarcontrol extends Controller
 
         $profileImg = $biodata->profile_img ?? 'img/undraw_profile.svg';
 
+        $ExamResultTPU = $this->getExamResult($examTPU, $user->id);
+        $ExamResultWWN = $this->getExamResult($examWWN, $user->id);
+
         return view('ujian.mainujian', compact(
             'user',
             'biodata',
             'profileImg',
             'examTPU',
-            'examWWN'
+            'examWWN',
+            'ExamResultTPU',
+            'ExamResultWWN'
         ));
     }
+
+    private function getExamResult(?Exams $exam, int $userId): ?ResultExam
+    {
+        if (!$exam) {
+            return null;
+        }
+
+        return ResultExam::where('exam_id', $exam->id)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
 
 
 

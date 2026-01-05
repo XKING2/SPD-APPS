@@ -14,11 +14,11 @@ return new class extends Migration
 
         Schema::create('exam_user_results', function (Blueprint $table) {
             $table->id();
-
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('exam_id')->nullable();
             $table->enum('type',['TPU','WWN','PRAK','ORB'])->nullable();
             $table->integer('score')->default(0);
+            $table->json('question_order')->nullable();
             $table->boolean('is_submitted')->default(false);
             $table->timestamp('submitted_at')->nullable();
             $table->timestamps();

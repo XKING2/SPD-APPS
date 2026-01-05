@@ -227,17 +227,27 @@ function render() {
     }
 
     el.opsi.innerHTML = '';
-    q.options.forEach(opt => {
+
+    const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    q.options.forEach((opt, index) => {
         const div = document.createElement('div');
         div.className = 'option';
-        if (state.answers[q.id] === opt.id) div.classList.add('active');
 
-        div.innerHTML = `<strong>${opt.label}.</strong> ${opt.opsi_tulisan}`;
+        if (state.answers[q.id] === opt.id) {
+            div.classList.add('active');
+        }
+
+        div.innerHTML = `
+            <strong>${LABELS[index]}.</strong> ${opt.opsi_tulisan}
+        `;
+
         div.onclick = () => {
             state.answers[q.id] = opt.id;
             localStorage.setItem(ANSWER_KEY, JSON.stringify(state.answers));
             render();
         };
+
         el.opsi.appendChild(div);
     });
 

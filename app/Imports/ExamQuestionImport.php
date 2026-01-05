@@ -6,20 +6,19 @@ use App\Models\ExamQuestion;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
-use Illuminate\Support\Facades\File;
+use Maatwebsite\Excel\Concerns\WithStartRow;
 
-class ExamQuestionImport implements
-    ToCollection,
-    WithHeadingRow,
-    SkipsEmptyRows
+class ExamQuestionImport implements ToCollection,WithHeadingRow,SkipsEmptyRows
 {
     protected int $examId;
     protected string $tempImagePath;
+
 
     public function __construct(int $examId, string $tempImagePath)
     {
@@ -27,87 +26,105 @@ class ExamQuestionImport implements
         $this->tempImagePath = $tempImagePath;
     }
 
+    public function collection(Collection $rows): void
+    {
 
-
-    public function collection(Collection $rows)
-{
-    Log::info('[DEBUG HEADER]', [
-        'keys' => $rows->first()?->keys()
-    ]);
-
-    Log::info('[IMPORT] Jumlah baris Excel', [
-        'total_rows' => $rows->count()
-    ]);
-
-    // 🔑 BUILD MAP: filename => fullpath
-    $imageMap = collect(File::allFiles($this->tempImagePath))
-        ->mapWithKeys(fn ($file) => [
-            $file->getFilename() => $file->getRealPath()
-        ]);
-
-    Log::info('[IMPORT] Total file gambar ditemukan', [
-        'count' => $imageMap->count()
-    ]);
-
-    DB::transaction(function () use ($rows, $imageMap) {
-
-        foreach ($rows as $index => $row) {
-
-            Log::info('[IMPORT] Proses baris', [
-                'row' => $index + 1,
-                'code_pertanyaan' => $row['code_pertanyaan'] ?? null,
+        $imageMap = collect(File::allFiles($this->tempImagePath))
+            ->mapWithKeys(fn ($file) => [
+                $file->getFilename() => $file->getRealPath()
             ]);
 
-            $gambarPath = null;
+        try {
 
-                if (!empty($row['image_name']) && $imageMap->has($row['image_name'])) {
+            DB::transaction(function () use ($rows, $imageMap) {
 
-                    $gambarPath = 'soal/' . strtolower($row['subject']) . '/' . $row['image_name'];
+                foreach ($rows as $index => $row) {
 
-                    Storage::disk('public')->put(
-                        $gambarPath,
-                        file_get_contents($imageMap[$row['image_name']])
+                    $rowNumber = $index + 1;
+                    $subject  = trim($row['subject']);
+                    $code     = trim($row['code_pertanyaan']);
+                    $jawaban  = strtoupper(trim($row['jawaban_benar']));
+
+                    $gambarPath = null;
+
+                    if (!empty($row['image_name'])) {
+
+
+                        if (!$imageMap->has($row['image_name'])) {
+                            throw new \Exception(
+                                "Gambar '{$row['image_name']}' tidak ditemukan (baris {$rowNumber})"
+                            );
+                        }
+
+                        $gambarPath = 'soal/' . strtolower($subject) . '/' . uniqid() . '_' . $row['image_name'];
+
+                        Storage::disk('public')->put(
+                            $gambarPath,
+                            file_get_contents($imageMap[$row['image_name']])
+                        );
+
+                    }
+
+
+                    $question = ExamQuestion::updateOrCreate(
+                        [
+                            'id_exam' => $this->examId,
+                            'code_pertanyaan' => $code,
+                        ],
+                        [
+                            'subject'    => $subject,
+                            'pertanyaan' => trim($row['pertanyaan']),
+                            'image_name' => $gambarPath,
+                        ]
                     );
+;
 
-                    Log::info('[IMPORT] Gambar ditemukan & disimpan', [
-                        'file' => $row['image_name'],
-                        'path' => $gambarPath,
-                    ]);
+                    $question->options()->delete();
+                    $optionsMap = [];
 
-                } elseif (!empty($row['image_name'])) {
+                    foreach ([
+                        'A' => $row['option_a'],
+                        'B' => $row['option_b'],
+                        'C' => $row['option_c'],
+                        'D' => $row['option_d'],
+                    ] as $label => $text) {
 
-                    Log::warning('[IMPORT] Gambar TIDAK ditemukan', [
-                        'image_name' => $row['image_name'],
+                        if (trim($text) === '') {
+                            throw new \Exception(
+                                "Opsi {$label} kosong pada soal {$code} (baris {$rowNumber})"
+                            );
+                        }
+
+                        $option = $question->options()->create([
+                            'label' => $label,
+                            'opsi_tulisan' => trim($text),
+                        ]);
+
+                        $optionsMap[$label] = $option->id;
+;
+                    }
+
+                    if (!isset($optionsMap[$jawaban])) {
+
+                        throw new \Exception(
+                            "Jawaban benar '{$jawaban}' tidak valid pada soal '{$code}' (baris {$rowNumber})"
+                        );
+                    }
+
+                    $question->update([
+                        'correct_option_id' => $optionsMap[$jawaban]
                     ]);
                 }
+            });
 
-            $question = ExamQuestion::updateOrCreate(
-                [
-                    'id_exam' => $this->examId,
-                    'code_pertanyaan' => $row['code_pertanyaan']
-                ],
-                [
-                    'subject'       => $row['subject'],
-                    'pertanyaan'    => $row['pertanyaan'],
-                    'image_name'    => $gambarPath,
-                    'jawaban_benar' => strtoupper($row['jawaban_benar']),
-                ]
-            );
+        } catch (\Throwable $e) {
 
-            $question->options()->delete();
 
-            $question->options()->createMany([
-                ['label' => 'A', 'opsi_tulisan' => $row['option_a']],
-                ['label' => 'B', 'opsi_tulisan' => $row['option_b']],
-                ['label' => 'C', 'opsi_tulisan' => $row['option_c']],
-                ['label' => 'D', 'opsi_tulisan' => $row['option_d']],
-            ]);
+            throw $e;
         }
-    });
 
-    Log::info('[IMPORT] Transaction selesai');
-}
-
+        Log::info('[IMPORT] Import soal TPU selesai');
+    }
 
     public function rules(): array
     {
@@ -123,5 +140,4 @@ class ExamQuestionImport implements
             '*.image_name'      => 'nullable|string',
         ];
     }
-
 }

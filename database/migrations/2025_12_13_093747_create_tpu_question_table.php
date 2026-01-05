@@ -41,12 +41,11 @@ return new class extends Migration
 
         Schema::create('tpu_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_exam') ->nullable()->constrained('exams')->cascadeOnDelete();
+            $table->foreignId('id_exam')->nullable()->constrained('exams')->cascadeOnDelete();
             $table->string('subject');
             $table->string('code_pertanyaan')->unique();
             $table->text('pertanyaan');
             $table->string('image_name')->nullable();
-            $table->string('jawaban_benar', 1);
             $table->timestamps();
         });
     }

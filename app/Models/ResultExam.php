@@ -16,13 +16,15 @@ class ResultExam extends Model
         'exam_id',
         'type',
         'score',
+        'question_order',
         'is_submitted',
         'submitted_at',
     ];
 
     protected $casts = [
-        'is_submitted' => 'boolean',
-        'submitted_at' => 'datetime',
+        'question_order' => 'array',
+        'is_submitted'   => 'boolean',
+        'submitted_at'   => 'datetime',
     ];
 
     // ================= RELATION =================

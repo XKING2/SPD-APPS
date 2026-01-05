@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('id_Pertanyaan')->constrained('tpu_questions')->cascadeOnDelete();
             $table->string('label', 1);
             $table->text('opsi_tulisan');
+            $table->unique(['id_Pertanyaan', 'label']);
             $table->timestamps();
         });
     }

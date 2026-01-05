@@ -104,10 +104,13 @@
 
 <div class="modal fade" id="importSoalModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form action="{{ route('exam-questions.import', ['seleksi' => $seleksi->id,'desa'=> $desa->id]) }}"
-              method="POST"
-              enctype="multipart/form-data"
-              class="modal-content">
+        <form method="POST"
+            action="{{ route('exam-questions.import', [
+                'seleksiHash' => $seleksiHash,
+                'desaHash'    => $desaHash
+            ]) }}"
+            enctype="multipart/form-data"
+            class="modal-content">
 
             @csrf
             <input type="hidden" name="id_seleksi" value="{{ $seleksi->id }}">

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>{{ $exams->judul }}</title>
+<title>{{ $exam->judul }}</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -88,7 +88,7 @@
 
 <div class="card mb-3">
     <div class="card-body d-flex justify-content-between align-items-center">
-        <strong>{{ $exams->judul }}</strong>
+        <strong>{{ $exam->judul }}</strong>
         <div id="timer" class="bg-danger text-white px-3 py-2 rounded">00:00</div>
     </div>
 </div>
@@ -134,10 +134,10 @@
 
 <script id="exam-data" type="application/json">
 {!! json_encode([
-    'examId'    => $exams->id,
+    'examId'    => $exam->id,
     'questions' => $questions,
-    'duration'  => (int) $exams->duration * 60,
-    'submitUrl' => route('exam.wwn.submit', $exams->id),
+    'duration'  => (int) $exam->duration * 60,
+    'submitUrl' => route('exam.wwn.submit', $exam->id),
 ], JSON_UNESCAPED_UNICODE) !!}
 </script>
 
@@ -227,29 +227,36 @@ function render() {
     }
 
     el.opsi.innerHTML = '';
-    q.options.forEach(opt => {
+    const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    q.options.forEach((opt, index) => {
         const div = document.createElement('div');
         div.className = 'option';
-        if (state.answers[q.id] === opt.id) div.classList.add('active');
 
-        div.innerHTML = `<strong>${opt.label}.</strong> ${opt.opsi_tulisan}`;
+        if (state.answers[q.id] === opt.id) {
+            div.classList.add('active');
+        }
+
+        div.innerHTML = `
+            <strong>${LABELS[index]}.</strong> ${opt.opsi_tulisan}
+        `;
+
         div.onclick = () => {
             state.answers[q.id] = opt.id;
             localStorage.setItem(ANSWER_KEY, JSON.stringify(state.answers));
             render();
         };
+
         el.opsi.appendChild(div);
     });
 
     document.querySelectorAll('.soal-btn').forEach((btn, i) => {
     btn.classList.remove('answered');
 
-        // WARNA HIJAU JIKA TERJAWAB
         if (state.answers[QUESTIONS[i].id]) {
             btn.classList.add('answered');
         }
-
-        // HAPUS FLAG SEBELUM RENDER ULANG
+        
         const oldFlag = btn.querySelector('.flag-badge');
         if (oldFlag) oldFlag.remove();
 

@@ -41,8 +41,15 @@
                     $canGenerate = $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(5));
                 @endphp 
 
+                {{-- ================= SUDAH DIKERJAKAN ================= --}}
+                @if($ExamResultTPU && $ExamResultTPU->is_submitted)
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Anda sudah mengerjakan ujian TPU.</strong>
+                </div>
+
                 {{-- ================= UJIAN SELESAI ================= --}}
-                @if($isFinished)
+                @elseif($isFinished)
                     <p class="text-secondary mt-3 fw-bold">
                         Jadwal ujian sudah selesai
                     </p>
@@ -50,48 +57,11 @@
                 {{-- ================= BISA MULAI UJIAN ================= --}}
                 @elseif($canGenerate)
                     <button
-                        class="btn btn-lg btn-primary"
-                        data-toggle="modal"
-                        data-target="#enrollModal">
+                        class="btn btn-lg btn-primary btn-enroll"
+                        data-action="{{ route('exam.tpu.verify', $examTPU->id) }}"
+                        data-title="Ujian TPU">
                         Mulai Ujian TPU
                     </button>
-
-                    {{-- MODAL ENROLLMENT --}}
-                    <div class="modal fade" id="enrollModal" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Masukkan Enrollment Key</h5>
-                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                </div>
-
-                                <form method="POST" action="{{ route('exam.tpu.verify', $examTPU->id) }}">
-                                    @csrf
-
-                                    <div class="modal-body text-center">
-                                        <input type="text"
-                                            name="enrollment_key"
-                                            class="form-control text-center text-uppercase"
-                                            placeholder="XXXXXX"
-                                            maxlength="6"
-                                            required>
-
-                                        @error('enrollment_key')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary">
-                                            Verifikasi & Mulai
-                                        </button>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
 
                 {{-- ================= BELUM WAKTUNYA ================= --}}
                 @else
@@ -121,7 +91,7 @@
 <div class="card shadow-lg border-left-primary mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h5 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-clipboard-check mr-2"></i> Test Pengetahuan Umum
+                <i class="fas fa-clipboard-check mr-2"></i> Test Wawancara
             </h5>
         </div>
 
@@ -147,8 +117,15 @@
                     $canGenerate = $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(5));
                 @endphp 
 
+                {{-- ================= SUDAH DIKERJAKAN ================= --}}
+                @if($ExamResultWWN && $ExamResultWWN->is_submitted)
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Anda sudah mengerjakan ujian Wawancara.</strong>
+                </div>
+
                 {{-- ================= UJIAN SELESAI ================= --}}
-                @if($isFinished)
+                @elseif($isFinished)
                     <p class="text-secondary mt-3 fw-bold">
                         Jadwal ujian sudah selesai
                     </p>
@@ -156,48 +133,11 @@
                 {{-- ================= BISA MULAI UJIAN ================= --}}
                 @elseif($canGenerate)
                     <button
-                        class="btn btn-lg btn-primary"
-                        data-toggle="modal"
-                        data-target="#enrollModal">
-                        Mulai Ujian TPU
+                        class="btn btn-lg btn-primary btn-enroll"
+                        data-action="{{ route('exam.wwn.verify', $examWWN->id) }}"
+                        data-title="Ujian Wawancara">
+                        Mulai Ujian Wawancara
                     </button>
-
-                    {{-- MODAL ENROLLMENT --}}
-                    <div class="modal fade" id="enrollModal" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Masukkan Enrollment Key</h5>
-                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                </div>
-
-                                <form method="POST" action="{{ route('exam.wwn.verify', $examWWN->id) }}">
-                                    @csrf
-
-                                    <div class="modal-body text-center">
-                                        <input type="text"
-                                            name="enrollment_key"
-                                            class="form-control text-center text-uppercase"
-                                            placeholder="XXXXXX"
-                                            maxlength="6"
-                                            required>
-
-                                        @error('enrollment_key')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary">
-                                            Verifikasi & Mulai
-                                        </button>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
 
                 {{-- ================= BELUM WAKTUNYA ================= --}}
                 @else
@@ -228,6 +168,67 @@
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-enroll').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const action = this.dataset.action;
+            const title  = this.dataset.title;
+            const csrf   = document.querySelector('meta[name="csrf-token"]').content;
+
+            const { value: enrollment } = await Swal.fire({
+                title: title,
+                text: 'Masukkan Enrollment Key',
+                input: 'text',
+                inputPlaceholder: 'XXXXXX',
+                inputAttributes: {
+                    maxlength: 6,
+                    autocapitalize: 'characters',
+                    autocorrect: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Verifikasi & Mulai',
+                cancelButtonText: 'Batal',
+                preConfirm: (value) => {
+                    if (!value || value.length !== 6) {
+                        Swal.showValidationMessage('Enrollment key harus 6 karakter');
+                    }
+                    return value;
+                }
+            });
+
+            if (!enrollment) return;
+
+            // Kirim POST via fetch
+            try {
+                const res = await fetch(action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: new URLSearchParams({
+                        enrollment_key: enrollment
+                    })
+                });
+
+                if (res.redirected) {
+                    window.location.href = res.url;
+                    return;
+                }
+
+                const text = await res.text();
+                Swal.fire('Gagal', text || 'Enrollment key salah', 'error');
+
+            } catch (err) {
+                Swal.fire('Error', 'Terjadi kesalahan saat verifikasi', 'error');
+            }
+        });
+    });
+});
+</script>
 
 <script>
 document.getElementById('startExamBtn')?.addEventListener('click', function () {

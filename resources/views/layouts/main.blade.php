@@ -74,8 +74,6 @@
                     aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item {{ Request::routeIs('showbiodata') ? 'active' : '' }}" href="{{ route('showbiodata') }}">Biodata</a>
-                        <a class="collapse-item {{ Request::routeIs('showverivikasi') ? 'active' : '' }}" href="{{ route('showverivikasi') }}">Verivikasi Biodata</a>
-                       
                     </div>
                 </div>
             </li>

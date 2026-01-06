@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\biodata;
 use App\Models\exams;
+use App\Models\Formasi;
 use App\Models\ResultExam;
 
 class sidebarcontrol extends Controller
@@ -27,11 +28,19 @@ class sidebarcontrol extends Controller
             'profileImg'
         ));
     }
+    
     public function showbiodata()
     {
-        $biodata = Biodata::where('id_user', Auth::id())->first();
+        $user = Auth::user(); // OBJECT
 
-        return view('users.biodata', compact('biodata'));
+        $formasis = Formasi::with('kebutuhan')
+            ->where('id_desas', $user->id_desas)
+            ->where('tahun', now()->year)
+            ->get();
+
+        $biodata = Biodata::where('id_user', $user->id)->first();
+
+        return view('users.biodata', compact('biodata', 'user', 'formasis'));
     }
 
     public function showverikasibio()

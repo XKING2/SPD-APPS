@@ -10,8 +10,6 @@ class wawancaraquest extends Model
 
     protected $fillable = [
         'subject',
-        'id_exams',
-        'code_pertanyaan',
         'pertanyaan',
         'image_path',
     ];

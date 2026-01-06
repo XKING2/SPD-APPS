@@ -18,87 +18,55 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class WWNControl extends Controller
 {
-    public function storeWawancara(Request $request, string $seleksiHash, string $desaHash)
+   public function storeWawancara(Request $request)
     {
-
-        $seleksiId = Hashids::decode($seleksiHash)[0] ?? null;
-        $desaId    = Hashids::decode($desaHash)[0] ?? null;
-
-        if (!$seleksiId || !$desaId) {
-            abort(404);
-        }
-
-
-        $seleksi = seleksi::findOrFail($seleksiId);
-        $desa    = Desas::findOrFail($desaId);
-
-        if ($seleksi->id_desas !== $desa->id) {
-            abort(403, 'Desa tidak sesuai dengan seleksi');
-        }
-
         $request->validate([
-            'type'     => 'required|string',
-            'duration' => 'required|integer|min:1',
-            'excel'    => 'required|file|mimes:xlsx,xls',
-            'zip'      => 'nullable|file|mimes:zip',
+            'excel' => 'required|file|mimes:xlsx,xls',
+            'zip'   => 'nullable|file|mimes:zip',
         ]);
 
-        DB::beginTransaction();
-       
+        $tempDir = storage_path('app/temp_images/' . uniqid());
 
         try {
 
-            $exam = exams::create([
-                'id_seleksi' => $seleksi->id,
-                'id_desas'   => $desa->id,
-                'type'       => $request->type,
-                'start_at'   => $request->start_at,
-                'end_at'     => $request->end_at,
-                'duration'   => $request->duration,
-                'status'     => 'draft',
-                'created_by'=> Auth::id(),
-            ]);
-
-            $tempDir = storage_path('app/temp_wawancara/exam_' . uniqid());
-            if (!file_exists($tempDir)) {
-                mkdir($tempDir, 0777, true);
+            // Buat folder temp
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0755, true);
             }
 
+            // Extract ZIP jika ada
             if ($request->hasFile('zip')) {
                 $zip = new \ZipArchive;
                 if ($zip->open($request->file('zip')->getRealPath()) === true) {
                     $zip->extractTo($tempDir);
                     $zip->close();
                 } else {
-                    throw new \Exception('Gagal extract ZIP');
+                    throw new \Exception('Gagal membuka file ZIP');
                 }
             }
 
+            // Import Excel
             Excel::import(
-                new WawancaraQuestionImport(
-                    $exam->id,
-                    $tempDir
-                ),
+                new WawancaraQuestionImport($tempDir),
                 $request->file('excel')
             );
 
-            DB::commit();
-
+            // Bersihkan folder temp
             $this->deleteDirectory($tempDir);
 
-            return back()->with('success', 'Soal TPU berhasil ditambahkan');
+            return back()->with('success', 'Soal TPU berhasil diimport');
 
         } catch (\Throwable $e) {
 
-            DB::rollBack();
-
-            if (isset($tempDir)) {
+            if (is_dir($tempDir)) {
                 $this->deleteDirectory($tempDir);
             }
 
-            return back()->withErrors([
-                'import' => 'Proses gagal: ' . $e->getMessage()
-            ]);
+            report($e);
+
+            return back()->withErrors(
+                'Gagal import soal: ' . $e->getMessage()
+            );
         }
     }
 
@@ -234,42 +202,14 @@ class WWNControl extends Controller
         ]);
     }
 
-    public function showtambahwawancara(string $seleksiHash, string $desaHash)
+    public function showtambahwawancara()
     {
 
-        $seleksiId = Hashids::decode($seleksiHash)[0] ?? null;
-        $desaId    = Hashids::decode($desaHash)[0] ?? null;
+       // Ambil semua soal TPU (atau semua soal kalau mau)
+        $questions = wawancaraquest::latest()->get();
 
-        if (!$seleksiId || !$desaId) {
-            abort(404);
-        }
-
-        $seleksi = Seleksi::findOrFail($seleksiId);
-        $desa    = Desas::findOrFail($desaId);
-
-        $seleksiHashForForm = Hashids::encode($seleksi->id);
-        $desaHashForForm    = Hashids::encode($desa->id);
-
-        $exam = Exams::where('id_seleksi', $seleksi->id)
-            ->where('id_desas', $desa->id)
-            ->where('type', 'WWN')
-            ->first();
-
-
-        $questions = [];
-        if ($exam) {
-            $questions = wawancaraquest::where('id_exams', $exam->id)
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('penguji.tambahsoal.tambahwawancara', compact(
-            'seleksi', 'desa', 'exam', 'questions'
-        ))->with([
-            'types' => Exams::TYPES,
-            'kecamatans' => Kecamatans::orderBy('nama_kecamatan')->get(),
-            'seleksiHash' => $seleksiHashForForm,
-            'desaHash'    => $desaHashForForm,
+        return view('penguji.tambahsoalWWNmain', [
+            'questions' => $questions,
         ]);
 
     }

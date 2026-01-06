@@ -11,21 +11,30 @@ use Illuminate\Support\Facades\Storage;
 class biodatacontrol extends Controller
 {
 
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'profile_img'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'kartu_keluarga'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'ktp'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'ijazah'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'cv'                => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
-            'surat_pendaftaran' => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
+            'id_formasi'   => 'required|exists:formasis,id',
+            'id_kebutuhan' => 'required|exists:kebutuhan_formasi,id',
+            'profile_img'       => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'kartu_keluarga'    => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'ktp'               => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'ijazah'            => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'cv'                => 'required|mimes:pdf,jpg,jpeg,png|max:4096',
+            'surat_pendaftaran' => 'required|mimes:pdf,jpg,jpeg,png|max:4096',
         ]);
 
+        $user = Auth::user();
 
-        $biodata = Biodata::firstOrNew(['id_user' => Auth::id()]);
+        $biodata = Biodata::firstOrNew([
+            'id_user' => $user->id
+        ]);
 
-        // === HANDLE FILES ===
+        // === SIMPAN PILIHAN FORMASI & KEBUTUHAN (INI INTI) ===
+        $biodata->id_formasi   = $request->id_formasi;
+        $biodata->id_kebutuhan = $request->id_kebutuhan;
+
+        // === HANDLE FILE UPLOAD ===
         $fields = [
             'profile_img',
             'kartu_keluarga',
@@ -38,20 +47,21 @@ class biodatacontrol extends Controller
         foreach ($fields as $field) {
             if ($request->hasFile($field)) {
 
-                // hapus file lama kalau ada
+                // hapus file lama
                 if ($biodata->$field) {
                     Storage::disk('public')->delete($biodata->$field);
                 }
 
                 // simpan file baru
-                $biodata->$field = $request->file($field)->store("uploads/$field", 'public');
+                $biodata->$field = $request->file($field)
+                    ->store("uploads/$field", 'public');
             }
         }
 
-        $biodata->id_user = Auth::id();
+        $biodata->status = 'draft';
         $biodata->save();
 
-        return back()->with('success', 'Biodata berhasil disimpan!');
+        return back()->with('success', 'Biodata dan pilihan formasi berhasil disimpan!');
     }
 
     public function index()

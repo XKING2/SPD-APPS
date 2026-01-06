@@ -2,3 +2,11 @@ User-agent: *
 Disallow:
 
 
+<script id="exam-data" type="application/json">
+{!! json_encode([
+    'examId'    => $exam->id,
+    'questions' => $questions,
+    'duration'  => (int) $exam->duration * 60,
+    'submitUrl' => route('exam.wwn.submit', $exam->id),
+], JSON_UNESCAPED_UNICODE) !!}
+</script>

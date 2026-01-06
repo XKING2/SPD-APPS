@@ -37,37 +37,37 @@
 
             <div class="row">
 
-                {{-- KTP --}}
                 <div class="col-md-6 mb-4">
                     <label>KTP</label>
-                    @if($biodata->ktp)
-                        <img src="{{ asset('storage/'.$biodata->ktp) }}"
-                             class="img-fluid img-thumbnail">
-                    @else
-                        <p class="text-muted">Tidak ada</p>
-                    @endif
+                    <div class="doc-wrapper">
+                        @if($biodata->ktp)
+                            <img src="{{ asset('storage/'.$biodata->ktp) }}">
+                        @else
+                            <span class="doc-empty">Tidak ada KTP</span>
+                        @endif
+                    </div>
                 </div>
 
-                {{-- KARTU KELUARGA --}}
                 <div class="col-md-6 mb-4">
                     <label>Kartu Keluarga</label>
-                    @if($biodata->kartu_keluarga)
-                        <img src="{{ asset('storage/'.$biodata->kartu_keluarga) }}"
-                             class="img-fluid img-thumbnail">
-                    @else
-                        <p class="text-muted">Tidak ada</p>
-                    @endif
+                    <div class="doc-wrapper">
+                        @if($biodata->kartu_keluarga)
+                            <img src="{{ asset('storage/'.$biodata->kartu_keluarga) }}">
+                        @else
+                            <span class="doc-empty">Tidak ada KK</span>
+                        @endif
+                    </div>
                 </div>
 
-                {{-- IJAZAH --}}
                 <div class="col-md-6 mb-4">
                     <label>Ijazah</label>
-                    @if($biodata->ijazah)
-                        <img src="{{ asset('storage/'.$biodata->ijazah) }}"
-                             class="img-fluid img-thumbnail">
-                    @else
-                        <p class="text-muted">Tidak ada</p>
-                    @endif
+                    <div class="doc-wrapper">
+                        @if($biodata->ijazah)
+                            <img src="{{ asset('storage/'.$biodata->ijazah) }}">
+                        @else
+                            <span class="doc-empty">Tidak ada Ijazah</span>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- SURAT PENDAFTARAN --}}

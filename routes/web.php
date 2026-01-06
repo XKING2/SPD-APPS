@@ -5,15 +5,18 @@ use App\Http\Controllers\biodatacontrol;
 use App\Http\Controllers\sidebar2control;
 use App\Http\Controllers\sidebarcontrol;
 use App\Http\Controllers\Enrollcontrol;
+use App\Http\Controllers\formasicontrol;
 use App\Http\Controllers\OrbControl;
 use App\Http\Controllers\PrakControl;
 use App\Http\Controllers\Sawcontrol;
+use App\Http\Controllers\seleksicontrol;
 use App\Http\Controllers\sidebar3control;
 use App\Http\Controllers\Startcontrol;
 use App\Http\Controllers\tpuControl;
 use App\Http\Controllers\ujiancontrol;
 use App\Http\Controllers\WWNControl;
 use App\Models\Desas;
+use App\Models\seleksi;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/register', [Authcontroller::class, 'showRegisterForm'])->name('register.form');
@@ -47,15 +50,15 @@ Route::get('/Penguji/Nilai/TPU/desa/{desa}',[sidebar3control::class, 'resolveSel
 Route::get('/Penguji/Nilai/TPU/{seleksiHash}/desa/{desaHash}', [tpuControl::class, 'shownilaiTPU'])->name('showtpu');
 Route::get('/Penguji/AddSeleksi/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa5'])->name('praktik.resolve');
 Route::get('/Penguji/AddSeleksi',[sidebar3control::class, 'showTambahTPUMain'])->name('tambahtpu');
-Route::post('/penguji/add-seleksi/{seleksiHash}/desa/{desaHash}/tpu',[tpuControl::class, 'storeTPU'])->name('exam-questions.import');
-Route::get('/penguji/add-seleksi/{seleksiHash}/desa/{desaHash}/tpu',[tpuControl::class, 'showTambahTPU'])->name('addTPU');
+Route::post('/penguji/add-SOAL/tpu',[tpuControl::class, 'storeTPU'])->name('exam-questions.import');
+Route::get('/penguji/add-SOAL/tpu',[tpuControl::class, 'showTambahTPU'])->name('addTPU');
 Route::get('/TPU/{id}/edit', [tpuControl::class, 'editTPU'])->name('TPU.edit');
 Route::put('/TPU/{id}', [tpuControl::class, 'updateTPU'])->name('TPU.update');
 Route::delete('/TPU/{id}', [tpuControl::class, 'destroyTPU'])->name('TPU.destroy');
 
 
-Route::get('/ujian/WWN/{exam}', [ujiancontrol::class, 'startWWN'])->name('exam.wwn.start');
-Route::post('/exam/WWN/{exam}/verify', [ujiancontrol::class, 'verifyEnrollmentWawancara'])->name('exam.wwn.verify');
+Route::get('/ujian/WWN/{exam}', [Startcontrol::class, 'startWWN'])->name('exam.wwn.start');
+Route::post('/exam/WWN/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentWawancara'])->name('exam.wwn.verify');
 Route::post('/exam/WWN/{exam}/submit', [ujiancontrol::class, 'submitWawancara'])->name('exam.wwn.submit');
 
 
@@ -64,8 +67,8 @@ Route::get('/Penguji/Nilai/Wawancara/desa/{desa}',[sidebar3control::class, 'reso
 Route::get('/Penguji/Nilai/Wawancara/{seleksiHash}/desa/{desaHash}', [WWNControl::class, 'shownilaiWWN'])->name('ShowWWN');
 Route::get('/Penguji/Tambah/Wawancara', [sidebar3control::class, 'showtambahWWNMain'])->name('tambahwawan');
 Route::get('/Penguji/AddSeleksi/WWN/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa6'])->name('praktik.resolve');
-Route::post('/Penguji/AddSeleksi/{seleksiHash}/Desa/{desaHash}/WWN', [WWNControl::class, 'storeWawancara'])->name('exam-wawancara.import');
-Route::get('/Penguji/AddSeleksi/{seleksiHash}/Desa/{desaHash}/WWN', [sidebar3control::class, 'showtambahwawancara'])->name('addWWN');
+Route::post('/Penguji/Post/Add-Soal//WWN', [WWNControl::class, 'storeWawancara'])->name('exam-wawancara.import');
+Route::get('/Penguji/Add-Soal/WWN', [WWNControl::class, 'showtambahwawancara'])->name('addWWN');
 Route::get('/Wawancara/{id}/edit', [ujiancontrol::class, 'editWawancara'])->name('wawan.edit');
 Route::put('/Wawancara/{id}', [ujiancontrol::class, 'updateWawancara'])->name('wawan.update');
 Route::delete('/wawancara/{id}', [ujiancontrol::class, 'destroy'])->name('wawancara.destroy');
@@ -88,6 +91,7 @@ Route::post('/biodata', [biodatacontrol::class, 'store'])->name('biodata.post');
 
 
 Route::get('/admin/dashboard', [sidebar2control::class, 'index'])->name('admindashboard');
+
 Route::get('/ujian', [sidebar2control::class, 'startexams'])->name('adminujian');
 Route::post('/admin/exam/{exam}/generate',[sidebar2control::class, 'generate'])->name('admin.tpu.generate');
 Route::post('/admin/exams/{exam}/generateWWN',[sidebar2control::class, 'generateWWN'])->name('admin.wwn.generate');
@@ -95,12 +99,22 @@ Route::get('/validasi-biodata', [biodatacontrol::class, 'index'])->name('validas
 Route::post('/validasi-biodata/{biodata}', [BiodataControl::class, 'validasi'])->name('validasi.submit');
 Route::get('/validasi-biodata/{id}', [biodatacontrol::class, 'show'])->name('validasi.show');
 Route::post('/validasi-biodata/{id}/validasi', [biodatacontrol::class, 'validasi'])->name('validasi.submit');
-Route::get('/admin/validasi', [biodatacontrol::class, 'index'])->name('validasi.index');
 Route::post('/admin/validasi/{id}', [biodatacontrol::class, 'validasi'])->name('validasi.submit');
 Route::get('/Admin/Generate', [sidebar2control::class, 'generatePageSaw'])->name('generate.admin');
 Route::post('/Admin/saw/generate/{seleksi}',[Sawcontrol::class, 'generateAdminSaw'])->name('saw.admin.generate');
+Route::get('/Admin/Exams', [ujiancontrol  ::class, 'ShowExamsAdmin'])->name('adminexams');
+Route::get('/exams/{exam}/edits', [sidebar2control::class, 'editExams'])->name('adminexam.edit');
+Route::put('/exams/{exam}', [sidebar2control::class, 'updateExams'])->name('Adminexam.update');
 
+Route::get('Admin/Formasi/Main/Page', [sidebar2control::class, 'FormasiIndex'])->name('formasi.index');
 
+Route::post('Admin/Formasi/store', [formasicontrol::class, 'store'])->name('formasi.store');
+
+    
+Route::get('Admin/Formasi/{formasi}', [formasicontrol::class, 'show'])->name('formasi.show');
+
+    
+Route::post('Admin/Formasi/{formasi}/kebutuhan', [formasicontrol::class, 'storeKebutuhan'])->name('formasi.kebutuhan.store');
 
 
 Route::get('/Penguji/Main/PRAK', [sidebar3control::class, 'showMainPrak'])->name('showPrakMain');
@@ -126,11 +140,19 @@ Route::get('/get-desa/{kecamatan}', function ($kecamatanId) {
     return Desas::where('id_kecamatans', $kecamatanId)->get();
 });
 Route::get('/Penguji/Seleksi', [sidebar3control  ::class, 'showSeleksi'])->name('addseleksi');
-Route::post('/Seleksi/import', [sidebar3control::class, 'store'])->name('seleksi.import');
+Route::post('/Seleksi/import', [seleksicontrol::class, 'store'])->name('seleksi.import');
+Route::get('/seleksi/{seleksi}/edit', [seleksicontrol ::class, 'edit'])->name('seleksi.edit');
+Route::put('/seleksi/{seleksi}', [seleksicontrol::class, 'update'])->name('seleksi.update');
+Route::delete('/seleksi/{seleksi}', [seleksicontrol::class, 'destroy'])->name('seleksi.destroy');
 Route::get('/desa/by-kecamatan/{id}', [sidebar3control::class, 'getDesaByKecamatan']);
 Route::get('/desa/by-kecamatan/{kecamatan}', [sidebar3control::class, 'getDesaByKecamatan']);
 Route::get('/cek-seleksi-desa/{desa}', [sidebar3control::class, 'cekSeleksiDesa']);
-Route::post('/exam/{exam}/validasi/{type}',[ujiancontrol::class, 'validasiExam'])->name('exam.validasi');
+Route::get('/Penguji/Exams', [sidebar3control  ::class, 'showExams'])->name('addexams');
+Route::post('/Exams/import', [sidebar3control::class, 'storeExams'])->name('exams.import');
+Route::get('/exam/{exam}/edit', [ujiancontrol::class, 'edit'])->name('exam.edit');
+Route::put('/exam/{exam}', [ujiancontrol::class, 'update'])->name('exam.update');
+Route::delete('/exam/{exam}', [ujiancontrol::class, 'destroy'])->name('exam.destroy');
+Route::post('/exam/{exam}/validasi',[ujiancontrol::class, 'validasiExam'])->name('exam.validasi');
 Route::get('/Penguji/Generate', [sidebar3control::class, 'generatePage'])->name('generate.page');
 Route::post('/Penguji/saw/generate/{seleksi}',[Sawcontrol::class, 'generate'])->name('saw.generate');
 

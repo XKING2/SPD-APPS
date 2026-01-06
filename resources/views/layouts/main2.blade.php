@@ -69,6 +69,13 @@
                 </a>
             </li>
 
+            <li class="nav-item {{ Request::routeIs('addexams') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('addexams') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Tambah Ujian </span>
+                </a>
+            </li>
+
             <li class="nav-item {{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBeritaAcara"
                     aria-expanded="{{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'true' : 'false' }}"
@@ -97,11 +104,11 @@
                     <span>Tambah Soal</span>
                 </a>
                 <div id="collapseTambahSoal"
-                    class="collapse {{ Request::routeIs('tambahtpu') || Request::routeIs('tambahwawan') ? 'show' : '' }}"
+                    class="collapse {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') ? 'show' : '' }}"
                     aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Request::routeIs('tambahtpu') ? 'active' : '' }}" href="{{ route('tambahtpu') }}">TPU</a>
-                        <a class="collapse-item {{ Request::routeIs('tambahwawan') ? 'active' : '' }}" href="{{ route('tambahwawan') }}">Wawancara</a>
+                        <a class="collapse-item {{ Request::routeIs('addTPU') ? 'active' : '' }}" href="{{ route('addTPU') }}">TPU</a>
+                        <a class="collapse-item {{ Request::routeIs('addWWN') ? 'active' : '' }}" href="{{ route('addWWN') }}">Wawancara</a>
                     </div>
                 </div>
              </li>

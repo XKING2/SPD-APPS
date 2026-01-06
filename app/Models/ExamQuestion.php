@@ -9,9 +9,7 @@ class ExamQuestion extends Model
     protected $table = 'tpu_questions';
 
     protected $fillable = [
-        'id_exam',
         'subject',
-        'code_pertanyaan',
         'pertanyaan',
         'image_name',
         'correct_option_id',

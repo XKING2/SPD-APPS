@@ -56,15 +56,20 @@
                                 </td>
                                 <td>{{ $item->tahun}}</td>
                                 <td>
-                                    <a href="#"
-                                    class="btn btn-sm btn-success">
-                                        <i class="fas fa-edit"></i> Edit
+                                    <a href="{{ route('seleksi.edit', $item->id) }}"
+                                        class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
                                     </a>
 
-                                    <form action="#"method="POST"class="d-inline" onsubmit="return confirm('Yakin hapus data ini?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
+                                    <form action="{{ route('seleksi.destroy', $item->id) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Yakin hapus seleksi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                     </form>
                                 </td>
                             </tr>

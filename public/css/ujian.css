@@ -1,0 +1,72 @@
+
+.option {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+.option.active {
+    background: #0d6efd;
+    color: #fff;
+}
+
+/* ================== SOAL BUTTON ================== */
+.soal-btn {
+    min-width: 44px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    padding: 0;
+    border: 1px solid #ced4da;
+    background: #fff;
+    color: #000;
+}
+
+/* HANYA SATU STATUS WARNA */
+.soal-btn.answered {
+    background: #198754;
+    color: #fff;
+    border-color: #198754;
+}
+
+/* ================================================= */
+.soal-image-wrapper {
+    width: 240px;
+    height: 240px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.soal-image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.soal-btn {
+    position: relative;
+}
+
+/* BADGE FLAG */
+.soal-btn .flag-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #fff;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}

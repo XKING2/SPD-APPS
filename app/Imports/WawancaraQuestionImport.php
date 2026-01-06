@@ -2,7 +2,6 @@
 
 namespace App\Imports;
 
-use App\Models\ExamWawancara;
 use App\Models\WawancaraOption;
 use App\Models\wawancaraquest;
 use Illuminate\Support\Collection;
@@ -16,79 +15,68 @@ use Illuminate\Support\Facades\File;
 
 class WawancaraQuestionImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 {
-    /**
-    * @param Collection $collection
-    */
-    protected int $examId;
     protected string $tempImagePath;
 
-    public function __construct(int $examId, string $tempImagePath)
+    public function __construct(string $tempImagePath)
     {
-        $this->examId = $examId;
         $this->tempImagePath = $tempImagePath;
     }
 
-    public function collection(Collection $rows)
+    public function collection(Collection $rows): void
     {
         Log::info('[WAWANCARA IMPORT] Total rows', [
             'rows' => $rows->count()
         ]);
 
-        DB::transaction(function () use ($rows) {
+        /** =====================
+         * IMAGE MAP (SEKALI)
+         * ===================== */
+        $imageMap = collect(File::allFiles($this->tempImagePath))
+            ->mapWithKeys(fn ($file) => [
+                $file->getFilename() => $file->getRealPath()
+            ]);
+
+        DB::transaction(function () use ($rows, $imageMap) {
 
             foreach ($rows as $index => $row) {
 
-                Log::info('[WAWANCARA IMPORT] Proses baris', [
-                    'row' => $index + 1,
-                    'code' => $row['code_pertanyaan'] ?? null
+                $rowNumber = $index + 2;
+
+                /** =====================
+                 * HANDLE GAMBAR
+                 * ===================== */
+                $imagePath = null;
+
+                if (!empty($row['image_path'])) {
+
+                    if (!$imageMap->has($row['image_path'])) {
+                        throw new \Exception(
+                            "Gambar '{$row['image_path']}' tidak ditemukan (baris {$rowNumber})"
+                        );
+                    }
+
+                    $imagePath = 'soal/wawancara/' . uniqid() . '_' . $row['image_path'];
+
+                    Storage::disk('public')->put(
+                        $imagePath,
+                        file_get_contents($imageMap[$row['image_path']])
+                    );
+                }
+
+                /** =====================
+                 * SIMPAN SOAL (GLOBAL)
+                 * ===================== */
+                $question = wawancaraquest::create([
+                    'subject'    => trim($row['subject']),
+                    'pertanyaan' => trim($row['pertanyaan']),
+                    'image_path' => $imagePath,
                 ]);
 
-
-            $imageMap = collect(File::allFiles($this->tempImagePath))
-                ->mapWithKeys(fn ($file) => [
-                    $file->getFilename() => $file->getRealPath()
-                ]);
-
-            Log::info('[WAWANCARA IMPORT] Total image', [
-                    'count' => $imageMap->count()
-                ]);
-
-            $imagePath = null;
-
-
-            if (!empty($row['image_path']) && $imageMap->has($row['image_path'])) {
-
-                $imagePath = 'soal/' . strtolower($row['subject']) . '/' . $row['image_path'];
-
-                Storage::disk('public')->put(
-                    $imagePath,
-                    file_get_contents($imageMap[$row['image_path']])
-                );
-
-                Log::info('[WAWANCARA IMPORT] Gambar disimpan', [
-                    'file' => $row['image_path'],
-                    'path' => $imagePath
-                ]);
-
-            } elseif (!empty($row['image_path'])) {
-
-                Log::warning('[WAWANCARA IMPORT] Gambar tidak ditemukan', [
-                    'image_path' => $row['image_path']
-                ]);
-            }
-
-                $question = wawancaraquest::updateOrCreate(
-                    [   'id_exams' => $this->examId,
-                        'code_pertanyaan' => $row['code_pertanyaan']],
-                    [
-                        'subject'     => $row['subject'],
-                        'pertanyaan'  => $row['pertanyaan'],
-                        'image_path'  => $imagePath,
-                    ]
-                );
-
+                /** =====================
+                 * OPSI (TIDAK DIUBAH)
+                 * ===================== */
                 $question->options()->delete();
-                
+
                 $options = [
                     ['label' => 'A', 'text' => 'option_a', 'point' => 'point_a'],
                     ['label' => 'B', 'text' => 'option_b', 'point' => 'point_b'],
@@ -100,7 +88,7 @@ class WawancaraQuestionImport implements ToCollection, WithHeadingRow, SkipsEmpt
                 foreach ($options as $opt) {
                     if (!empty($row[$opt['text']])) {
                         WawancaraOption::create([
-                            'id_wwn'      => $question->id,
+                            'id_wwn'       => $question->id,
                             'label'        => $opt['label'],
                             'opsi_tulisan' => $row[$opt['text']],
                             'point'        => (int) ($row[$opt['point']] ?? 0),
@@ -113,3 +101,4 @@ class WawancaraQuestionImport implements ToCollection, WithHeadingRow, SkipsEmpt
         Log::info('[WAWANCARA IMPORT] Import selesai');
     }
 }
+

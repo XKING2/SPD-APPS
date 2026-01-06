@@ -7,6 +7,7 @@ use App\Charts\StatusBiodataChart;
 use App\Charts\weeklypendaftarChart;
 use App\Models\biodata;
 use App\Models\exams;
+use App\Models\Formasi;
 use App\Models\seleksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -184,5 +185,56 @@ class sidebar2control extends Controller
 
         return view('admin.generatesaws', compact('seleksis', 'selectedSeleksi'));
     }
+
+
+    public function editExams(exams $exam)
+    {
+        return view('admin.admineditexams', [
+            'exam'     => $exam,
+            'seleksi'  => seleksi::orderBy('judul')->get(),
+            'types'    => exams::TYPES,
+        ]);
+    }
+
+    public function updateExams(Request $request, exams $exam)
+    {
+        $request->validate([
+            'judul'      => 'required|string',
+            'type'       => 'required|in:tpu,wwn',
+            'duration'   => 'required|integer|min:1',
+            'id_seleksi' => 'required|exists:selections,id',
+            'start_at'   => 'required|date',
+            'end_at'     => 'required|date|after:start_at',
+        ]);
+
+        if ($exam->status === 'active') {
+            return back()->withErrors([
+                'update' => 'Exam aktif tidak bisa diedit'
+            ]);
+        }
+
+        $exam->update([
+            'judul'      => $request->judul,
+            'type'       => $request->type,
+            'duration'   => $request->duration,
+            'id_seleksi' => $request->id_seleksi,
+            'start_at'   => $request->start_at,
+            'end_at'     => $request->end_at,
+        ]);
+
+        return redirect()
+            ->route('adminexams')
+            ->with('success', 'Exam berhasil diperbarui');
+    }
+
+    public function FormasiIndex()
+    {
+        $formasis = Formasi::with('seleksi')->latest()->get();
+        $seleksis = Seleksi::orderBy('tahun', 'desc')->get();
+
+        return view('admin.formasi.addformasimain', compact('formasis', 'seleksis'));
+    }
+
+
 
 }

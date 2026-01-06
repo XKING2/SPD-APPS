@@ -13,6 +13,7 @@ use App\Models\ExamTPUanswer;
 use App\Models\FuzzyRule;
 use App\Models\FuzzyScore;
 use App\Models\ResultExam;
+use App\Models\seleksi;
 use App\Models\wawancaranswer;
 
 
@@ -158,9 +159,7 @@ class ujiancontrol extends Controller
             DB::transaction(function () use ($answers, $user, $exam, &$score) {
 
 
-                $questions = wawancaraquest::where('id_exams', $exam->id)
-                    ->pluck('id')
-                    ->toArray();
+                $questions = wawancaraquest::pluck('id')->toArray();
 
                 if (empty($questions)) {
                     throw new \Exception('Pertanyaan wawancara tidak ditemukan');
@@ -173,7 +172,7 @@ class ujiancontrol extends Controller
                 foreach ($answers as $questionId => $optionId) {
 
                     if (!in_array($questionId, $questions)) {
-                        continue;
+                        throw new \Exception('Soal tidak valid');
                     }
 
                     if (!isset($options[$optionId])) {
@@ -247,7 +246,7 @@ class ujiancontrol extends Controller
     }
 
 
-    public function validasiExam(Exams $exam, string $type)
+    public function validasiExam(Exams $exam)
     {
         if ($exam->status !== 'draft') {
             return back()->withErrors([
@@ -255,15 +254,15 @@ class ujiancontrol extends Controller
             ]);
         }
 
-        if ($type === 'TPU') {
+        if ($exam->type === 'TPU') {
             if ($exam->questions()->count() === 0) {
                 return back()->withErrors([
                     'soal' => 'Tidak bisa validasi, soal TPU masih kosong'
                 ]);
-            }   
+            }
         }
 
-        if ($type === 'WWN') {
+        if ($exam->type === 'WWN') {
             if ($exam->wawancara()->count() === 0) {
                 return back()->withErrors([
                     'soal' => 'Tidak bisa validasi, soal wawancara masih kosong'
@@ -275,7 +274,77 @@ class ujiancontrol extends Controller
             'status' => 'active'
         ]);
 
-        return back()->with('success', "Exam {$type} berhasil divalidasi dan diaktifkan");
+        return back()->with(
+            'success',
+            "Exam {$exam->type} berhasil divalidasi dan diaktifkan"
+        );
+    }
+
+    public function ShowExamsAdmin()
+    {
+        $exams = Exams::with(['seleksi'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('admin.adminexams', [
+            'exams'    => Exams::with('seleksi')->latest()->get(),
+            'seleksis' => seleksi::orderBy('judul')->get(),
+            'types'    => Exams::TYPES,
+        ]);
+    }
+
+
+    public function edit(exams $exam)
+    {
+        return view('penguji.editexams', [
+            'exam'     => $exam,
+            'seleksi'  => seleksi::orderBy('judul')->get(),
+            'types'    => exams::TYPES,
+        ]);
+    }
+
+    public function update(Request $request, exams $exam)
+    {
+        $request->validate([
+            'judul'      => 'required|string',
+            'type'       => 'required|in:tpu,wwn',
+            'duration'   => 'required|integer|min:1',
+            'id_seleksi' => 'required|exists:selections,id',
+            'start_at'   => 'required|date',
+            'end_at'     => 'required|date|after:start_at',
+        ]);
+
+        if ($exam->status === 'active') {
+            return back()->withErrors([
+                'update' => 'Exam aktif tidak bisa diedit'
+            ]);
+        }
+
+        $exam->update([
+            'judul'      => $request->judul,
+            'type'       => $request->type,
+            'duration'   => $request->duration,
+            'id_seleksi' => $request->id_seleksi,
+            'start_at'   => $request->start_at,
+            'end_at'     => $request->end_at,
+        ]);
+
+        return redirect()
+            ->route('addexams')
+            ->with('success', 'Exam berhasil diperbarui');
+    }
+
+    public function destroy(exams $exam)
+    {
+        if ($exam->status === 'active') {
+            return back()->withErrors([
+                'delete' => 'Exam aktif tidak bisa dihapus'
+            ]);
+        }
+
+        $exam->delete();
+
+        return back()->with('success', 'Exam berhasil dihapus');
     }
 
 

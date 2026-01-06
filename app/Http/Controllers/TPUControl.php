@@ -5,13 +5,9 @@ namespace App\Http\Controllers;
 use App\Imports\ExamQuestionImport;
 use App\Models\Desas;
 use App\Models\ExamQuestion;
-use App\Models\exams;
-use App\Models\Kecamatans;
 use App\Models\seleksi;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
@@ -19,57 +15,23 @@ use ZipArchive;
 
 class tpuControl extends Controller
 {
-    public function storeTPU(Request $request, string $seleksiHash, string $desaHash)
+    public function storeTPU(Request $request)
     {
-        // 1️⃣ Decode hash → ID
-        $seleksiId = Hashids::decode($seleksiHash)[0] ?? null;
-        $desaId    = Hashids::decode($desaHash)[0] ?? null;
-
-        if (!$seleksiId || !$desaId) {
-            abort(404);
-        }
-
-        // 2️⃣ Ambil model
-        $seleksi = seleksi::findOrFail($seleksiId);
-        $desa    = Desas::findOrFail($desaId);
-
-        // 3️⃣ VALIDASI RELASI & AUTHORIZATION (WAJIB)
-        if ($seleksi->id_desas !== $desa->id) {
-            abort(403, 'Desa tidak sesuai dengan seleksi');
-        }
-
-
-
-        // 4️⃣ Validasi request
         $request->validate([
-            'type'     => 'required|string',
-            'duration' => 'required|integer|min:1',
-            'excel'    => 'required|file|mimes:xlsx,xls',
-            'zip'      => 'nullable|file|mimes:zip',
+            'excel' => 'required|file|mimes:xlsx,xls',
+            'zip'   => 'nullable|file|mimes:zip',
         ]);
 
-        DB::beginTransaction();
+        $tempDir = storage_path('app/temp_images/' . uniqid());
 
         try {
-            // 5️⃣ Buat exam
-            $exam = exams::create([
-                'id_seleksi' => $seleksi->id,
-                'id_desas'   => $desa->id,
-                'type'       => $request->type,
-                'start_at'   => $request->start_at,
-                'end_at'     => $request->end_at,
-                'duration'   => $request->duration,
-                'status'     => 'draft',
-                'created_by'=> Auth::id(),
-            ]);
 
-            // 6️⃣ Prepare temp dir (AMAN)
-            $tempDir = storage_path('app/temp_images/exam_' . uniqid());
+            // Buat folder temp
             if (!is_dir($tempDir)) {
                 mkdir($tempDir, 0755, true);
             }
 
-            // 7️⃣ Extract ZIP jika ada
+            // Extract ZIP jika ada
             if ($request->hasFile('zip')) {
                 $zip = new \ZipArchive;
                 if ($zip->open($request->file('zip')->getRealPath()) === true) {
@@ -80,30 +42,31 @@ class tpuControl extends Controller
                 }
             }
 
-            // 8️⃣ Import Excel
+            // Import Excel
             Excel::import(
-                new ExamQuestionImport($exam->id, $tempDir),
+                new ExamQuestionImport($tempDir),
                 $request->file('excel')
             );
 
-            DB::commit();
-
+            // Bersihkan folder temp
             $this->deleteDirectory($tempDir);
 
-            return back()->with('success', 'Soal TPU berhasil ditambahkan');
+            return back()->with('success', 'Soal TPU berhasil diimport');
 
         } catch (\Throwable $e) {
-            DB::rollBack();
 
-            if (isset($tempDir) && is_dir($tempDir)) {
+            if (is_dir($tempDir)) {
                 $this->deleteDirectory($tempDir);
             }
 
             report($e);
 
-            return back()->withErrors('Terjadi kesalahan saat menyimpan soal');
+            return back()->withErrors(
+                'Gagal import soal: ' . $e->getMessage()
+            );
         }
     }
+
 
     protected function deleteDirectory(string $dir): void
     {
@@ -221,42 +184,13 @@ class tpuControl extends Controller
         ]);
     }
 
-    public function showTambahTPU(string $seleksiHash, string $desaHash)
+    public function showTambahTPU()
     {
-        $seleksiId = Hashids::decode($seleksiHash)[0] ?? null;
-        $desaId    = Hashids::decode($desaHash)[0] ?? null;
+        // Ambil semua soal TPU (atau semua soal kalau mau)
+        $questions = ExamQuestion::latest()->get();
 
-        if (!$seleksiId || !$desaId) {
-            abort(404);
-        }
-
-        $seleksi = Seleksi::findOrFail($seleksiId);
-        $desa    = Desas::findOrFail($desaId);
-
-        $seleksiHashForForm = Hashids::encode($seleksi->id);
-        $desaHashForForm    = Hashids::encode($desa->id);
-
-        // 🔒 VALIDASI RELASI
-        if ($seleksi->id_desas !== $desa->id) {
-            abort(403, 'Desa tidak sesuai dengan seleksi');
-        }
-
-        $exam = Exams::where('id_seleksi', $seleksi->id)
-            ->where('id_desas', $desa->id)
-            ->where('type', 'TPU')
-            ->first();
-
-        $questions = $exam
-            ? ExamQuestion::where('id_exam', $exam->id)->latest()->get()
-            : [];
-
-        return view('penguji.tambahsoal.tambahTPU', compact(
-            'seleksi', 'desa', 'exam', 'questions'
-        ))->with([
-            'types' => Exams::TYPES,
-            'kecamatans' => Kecamatans::orderBy('nama_kecamatan')->get(),
-            'seleksiHash' => $seleksiHashForForm,
-            'desaHash'    => $desaHashForForm,
+        return view('penguji.tambahsoalTPUmain', [
+            'questions' => $questions,
         ]);
     }
 

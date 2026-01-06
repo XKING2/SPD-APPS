@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wwn_questions', function (Blueprint $table) {
+        Schema::create('kebutuhan_formasi', function (Blueprint $table) {
             $table->id();
-            $table->string('subject');
-            $table->text('pertanyaan');
-            $table->string('image_path')->nullable();
+            $table->foreignId('id_formasi')->nullable()->constrained('formasis') ->cascadeOnDelete();
+            $table->string('nama_kebutuhan')->nullable();
+            $table->integer('jumlah')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exam_wawancara');
+        Schema::dropIfExists('kebutuhan_formasi');
     }
 };

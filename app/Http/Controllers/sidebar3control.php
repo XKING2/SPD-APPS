@@ -9,7 +9,10 @@ use App\Models\seleksi;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Charts\PendaftaranKecamatanChart;
-
+use App\Models\exams;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Log;
 use Vinkla\Hashids\Facades\Hashids;
 
 class sidebar3control extends Controller
@@ -64,6 +67,59 @@ class sidebar3control extends Controller
     }
 
 
+    public function showExams()
+    {
+        $exams = Exams::with(['seleksi'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('penguji.tambahexam', [
+            'exams'    => Exams::with('seleksi')->latest()->get(),
+            'seleksis' => seleksi::orderBy('judul')->get(),
+            'types'    => Exams::TYPES,
+        ]);
+    }
+
+    public function getSeleksi($id)
+    {
+        return seleksi::where('id_kecamatans', $id)
+            ->orderBy('nama_desa')
+            ->get(['id', 'nama_desa']);
+    }
+
+    public function storeExams(Request $request)
+    {
+        $request->validate([
+            'judul'      => 'required|string',
+            'seleksi_id' => 'required|exists:selections,id',
+            'type'       => 'required|string',
+            'duration'   => 'required|integer|min:1',
+            'start_at'   => 'nullable|date',
+            'end_at'     => 'nullable|date',
+        ]);
+
+            // Ambil seleksi
+        $seleksi = seleksi::findOrFail($request->seleksi_id);
+
+            // Buat exam
+            $exam = exams::create([
+                'id_seleksi' => $seleksi->id,
+                'id_desas'   => $seleksi->id_desas,
+                'judul'      => $request->judul,
+                'type'       => $request->type,
+                'start_at'   => $request->start_at,
+                'end_at'     => $request->end_at,
+                'duration'   => $request->duration,
+                'status'     => 'draft',
+                'created_by' => Auth::id(),
+            ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Exam berhasil dibuat');
+        
+    }
+
     public function showSeleksi()
     {
         $seleksi = seleksi::orderBy('id')->get();
@@ -79,40 +135,7 @@ class sidebar3control extends Controller
             ->get(['id', 'nama_desa']);
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'judul'         => 'required|string|max:255',
-            'deskripsi'     => 'nullable|string',
-            'tahun'         => 'required|digits:4',
-            'id_kecamatans' => 'required|exists:kecamatans,id',
-            'id_desas'      => 'required|exists:desas,id',
-        ]);
-
-        $desaValid = Desas::where('id', $request->id_desas)
-            ->where('id_kecamatans', $request->id_kecamatans)
-            ->exists();
-
-        if (!$desaValid) {
-            return back()->withErrors([
-                'id_desas' => 'Desa tidak sesuai dengan kecamatan yang dipilih'
-            ]);
-        }
-
-        DB::transaction(function () use ($request) {
-            seleksi::create([
-                'judul'     => $request->judul,
-                'deskripsi' => $request->deskripsi,
-                'tahun'     => $request->tahun,
-                'id_desas'  => $request->id_desas,
-                'id_kecamatans'  => $request->id_kecamatans,
-            ]);
-        });
-
-        return redirect()
-            ->back()
-            ->with('success', 'Data seleksi berhasil dibuat');
-    }
+    
 
     public function cekSeleksiDesa($desaId)
     {
@@ -223,22 +246,6 @@ class sidebar3control extends Controller
         return view('penguji.nilaiorbmain',compact('kecamatans'));
     }
 
-
-    public function showtambahTPUMain(Seleksi $seleksi, Desas $desa)
-    {
-        $kecamatans = Kecamatans::orderBy('nama_kecamatan')->get();
-            
-        if ($seleksi->id_desas !== $desa->id) {
-            abort(403, 'Desa tidak sesuai dengan seleksi');
-        }
-
-        return view('penguji.tambahsoalTPUmain', [
-            'seleksi' => $seleksi,
-            'desa'    => $desa,
-            'kecamatans'=> $kecamatans
-
-        ]);
-    }
 
     public function resolveSeleksiByDesa5($desaId)
     {

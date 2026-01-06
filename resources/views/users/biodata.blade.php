@@ -137,6 +137,39 @@
                                     {{ optional($biodata)->cv ? 'Sudah upload' : 'Belum' }}
                             </span>
                         </div>
+
+                        <div class="mb-3">
+                             @forelse($formasis as $formasi)
+                                    <div class="form-group mb-3">
+                                        <label>
+                                            Formasi Tahun {{ $formasi->tahun }}
+                                            <span class="text-danger">*</span>
+                                            <span class="status-label {{ optional($biodata)->cv ? 'text-success' : 'text-danger' }}">
+                                                {{ optional($biodata)->id_formasi ? 'Sudah upload' : 'Belum' }}
+                                            </span>
+                                        </label>
+
+                                        <select name="id_kebutuhan" class="form-control" required>
+                                            <option value="">-- Pilih Formasi --</option>
+
+                                            @foreach($formasi->kebutuhan as $kebutuhan)
+                                                <option value="{{ $kebutuhan->id }}">
+                                                    {{ $kebutuhan->nama_kebutuhan }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        {{-- kirim id_formasi secara eksplisit --}}
+                                        <input type="hidden" name="id_formasi" value="{{ $formasi->id }}">
+                                    </div>
+                                @empty
+                                    <div class="alert alert-warning">
+                                        Formasi belum tersedia.
+                                    </div>
+                                @endforelse
+
+                                
+                        </div>
                     </div> 
                 </div>
 

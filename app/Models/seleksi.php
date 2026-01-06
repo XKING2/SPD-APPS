@@ -19,7 +19,7 @@ class seleksi extends Model
     {
         return $this->hasMany(
             exams::class,
-            'seleksi_id',
+            'id_seleksi',
             'id'
         );
     }

@@ -10,6 +10,7 @@ class exams extends Model
     protected $table = 'exams';
     protected $fillable = [
         'id_seleksi',
+        'judul',
         'type',
         'duration',
         'status',
@@ -26,7 +27,7 @@ class exams extends Model
     {
         return $this->belongsTo(
             seleksi::class,
-            'seleksi_id'
+            'id_seleksi'
         );
     }
 

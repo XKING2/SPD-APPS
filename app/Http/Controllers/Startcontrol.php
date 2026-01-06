@@ -14,7 +14,7 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class Startcontrol extends Controller
 {
-        public function startTPU(string $exam)
+    public function startTPU(string $exam)
     {
         // ================= DECODE HASH =================
         $decoded = Hashids::decode($exam);

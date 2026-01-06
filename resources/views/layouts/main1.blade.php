@@ -20,6 +20,8 @@
     <!-- Custom styles for this template-->
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/footer.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/biodata.css') }}" rel="stylesheet">
+ 
 
 
 </head>
@@ -40,30 +42,44 @@
 
     <hr class="sidebar-divider my-0">
 
-            {{-- Dashboard --}}
-            <li class="nav-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ url('admin/dashboard') }}">
+            <li class="nav-item {{ Request::routeIs('admindashboard') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admindashboard') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
+            <li class="nav-item {{ Request::routeIs('formasi.index') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('formasi.index') }}">
+                    <i class="fas fa-cogs"></i>
+                    <span>Formasi</span>
+                </a>
+            </li>
 
-            {{-- Validasi Biodata --}}
-            <li class="nav-item {{ request()->is('admin/validasi*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ url('admin/validasi') }}">
+
+            <li class="nav-item {{ Request::routeIs('validasi.index') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('validasi.index') }}">
                     <i class="fas fa-user-check"></i>
                     <span>Validasi Biodata</span>
                 </a>
             </li>
 
-            {{-- Mulai Ujian --}}
-            <li class="nav-item {{ request()->is('/ujian') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('adminujian') }}">
-                    <i class="fas fa-pen-alt"></i> {{-- ICON UJIAN / TEST --}}
-                    <span>Mulai Ujian</span>
+           
+            <li class="nav-item {{ Request::routeIs('adminexams') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('adminexams') }}">
+                   <i class="fas fa-file-alt"></i>
+                    <span>Data Ujian</span>
                 </a>
             </li>
+
+            <li class="nav-item {{ Request::routeIs('adminujian') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('adminujian') }}">
+                    <i class="fa fa-bars"></i>
+                    <span>Generate Code Enroll</span>
+                </a>
+            </li>
+
+
             <li class="nav-item {{ Request::routeIs('generate.admin') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('generate.admin') }}">
                     <i class="fas fa-fw fa-chart-area"></i>

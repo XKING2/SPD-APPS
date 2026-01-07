@@ -59,7 +59,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="{{ route('validasi.show', $data->id) }}"
+                                        <a href="{{ route('validasi.show', Hashids::encode($data->id)) }}"
                                         class="btn btn-info btn-sm">
                                             Lihat
                                         </a>

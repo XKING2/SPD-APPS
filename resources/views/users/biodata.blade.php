@@ -16,6 +16,7 @@
         $ijazah = optional($biodata)->ijazah;
         $cv = optional($biodata)->cv;
         $suratPendaftaran = optional($biodata)->surat_pendaftaran;
+        $isReadonly = !empty($biodata) && !empty($biodata->id_kebutuhan);
     @endphp
 
     @if($biodata)
@@ -139,36 +140,38 @@
                         </div>
 
                         <div class="mb-3">
-                             @forelse($formasis as $formasi)
-                                    <div class="form-group mb-3">
-                                        <label>
-                                            Formasi Tahun {{ $formasi->tahun }}
-                                            <span class="text-danger">*</span>
-                                            <span class="status-label {{ optional($biodata)->cv ? 'text-success' : 'text-danger' }}">
-                                                {{ optional($biodata)->id_formasi ? 'Sudah upload' : 'Belum' }}
-                                            </span>
-                                        </label>
+                            @forelse($formasis as $formasi)
+                                <div class="form-group mb-3">
+                                    <label>
+                                        Formasi Tahun {{ $formasi->tahun }}
+                                        <span class="text-danger">*</span>
+                                    </label>
 
-                                        <select name="id_kebutuhan" class="form-control" required>
-                                            <option value="">-- Pilih Formasi --</option>
-
-                                            @foreach($formasi->kebutuhan as $kebutuhan)
-                                                <option value="{{ $kebutuhan->id }}">
-                                                    {{ $kebutuhan->nama_kebutuhan }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-                                        {{-- kirim id_formasi secara eksplisit --}}
-                                        <input type="hidden" name="id_formasi" value="{{ $formasi->id }}">
-                                    </div>
-                                @empty
-                                    <div class="alert alert-warning">
-                                        Formasi belum tersedia.
-                                    </div>
-                                @endforelse
-
-                                
+                                    <select name="id_kebutuhan" class="form-control"{{ $isReadonly ? 'disabled' : '' }} required>
+                                        <option value="">-- Pilih Formasi --</option>
+                                        @foreach($formasi->kebutuhan as $kebutuhan)
+                                            <option value="{{ $kebutuhan->id }}"
+                                                {{ $biodata?->id_kebutuhan == $kebutuhan->id ? 'selected' : '' }}>
+                                                {{ $kebutuhan->nama_kebutuhan }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @if($isReadonly)
+                                        <input type="hidden" name="id_kebutuhan" value="{{ $biodata->id_kebutuhan }}">
+                                    @endif
+                                    
+                                    <input type="hidden" name="id_formasi" value="{{ $formasi->id }}">
+                                        <span class="status-label {{ $isReadonly ? 'text-success' : 'text-danger' }}">
+                                            {{ $isReadonly ? 'Sudah dipilih' : 'Belum dipilih' }}
+                                        </span>
+                                </div>
+                               
+                            @empty
+                                <div class="alert alert-warning">
+                                    Formasi belum tersedia.
+                                </div>
+                            @endforelse
+                                        
                         </div>
                     </div> 
                 </div>

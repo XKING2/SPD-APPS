@@ -8,6 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    @if(session('success'))
+        <meta name="alert-success" content="{{ session('success') }}">
+    @endif
+    
+    @if(session('error'))
+        <meta name="alert-error" content="{{ session('error') }}">
+    @endif
+    
+    @if(session('warning'))
+        <meta name="alert-warning" content="{{ session('warning') }}">
+    @endif
+    
+    @if(session('info'))
+        <meta name="alert-info" content="{{ session('info') }}">
+    @endif
 
     <title>Seleksi Perangkat Desa</title>
 
@@ -41,17 +56,20 @@
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion position-fixed" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center px-3" href="" style="gap: 12px;">
-
+            <a class="sidebar-brand d-flex align-items-center px-3" 
+                href="{{ route('pengujidashboard') }}">
+                
                 <div class="sidebar-brand-icon d-flex align-items-center justify-content-center"
-                    style="width: 40px; height: 40px; border-radius: 12px;overflow: hidden;flex-shrink: 0;">
-                    
+                        style="width: 40px; height: 40px; border-radius: 12px; overflow: hidden;">
+                        <img src="{{ asset('images/logo1.png') }}" alt="Logo E-SPJ"
+                            style="width:100%; height:100%; object-fit:cover;">
                 </div>
 
-                <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
-                    E-SPD
+                <div class="sidebar-brand-text text-white fw-bold ms-3" style="font-size: 1.1rem;">
+                    Si SSD
                 </div>
-            </a>
+
+                </a>
 
             <hr class="sidebar-divider my-0">
 
@@ -64,14 +82,14 @@
 
             <li class="nav-item {{ Request::routeIs('addseleksi') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addseleksi') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-file-alt "></i>
                     <span>Tambah Seleksi</span>
                 </a>
             </li>
 
             <li class="nav-item {{ Request::routeIs('addexams') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addexams') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-file-alt"></i>
                     <span>Tambah Ujian </span>
                 </a>
             </li>
@@ -311,7 +329,10 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="{{ route ('login')}}">Logout</a>
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">Logout</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -322,6 +343,8 @@
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script src="{{ asset('js/sweetalert-handler.js') }}"></script>
 
 </body>
 

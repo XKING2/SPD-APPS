@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Vinkla\Hashids\Facades\Hashids;
 
 class biodatacontrol extends Controller
 {
@@ -68,7 +69,8 @@ class biodatacontrol extends Controller
     {
         $admin = Auth::user();
 
-        // 🔒 Pastikan admin terikat desa
+            
+
         if (!$admin->id_desas) {
             abort(403, 'Admin tidak terikat dengan desa');
         }
@@ -84,8 +86,15 @@ class biodatacontrol extends Controller
         return view('admin.validasi.index', compact('biodatas'));
     }
 
-    public function show($id)
+    public function show($hash)
     {
+        $decoded = Hashids::decode($hash);
+
+        if (count($decoded) === 0) {
+            abort(404);
+        }
+
+        $id = $decoded[0];
 
         $admin = Auth::user();
 
@@ -99,7 +108,7 @@ class biodatacontrol extends Controller
         return view('admin.validasi.validasibio', compact('biodata'));
     }
 
-   public function Validasi(Request $request, Biodata $biodata)
+    public function Validasi(Request $request, Biodata $biodata)
     {
         // 🔒 Guard: hanya boleh dari pending
         if ($biodata->status !== 'draft') {
@@ -116,7 +125,7 @@ class biodatacontrol extends Controller
         ]);
 
 
-        return redirect()->route('validasi.index');
+        return redirect()->route('validasi.index')->with('success', 'Validasi berhasil.');
     }
 
 

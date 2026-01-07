@@ -9,6 +9,21 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if(session('success'))
+        <meta name="alert-success" content="{{ session('success') }}">
+    @endif
+    
+    @if(session('error'))
+        <meta name="alert-error" content="{{ session('error') }}">
+    @endif
+    
+    @if(session('warning'))
+        <meta name="alert-warning" content="{{ session('warning') }}">
+    @endif
+    
+    @if(session('info'))
+        <meta name="alert-info" content="{{ session('info') }}">
+    @endif
 
     <title>Seleksi Perangkat Desa</title>
 
@@ -22,6 +37,10 @@
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/footer.css') }}" rel="stylesheet">
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    
     <style>
         .status-label {
             font-size: 0.85rem;
@@ -41,15 +60,15 @@
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion position-fixed" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center px-3" href="" style="gap: 12px;">
-
+            <a class="sidebar-brand d-flex align-items-center px-3" 
+                href="{{ route('userdashboard') }}" style="gap: 12px;">
                 <div class="sidebar-brand-icon d-flex align-items-center justify-content-center"
-                    style="width: 40px; height: 40px; border-radius: 12px;overflow: hidden;flex-shrink: 0;">
-                    
+                    style="width: 40px; height: 40px; border-radius: 12px; overflow: hidden;">
+                    <img src="{{ asset('images/logo1.png') }}" alt="Logo E-SPJ" style="width:100%; height:100%; object-fit:cover;">
                 </div>
 
                 <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
-                    E-SPD
+                    Si SSD
                 </div>
             </a>
 
@@ -62,20 +81,11 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ Request::routeIs('showbiodata') || Request::routeIs('showverivikasi') ? 'active' : '' }}">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBeritaAcara"
-                    aria-expanded="{{ Request::routeIs('showbiodata') || Request::routeIs('showverivikasi') ? 'true' : 'false' }}"
-                    aria-controls="collapseBeritaAcara">
-                    <i class="fas fa-fw fa-file-alt"></i>
-                    <span>BioData</span>
+            <li class="nav-item {{ Request::routeIs('showbiodata') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('showbiodata') }}">
+                    <i class="fas fa-user fa-sm fa-fw mr-2"></i>
+                    <span>Biodata</span>
                 </a>
-                <div id="collapseBeritaAcara"
-                    class="collapse {{ Request::routeIs('showbiodata') || Request::routeIs('showverivikasi') ? 'show' : '' }}"
-                    aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Request::routeIs('showbiodata') ? 'active' : '' }}" href="{{ route('showbiodata') }}">Biodata</a>
-                    </div>
-                </div>
             </li>
 
 
@@ -288,7 +298,10 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="{{ route ('login')}}">Logout</a>
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">Logout</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -299,6 +312,8 @@
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script src="{{ asset('js/sweetalert-handler.js') }}"></script>
 
 
 </body>

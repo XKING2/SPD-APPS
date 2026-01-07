@@ -10,26 +10,25 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Kelola Data Ujian </h6>
+            <button class="btn btn-primary"
+                        data-toggle="modal"
+                        data-target="#createSeleksiModal">
+                    <i class="fas fa-file-import"></i> Tambah Ujian
+                </button>
         </div>
         <div class="card-body">
             <!-- Search & Print -->
             <div class="d-flex justify-content-between mb-3">
                 <form action="#" method="GET" class="form-inline">
                     <input type="text" name="search" class="form-control form-control-sm mr-2" 
-                        placeholder="Cari..." value="#">
+                        placeholder="Cari..." value="">
                     <button type="submit" class="btn btn-sm btn-secondary">Cari</button>
                 </form>
 
-            </div>
-            <div class="d-flex justify-content-between mb-3">
-                <h5 class="mb-0">Tambah Ujian</h5>
+                
 
-                <button class="btn btn-primary"
-                        data-toggle="modal"
-                        data-target="#createSeleksiModal">
-                    <i class="fas fa-file-import"></i> Tambah Ujian
-                </button>
             </div>
+
             <!-- Table -->
             <div class="table-responsive">
                 <table class="table table-bordered table-hover text-center align-middle">

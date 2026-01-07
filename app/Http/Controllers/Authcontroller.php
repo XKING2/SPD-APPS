@@ -9,6 +9,8 @@ use App\Models\Kecamatans;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Authcontroller extends Controller
 {
@@ -56,11 +58,15 @@ class Authcontroller extends Controller
 
     public function logout(Request $request)
     {
+        $userId = Auth::id();
+        $deleted = DB::table('sessions')->where('user_id', $userId)->delete();
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Anda telah logout.');
+        return redirect()->route('login')
+            ->with('success', 'Logout berhasil.');
     }
 
     public function register(Request $request)

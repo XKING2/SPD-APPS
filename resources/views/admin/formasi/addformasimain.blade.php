@@ -35,7 +35,7 @@
                                 <h5>{{ $formasi->seleksi->judul }}</h5>
                                 <p>Tahun {{ $formasi->tahun }}</p>
 
-                                <a href="{{ route('formasi.show', $formasi->id) }}"
+                                <a href="{{ route('formasi.show', Hashids::encode($formasi->id)) }} "
                                 class="btn btn-outline-info btn-sm">
                                     Kelola Kebutuhan
                                 </a>

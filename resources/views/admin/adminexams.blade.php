@@ -68,19 +68,8 @@
                                 </td>
 
                             <td>
-                                {{-- VALIDASI --}}
-                                <form action="{{ route('exam.validasi', $exam->id) }}"
-                                    method="POST"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Validasi ujian ini?')">
-                                    @csrf
-                                    <button class="btn btn-sm btn-primary"
-                                            {{ $exam->status === 'valid' ? 'disabled' : '' }}>
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </form>
 
-                                <a href="{{ route('adminexam.edit', $exam->id) }}"
+                                <a href="{{ route('adminexam.edit', Hashids::encode($exam->id)) }}"
                                 class="btn btn-sm btn-success">
                                     <i class="fas fa-edit"></i>
                                 </a>

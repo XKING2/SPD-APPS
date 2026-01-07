@@ -38,12 +38,6 @@
                                 </tr>
                             @endforeach
                         </tr>
-
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                Data tidak tersedia
-                            </td>
-                        </tr>
                     </tbody>
 
                 </table>

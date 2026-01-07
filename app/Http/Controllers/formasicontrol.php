@@ -6,6 +6,7 @@ use App\Models\Formasi;
 use App\Models\seleksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Vinkla\Hashids\Facades\Hashids;
 
 class formasicontrol extends Controller
 {
@@ -29,13 +30,20 @@ class formasicontrol extends Controller
         return back()->with('success', 'Formasi berhasil dibuat');
     }
 
-    public function show(Formasi $formasi)
+    public function show(string $hashFormasi)
     {
-        $formasi->load('seleksi', 'kebutuhan');
+        $decoded = Hashids::decode($hashFormasi);
+
+        if (empty($decoded)) {
+            abort(404);
+        }
+
+        $id = $decoded[0];
+
+        $formasi = Formasi::with(['seleksi', 'kebutuhan'])->findOrFail($id);
 
         return view('admin.formasi.addformasi', compact('formasi'));
     }
-
     public function storeKebutuhan(Request $request, Formasi $formasi)
     {
         $request->validate([

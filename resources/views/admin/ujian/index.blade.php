@@ -25,14 +25,25 @@
                             $now = Carbon::now();
                             $startAt = Carbon::parse($examTPU->start_at);
                             $endAt = Carbon::parse($examTPU->end_at);
+
                             $isFinished = $now->greaterThan($endAt);
-                            $canGenerate = $now->greaterThanOrEqualTo($startAt->subMinutes(30));
+                            $isDraft = $examTPU->status === 'draft';
+                            $canGenerate = !$isDraft && $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(30));
                         @endphp 
 
                         @if($isFinished)
                             <p class="text-secondary mt-3 fw-bold">
                                 Jadwal ujian sudah selesai
                             </p>
+
+                        @elseif($isDraft)
+                            <button class="btn btn-secondary" disabled>
+                                Generate Enrollment Key
+                            </button>
+
+                            <small class="text-danger d-block mt-2">
+                                Ujian masih berstatus draft
+                            </small>
 
                         @elseif($canGenerate)
                             <form action="{{ route('admin.tpu.generate', $examTPU->id) }}" method="POST">
@@ -81,13 +92,23 @@
                             $endAt = Carbon::parse($examWWN->end_at);
 
                             $isFinished = $now->greaterThan($endAt);
-                            $canGenerate = $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(30));
+                            $isDraft = $examWWN->status === 'draft';
+                            $canGenerate = !$isDraft && $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(30));
                         @endphp
 
                         @if($isFinished)
                             <p class="text-secondary mt-3 fw-bold">
                                 Jadwal ujian sudah selesai
                             </p>
+
+                        @elseif($isDraft)
+                            <button class="btn btn-secondary" disabled>
+                                Generate Enrollment Key
+                            </button>
+
+                            <small class="text-danger d-block mt-2">
+                                Ujian masih berstatus draft
+                            </small>
 
                         @elseif($canGenerate)
                             <form action="{{ route('admin.wwn.generate', $examWWN->id) }}" method="POST">
@@ -116,6 +137,7 @@
                             Ujian belum dibuat oleh penguji
                         </p>
                     @endif
+
 
                 </div>
             </div>
@@ -155,33 +177,33 @@
 @endif
 
 
-@if(session('enrollment_key'))
-<script>
-    let timeLeft = 300; // 5 menit (detik)
+    @if(session('enrollment_key'))
+        <script>
+            let timeLeft = 300; // 5 menit (detik)
 
-    const countdownEl = document.getElementById('countdown');
+            const countdownEl = document.getElementById('countdown');
 
-    const timer = setInterval(() => {
-        let minutes = Math.floor(timeLeft / 60);
-        let seconds = timeLeft % 60;
+            const timer = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
 
-        countdownEl.textContent =
-            `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+                countdownEl.textContent =
+                    `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
 
-        timeLeft--;
+                timeLeft--;
 
-        if (timeLeft < 0) {
-            clearInterval(timer);
-            closeModal();
-        }
-    }, 1000);
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    closeModal();
+                }
+            }, 1000);
 
-    function closeModal() {
-        document.getElementById('keyModal').style.display = 'none';
-        document.body.classList.remove('modal-open');
-        document.querySelector('.modal-backdrop')?.remove();
-    }
-</script>
-@endif
+            function closeModal() {
+                document.getElementById('keyModal').style.display = 'none';
+                document.body.classList.remove('modal-open');
+                document.querySelector('.modal-backdrop')?.remove();
+            }
+        </script>
+    @endif
 
 @endsection

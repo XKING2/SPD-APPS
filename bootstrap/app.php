@@ -12,8 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware ->alias([
+            'check.role' => \App\Http\Middleware\CheckRole::class,
             'check_status' => app\Http\Middleware\CheckStatus::class,
             'biodata.valid' => \App\Http\Middleware\checkbiodata::class,
+            'check.login' => \App\Http\Middleware\CheckLogin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

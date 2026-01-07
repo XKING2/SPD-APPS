@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Vinkla\Hashids\Facades\Hashids;
 
 class sidebar2control extends Controller
 {
@@ -127,6 +128,10 @@ class sidebar2control extends Controller
     {
         $exam = exams::findOrFail($examId);
 
+        if ($exam->status === 'draft') {
+            return back()->withErrors('Status Exam Masih Draft.');
+        }
+
         if ($exam->status === 'closed') {
             return back()->withErrors('Exam sudah ditutup.');
         }
@@ -142,7 +147,6 @@ class sidebar2control extends Controller
         ]);
 
         return back()->with([
-            'success' => 'Enrollment key berhasil dibuat.',
             'enrollment_key' => $key,
             'expired_at' => $exam->key_expired_at->timestamp
         ]);
@@ -151,6 +155,10 @@ class sidebar2control extends Controller
     public function generateWWN($examId)
     {
         $exam = exams::findOrFail($examId);
+
+        if ($exam->status === 'draft') {
+            return back()->withErrors('Status Exam Masih Draft.');
+        }
 
         if ($exam->status === 'closed') {
             return back()->withErrors('Exam sudah ditutup.');
@@ -187,12 +195,22 @@ class sidebar2control extends Controller
     }
 
 
-    public function editExams(exams $exam)
+    public function editExams(string $hashexam)
     {
+        $decoded = Hashids::decode($hashexam);
+
+        if (empty($decoded)) {
+            abort(404);
+        }
+
+        $id = $decoded[0];
+
+        $exam = Exams::all()->findOrFail($id);
+
         return view('admin.admineditexams', [
-            'exam'     => $exam,
-            'seleksi'  => seleksi::orderBy('judul')->get(),
-            'types'    => exams::TYPES,
+            'exam'    => $exam,
+            'seleksi' => Seleksi::orderBy('judul')->get(),
+            'types'   => Exams::TYPES,
         ]);
     }
 
@@ -207,12 +225,6 @@ class sidebar2control extends Controller
             'end_at'     => 'required|date|after:start_at',
         ]);
 
-        if ($exam->status === 'active') {
-            return back()->withErrors([
-                'update' => 'Exam aktif tidak bisa diedit'
-            ]);
-        }
-
         $exam->update([
             'judul'      => $request->judul,
             'type'       => $request->type,
@@ -220,6 +232,7 @@ class sidebar2control extends Controller
             'id_seleksi' => $request->id_seleksi,
             'start_at'   => $request->start_at,
             'end_at'     => $request->end_at,
+            'status'     => 'draft'
         ]);
 
         return redirect()

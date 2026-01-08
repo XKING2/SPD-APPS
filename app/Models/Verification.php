@@ -16,6 +16,8 @@ class Verification extends Model
         'type',
         'send_via',
         'resend',
+        'attempts',
+        'expires_at',
         'status',
     ];
 

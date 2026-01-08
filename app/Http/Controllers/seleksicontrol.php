@@ -7,6 +7,7 @@ use App\Models\Kecamatans;
 use App\Models\seleksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Vinkla\Hashids\Facades\Hashids;
 
 class seleksicontrol extends Controller
 {
@@ -45,8 +46,18 @@ class seleksicontrol extends Controller
             ->with('success', 'Data seleksi berhasil dibuat');
     }
 
-    public function edit(seleksi $seleksi)
+    public function edit(string $hashseleksi)
     {
+        $decoded = Hashids::decode($hashseleksi);
+
+        if (empty($decoded)) {
+            abort(404);
+        }
+
+        $id = $decoded[0];
+
+        $seleksi = seleksi::all()->findOrFail($id);
+
         return view('penguji.editseleksi', [
             'seleksi'    => $seleksi,
             'desas'      => Desas::orderBy('nama_desa')->get(),

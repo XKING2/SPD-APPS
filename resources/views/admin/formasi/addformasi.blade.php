@@ -37,6 +37,7 @@
                                     <td>{{ $k->jumlah }}</td>
                                 </tr>
                             @endforeach
+                            
                         </tr>
                     </tbody>
 
@@ -51,46 +52,68 @@
 </div>
 
 
-<div class="modal fade" id="createFormasiModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="createFormasiModal" tabindex="-1" aria-labelledby="createFormasiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
 
+            {{-- ===== HEADER ===== --}}
+            <div class="modal-header">
+                <h5 class="modal-title" id="createFormasiModalLabel">
+                    Tambah Kebutuhan Formasi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            {{-- ===== FORM ===== --}}
             <form action="{{ route('formasi.kebutuhan.store', $formasi->id) }}" method="POST">
                 @csrf
 
-                <div class="form-group">
-                    <label>Nama Kebutuhan</label>
-                    <input type="text" name="nama_kebutuhan" class="form-control" required>
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Kebutuhan</label>
+                        <input
+                            type="text"
+                            name="nama_kebutuhan"
+                            class="form-control"
+                            placeholder="Contoh: Tenaga Administrasi"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah</label>
+                        <input
+                            type="number"
+                            name="jumlah"
+                            class="form-control"
+                            min="1"
+                            placeholder="Masukkan jumlah kebutuhan"
+                            required
+                        >
+                    </div>
+
                 </div>
 
-                <div class="form-group">
-                    <label>Jumlah</label>
-                    <input type="number" name="jumlah" class="form-control" min="1" required>
+                {{-- ===== FOOTER ===== --}}
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        Simpan Kebutuhan
+                    </button>
                 </div>
-
-                <button class="btn btn-primary mt-2">
-                    Tambah Kebutuhan
-                </button>
             </form>
-
 
         </div>
     </div>
 </div>
 
 
-
-
-
-
-
 @endsection
 
-
-
-
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -54,41 +54,42 @@
                                 {{ $exam->seleksi->tahun ?? '-' }}
                             </td>
 
-                            <td>
-                                @if ($exam->status === 'valid')
-                                    <span class="badge badge-success">Tervalidasi</span>
-                                @elseif ($exam->status === 'draft')
-                                    <span class="badge badge-warning">Belum divalidasi</span>
-                                @else
-                                    <span class="badge badge-danger">Ditolak</span>
-                                @endif
-                            </td>
+                                <td>
+                                    @if ($exam->status === 'active')
+                                        <span class="badge bg-success text-white">Tervalidasi</span>
+                                    @elseif ($exam->status === 'draft')
+                                        <span class="badge bg-warning text-white">Belum divalidasi</span>
+                                    @elseif ($exam->status === 'closed')
+                                        <span class="badge bg-danger text-white">Ditutup</span>
+                                    @endif
+                                </td>
 
                             <td>
                                 {{-- VALIDASI --}}
                                 <form action="{{ route('exam.validasi', $exam->id) }}"
                                     method="POST"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Validasi ujian ini?')">
+                                    class="d-inline">
                                     @csrf
-                                    <button class="btn btn-sm btn-primary"
+                                    <button class="btn btn-sm btn-primary btn-valid-exam"
                                             {{ $exam->status === 'valid' ? 'disabled' : '' }}>
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </form>
+                                
 
-                                <a href="{{ route('exam.edit', $exam->id) }}"
-                                class="btn btn-sm btn-success">
+                                <button type="button"
+                                        class="btn btn-sm btn-success btn-edit-exam"
+                                        data-url="{{ route('exam.edit', $exam->id) }}">
                                     <i class="fas fa-edit"></i>
-                                </a>
+                                </button>
+                            
 
                                 <form action="{{ route('exam.destroy', $exam->id) }}"
                                     method="POST"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Yakin hapus exam ini?')">
+                                    class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">
+                                    <button class="btn btn-sm btn-danger btn-delete-exam">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -209,21 +210,41 @@
     </div>
 </div>
 
-
-
-
-@endsection
-
-
-
-
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        document.querySelectorAll('.btn-edit-exam').forEach(button => {
+            button.addEventListener('click', function () {
+
+                const url = this.dataset.url;
+
+                Swal.fire({
+                    title: 'Edit Ujian?',
+                    text: 'Pastikan Anda yakin ingin mengubah data ujian ini.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Edit',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+
+            });
+        });
+
+    });
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Tangkap semua tombol Edit
-    const editButtons = document.querySelectorAll('.btn-edit');
+    const editButtons = document.querySelectorAll('.btn-valid-exam');
 
     editButtons.forEach(button => {
         button.addEventListener('click', function(e) {
@@ -231,8 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const editUrl = this.getAttribute('data-edit-url');
 
             Swal.fire({
-                title: "Apakah Anda yakin ingin mengedit data ini?",
-                text: "Perubahan akan mempengaruhi data kwitansi terkait.",
+                title: "Apakah Anda yakin ingin Validasi data ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -248,28 +268,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Jika ada notifikasi sukses
-    const swalSuccess = document.querySelector('[data-swal-success]');
-    if (swalSuccess) {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: swalSuccess.getAttribute('data-swal-success'),
-            timer: 2500,
-            showConfirmButton: false
-        });
-    }
-
-    // Jika ada error
-    const swalErrors = document.querySelector('[data-swal-errors]');
-    if (swalErrors) {
-        const messages = swalErrors.getAttribute('data-swal-errors').split('|');
-        Swal.fire({
-            icon: 'error',
-            title: 'Terjadi Kesalahan!',
-            html: messages.join('<br>'),
-        });
-    }
 });
 </script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tangkap semua tombol Edit
+    const editButtons = document.querySelectorAll('.btn-delete-exam');
+
+    editButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // Cegah langsung pindah halaman
+            const editUrl = this.getAttribute('data-edit-url');
+
+            Swal.fire({
+                title: "Apakah Anda yakin ingin Menghapus Data ini?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, lanjutkan",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect ke halaman edit
+                    window.location.href = editUrl;
+                }
+            });
+        });
+    });
+
+});
+</script>
+
+
+
+@endsection
+
+
+
 

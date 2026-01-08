@@ -67,6 +67,10 @@ class exams extends Model
         'wwn' => 'Wawancara',
     ];
 
+    public function isKeyActive()
+    {
+        return $this->key_expired_at && $this->key_expired_at->isFuture();
+    }
 
 
 }

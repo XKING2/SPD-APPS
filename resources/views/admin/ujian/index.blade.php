@@ -5,11 +5,15 @@
 
     <h1 class="h3 mb-4 text-gray-800">Mulai Ujian</h1>
 
-    <div class="row">
+    @php
+        use Carbon\Carbon;
 
-        @php
-            use Carbon\Carbon;
-        @endphp
+        // default biar aman dipakai di bawah
+        $tpuHasKey = false;
+        $wwnHasKey = false;
+    @endphp
+
+    <div class="row">
 
         {{-- ================= TPU ================= --}}
         <div class="col-md-6 mb-4">
@@ -21,31 +25,41 @@
 
                     @if(isset($examTPU))
 
-                        @php     
-                            $now = Carbon::now();
-                            $startAt = Carbon::parse($examTPU->start_at);
-                            $endAt = Carbon::parse($examTPU->end_at);
+                        @php
+                            $now       = Carbon::now();
+                            $tpuStart  = Carbon::parse($examTPU->start_at);
+                            $tpuEnd    = Carbon::parse($examTPU->end_at);
 
-                            $isFinished = $now->greaterThan($endAt);
-                            $isDraft = $examTPU->status === 'draft';
-                            $canGenerate = !$isDraft && $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(30));
-                        @endphp 
+                            $tpuFinished = $now->greaterThan($tpuEnd);
+                            $tpuDraft    = $examTPU->status === 'draft';
 
-                        @if($isFinished)
-                            <p class="text-secondary mt-3 fw-bold">
+                            $tpuHasKey = !empty($examTPU->enrollment_key)
+                                && $examTPU->key_expired_at
+                                && Carbon::parse($examTPU->key_expired_at)->isFuture();
+
+                            $tpuCanGenerate =
+                                !$tpuDraft &&
+                                !$tpuHasKey &&
+                                $now->greaterThanOrEqualTo($tpuStart->copy()->subMinutes(30));
+                        @endphp
+
+                        @if($tpuFinished)
+                            <p class="text-secondary fw-bold">
                                 Jadwal ujian sudah selesai
                             </p>
 
-                        @elseif($isDraft)
+                        @elseif($tpuDraft)
                             <button class="btn btn-secondary" disabled>
                                 Generate Enrollment Key
                             </button>
 
-                            <small class="text-danger d-block mt-2">
-                                Ujian masih berstatus draft
-                            </small>
+                        @elseif($tpuHasKey)
+                            <button class="btn btn-outline-primary"
+                                    onclick="openKeyModal('tpu')">
+                                Lihat Enrollment Key Aktif
+                            </button>
 
-                        @elseif($canGenerate)
+                        @elseif($tpuCanGenerate)
                             <form action="{{ route('admin.tpu.generate', $examTPU->id) }}" method="POST">
                                 @csrf
                                 <button class="btn btn-primary">
@@ -57,19 +71,14 @@
                             <button class="btn btn-primary" disabled>
                                 Generate Enrollment Key
                             </button>
-
                             <small class="text-warning d-block mt-2">
-                                Tombol akan aktif 30 menit sebelum ujian dimulai
-                            </small>
-
-                            <small class="text-muted d-block">
-                                Waktu ujian: {{ $startAt->format('d M Y H:i') }}
+                                Aktif 30 menit sebelum ujian
                             </small>
                         @endif
 
                     @else
-                        <p class="text-danger mt-3 fw-bold">
-                            Ujian belum dibuat oleh penguji
+                        <p class="text-danger fw-bold">
+                            Ujian belum dibuat
                         </p>
                     @endif
 
@@ -88,29 +97,39 @@
                     @if(isset($examWWN))
 
                         @php
-                            $startAt = Carbon::parse($examWWN->start_at);
-                            $endAt = Carbon::parse($examWWN->end_at);
+                            $wwnStart  = Carbon::parse($examWWN->start_at);
+                            $wwnEnd    = Carbon::parse($examWWN->end_at);
 
-                            $isFinished = $now->greaterThan($endAt);
-                            $isDraft = $examWWN->status === 'draft';
-                            $canGenerate = !$isDraft && $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(30));
+                            $wwnFinished = $now->greaterThan($wwnEnd);
+                            $wwnDraft    = $examWWN->status === 'draft';
+
+                            $wwnHasKey = !empty($examWWN->enrollment_key)
+                                && $examWWN->key_expired_at
+                                && Carbon::parse($examWWN->key_expired_at)->isFuture();
+
+                            $wwnCanGenerate =
+                                !$wwnDraft &&
+                                !$wwnHasKey &&
+                                $now->greaterThanOrEqualTo($wwnStart->copy()->subMinutes(30));
                         @endphp
 
-                        @if($isFinished)
-                            <p class="text-secondary mt-3 fw-bold">
+                        @if($wwnFinished)
+                            <p class="text-secondary fw-bold">
                                 Jadwal ujian sudah selesai
                             </p>
 
-                        @elseif($isDraft)
+                        @elseif($wwnDraft)
                             <button class="btn btn-secondary" disabled>
                                 Generate Enrollment Key
                             </button>
 
-                            <small class="text-danger d-block mt-2">
-                                Ujian masih berstatus draft
-                            </small>
+                        @elseif($wwnHasKey)
+                            <button class="btn btn-outline-primary"
+                                    onclick="openKeyModal('wwn')">
+                                Lihat Enrollment Key Aktif
+                            </button>
 
-                        @elseif($canGenerate)
+                        @elseif($wwnCanGenerate)
                             <form action="{{ route('admin.wwn.generate', $examWWN->id) }}" method="POST">
                                 @csrf
                                 <button class="btn btn-primary">
@@ -122,54 +141,38 @@
                             <button class="btn btn-primary" disabled>
                                 Generate Enrollment Key
                             </button>
-
                             <small class="text-warning d-block mt-2">
-                                Tombol akan aktif 30 menit sebelum ujian dimulai
-                            </small>
-
-                            <small class="text-muted d-block">
-                                Waktu ujian: {{ $startAt->format('d M Y H:i') }}
+                                Aktif 30 menit sebelum ujian
                             </small>
                         @endif
 
                     @else
-                        <p class="text-danger mt-3 fw-bold">
-                            Ujian belum dibuat oleh penguji
+                        <p class="text-danger fw-bold">
+                            Ujian belum dibuat
                         </p>
                     @endif
-
 
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
 
 
-@if(session('enrollment_key'))
-<!-- Modal -->
-<div class="modal fade show" id="keyModal" tabindex="-1" style="display:block;background:rgba(0,0,0,.5)">
+{{-- ================= MODAL TPU ================= --}}
+@if($tpuHasKey)
+<div class="modal fade" id="keyModal-tpu" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center p-4">
-
-            <h4 class="mb-3 text-success">Enrollment Key</h4>
+            <h4 class="text-success">Enrollment Key TPU</h4>
 
             <div class="display-4 fw-bold text-primary mb-3">
-                {{ session('enrollment_key') }}
+                {{ $examTPU->enrollment_key }}
             </div>
 
-            <p class="text-muted mb-2">
-                Halaman ini akan tertutup otomatis dalam
-            </p>
-
-            <h5 id="countdown" class="text-danger fw-bold">
-                05:00
-            </h5>
-
-            <button class="btn btn-secondary mt-3" onclick="closeModal()">
-                Tutup Sekarang
-            </button>
+            <p class="text-muted mb-1">Berlaku hingga</p>
+            <h5 class="text-danger fw-bold" id="countdown-tpu"></h5>
 
         </div>
     </div>
@@ -177,33 +180,81 @@
 @endif
 
 
-    @if(session('enrollment_key'))
-        <script>
-            let timeLeft = 300; // 5 menit (detik)
+{{-- ================= MODAL WWN ================= --}}
+@if($wwnHasKey)
+<div class="modal fade" id="keyModal-wwn" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <h4 class="text-success">Enrollment Key WWN</h4>
 
-            const countdownEl = document.getElementById('countdown');
+            <div class="display-4 fw-bold text-primary mb-3">
+                {{ $examWWN->enrollment_key }}
+            </div>
 
-            const timer = setInterval(() => {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
+            <p class="text-muted mb-1">Berlaku hingga</p>
+            <h5 class="text-danger fw-bold" id="countdown-wwn"></h5>
+        </div>
+    </div>
+</div>
+@endif
 
-                countdownEl.textContent =
-                    `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+<script>
+function openKeyModal(type) {
+    const modalId = type === 'tpu'
+        ? 'keyModal-tpu'
+        : 'keyModal-wwn';
 
-                timeLeft--;
+    const modalEl = document.getElementById(modalId);
 
-                if (timeLeft < 0) {
-                    clearInterval(timer);
-                    closeModal();
-                }
-            }, 1000);
+    if (!modalEl) {
+        console.warn('Modal tidak ditemukan:', modalId);
+        return;
+    }
 
-            function closeModal() {
-                document.getElementById('keyModal').style.display = 'none';
-                document.body.classList.remove('modal-open');
-                document.querySelector('.modal-backdrop')?.remove();
-            }
-        </script>
-    @endif
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+</script>
+
+<div id="exam-data"
+     data-tpu="{{ $tpuHasKey ? $examTPU->key_expired_at : '' }}"
+     data-wwn="{{ $wwnHasKey ? $examWWN->key_expired_at : '' }}">
+</div>
+
+<script>
+const examData = document.getElementById('exam-data');
+
+const examKeys = {
+    tpu: examData.dataset.tpu || null,
+    wwn: examData.dataset.wwn || null,
+};
+
+function startCountdown(expiredAt, elementId) {
+    const expired = new Date(expiredAt).getTime();
+
+    setInterval(() => {
+        const diff = expired - Date.now();
+        if (diff <= 0) return;
+
+        const m = Math.floor(diff / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.innerText =
+                `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+    }, 1000);
+}
+
+if (examKeys.tpu) {
+    startCountdown(examKeys.tpu, 'countdown-tpu');
+}
+
+if (examKeys.wwn) {
+    startCountdown(examKeys.wwn, 'countdown-wwn');
+}
+</script>
+
 
 @endsection

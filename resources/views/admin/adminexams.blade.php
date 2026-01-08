@@ -58,31 +58,31 @@
                             </td>
 
                                 <td>
-                                    @if ($exam->status === 'valid')
-                                        <span class="badge badge-success">Tervalidasi</span>
+                                    @if ($exam->status === 'active')
+                                        <span class="badge bg-success text-white">Tervalidasi</span>
                                     @elseif ($exam->status === 'draft')
-                                        <span class="badge badge-warning">Belum divalidasi</span>
-                                    @else
-                                        <span class="badge badge-danger">Ditolak</span>
+                                        <span class="badge bg-warning text-white">Belum divalidasi</span>
+                                    @elseif ($exam->status === 'closed')
+                                        <span class="badge bg-danger text-white">Ditutup</span>
                                     @endif
                                 </td>
 
                             <td>
-
-                                <a href="{{ route('adminexam.edit', Hashids::encode($exam->id)) }}"
-                                class="btn btn-sm btn-success">
+                                <button type="button"
+                                        class="btn btn-sm btn-success btn-edit-exam"
+                                        data-url="{{ route('adminexam.edit', Hashids::encode($exam->id)) }}">
                                     <i class="fas fa-edit"></i>
-                                </a>
-
+                                </button>
                             </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center">
+                            @empty
+                            <td colspan="7" class="text-center">
                                 Data tidak tersedia
                             </td>
+                            @endforelse
                         </tr>
-                        @endforelse
+                        
+                            
+                        
                         </tbody>
 
                 </table>
@@ -95,8 +95,36 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
 
+        document.querySelectorAll('.btn-edit-exam').forEach(button => {
+            button.addEventListener('click', function () {
+
+                const url = this.dataset.url;
+
+                Swal.fire({
+                    title: 'Edit Ujian?',
+                    text: 'Pastikan Anda yakin ingin mengubah data ujian ini.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Edit',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+
+            });
+        });
+
+    });
+</script>
 
 
 @endsection
@@ -105,7 +133,7 @@
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

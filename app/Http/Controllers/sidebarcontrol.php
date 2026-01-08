@@ -19,13 +19,24 @@ class sidebarcontrol extends Controller
         $biodata = Biodata::where('id_user', Auth::id())->first();
         $profileImg = $biodata->profile_img ?? 'img/undraw_profile.svg';
 
-
-
+        // Ambil ujian TPU
+        $examTPU = exams::where('type', 'tpu')
+            ->where('id_desas', $user->id_desas) // Filter by user's desa
+            ->where('status', 'active')// Get questions count
+            ->first();
+        
+        // Ambil ujian Wawancara
+        $examWawancara = exams::where('type', 'wwn')
+            ->where('id_desas', $user->id_desas) // Filter by user's desa
+            ->where('status', 'active')
+            ->first();
 
         return view('users.dashboard', compact(
             'user',
             'biodata',
-            'profileImg'
+            'profileImg',
+            'examTPU',
+            'examWawancara'
         ));
     }
     

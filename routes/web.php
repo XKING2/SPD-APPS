@@ -19,24 +19,68 @@ use App\Models\Desas;
 use App\Models\seleksi;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/register', [Authcontroller::class, 'showRegisterForm'])->name('register.form');
-Route::post('/register',[Authcontroller::class, 'register'])->name('register');
 
-Route::get('/login', [authcontroller::class, 'showLoginForm'])->name('login');
-Route::post('/login', [authcontroller::class, 'login'])->name('login.post');
-Route::post('/logout', [authcontroller::class, 'logout'])->name('logout');
-
-
-Route::get('/get-desa/{kecamatan}', function ($kecamatan) {
-    return Desas::where('id_kecamatans', $kecamatan)
-        ->orderBy('nama_desa')
-        ->get();
+Route::get('/', function () {
+    return redirect()->route('login');
 });
 
-Route::get('/otp',[Authcontroller::class, 'otpForm'])->name('otp.form');
-Route::post('/otp/verify',[Authcontroller::class, 'verify'])->name('otp.verify');
 
-Route::middleware(['check.role:admin'])->group(function () {
+Route::middleware(['guest', 'otp.not.pending'])->group(function () {
+
+    Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
+        ->name('register.form');
+
+    Route::post('/register', [Authcontroller::class, 'register'])
+        ->middleware('throttle:5,10')
+        ->name('register');
+
+    Route::get('/login', [Authcontroller::class, 'showLoginForm'])
+        ->name('login');
+
+    Route::post('/login', [Authcontroller::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('login.post');
+});
+
+Route::post('/otp/verify', [Authcontroller::class, 'verify'])
+        ->middleware('throttle:5,1')
+        ->name('otp.verify');
+
+Route::get('/otp', [Authcontroller::class, 'otpForm'])
+    ->middleware('otp.session')
+    ->name('otp.form');
+
+Route::post('/otp/resend', [Authcontroller::class, 'resendOtp'])
+    ->middleware(['otp.session', 'throttle:3,10'])
+    ->name('otp.resend');
+    
+Route::post('/logout', [Authcontroller::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+
+
+
+Route::get('/ajax/desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
+    ->middleware('throttle:60,1');
+
+Route::middleware(['auth','check.role:users'])->group(function () {
+    Route::get('/User/Dashboard', [sidebarcontrol::class, 'showdashboard'])->name('userdashboard');
+    Route::get('/User/Biodata', [sidebarcontrol::class, 'showbiodata'])->name('showbiodata');
+    Route::get('/User/Cekdata', [sidebarcontrol::class, 'preview'])->name('showpreview');
+    Route::get('/User/Ujian', [sidebarcontrol::class, 'showmainujian'])->name('showmainujian');
+    Route::post('/biodata', [biodatacontrol::class, 'store'])->name('biodata.post');
+    Route::post('/exam/tpu/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentTPU'])->name('exam.tpu.verify');
+    Route::get('/ujian/TPU/{exam}', [Startcontrol::class, 'startTPU'])->name('exam.tpu.start');
+    Route::post('/exam/TPU/{exam}/submit', [ujiancontrol::class, 'submit'])->name('exam.tpu.submit');
+    Route::get('/ujian/WWN/{exam}', [Startcontrol::class, 'startWWN'])->name('exam.wwn.start');
+    Route::post('/exam/WWN/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentWawancara'])->name('exam.wwn.verify');
+    Route::post('/exam/WWN/{exam}/submit', [ujiancontrol::class, 'submitWawancara'])->name('exam.wwn.submit');
+});
+
+
+
+Route::middleware(['auth','check.role:admin'])->group(function () {
     Route::get('/admin/dashboard', [sidebar2control::class, 'index'])->name('admindashboard');
     Route::get('/ujian', [sidebar2control::class, 'startexams'])->name('adminujian');
     Route::post('/admin/exam/{exam}/generate',[sidebar2control::class, 'generate'])->name('admin.tpu.generate');
@@ -55,7 +99,7 @@ Route::middleware(['check.role:admin'])->group(function () {
     Route::post('Admin/Formasi/{formasi}/kebutuhan', [formasicontrol::class, 'storeKebutuhan'])->name('formasi.kebutuhan.store');
 });
 
-Route::middleware(['check.role:penguji'])->group(function () {
+Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/Penguji/Dashboard', [sidebar3control  ::class, 'ShowDashboard'])->name('pengujidashboard');
     Route::get('/api/chart/kecamatan', [sidebar3control::class, 'chartKecamatan']);
     Route::get('/api/chart/desa/{kecamatan}', [sidebar3control::class, 'chartDesa']);
@@ -68,7 +112,7 @@ Route::middleware(['check.role:penguji'])->group(function () {
 
     Route::get('/Penguji/Seleksi', [sidebar3control  ::class, 'showSeleksi'])->name('addseleksi');
     Route::post('/Seleksi/import', [seleksicontrol::class, 'store'])->name('seleksi.import');
-    Route::get('/seleksi/{seleksi}/edit', [seleksicontrol ::class, 'edit'])->name('seleksi.edit');
+    Route::get('/seleksi/{hashseleksi}/edit', [seleksicontrol ::class, 'edit'])->name('seleksi.edit');
     Route::put('/seleksi/{seleksi}', [seleksicontrol::class, 'update'])->name('seleksi.update');
     Route::delete('/seleksi/{seleksi}', [seleksicontrol::class, 'destroy'])->name('seleksi.destroy');
 
@@ -117,104 +161,3 @@ Route::middleware(['check.role:penguji'])->group(function () {
     Route::post('/Penguji/saw/generate/{seleksi}',[Sawcontrol::class, 'generate'])->name('saw.generate');
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Route::middleware(['check.role:users'])->group(function () {
-    Route::get('/User/Dashboard', [sidebarcontrol::class, 'showdashboard'])->name('userdashboard');
-    Route::get('/User/Biodata', [sidebarcontrol::class, 'showbiodata'])->name('showbiodata');
-    Route::get('/User/Cekdata', [sidebarcontrol::class, 'preview'])->name('showpreview');
-    Route::get('/User/Ujian', [sidebarcontrol::class, 'showmainujian'])->name('showmainujian');
-    Route::post('/biodata', [biodatacontrol::class, 'store'])->name('biodata.post');
-    Route::post('/exam/tpu/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentTPU'])->name('exam.tpu.verify');
-    Route::get('/ujian/TPU/{exam}', [Startcontrol::class, 'startTPU'])->name('exam.tpu.start');
-    Route::post('/exam/TPU/{exam}/submit', [ujiancontrol::class, 'submit'])->name('exam.tpu.submit');
-    Route::get('/ujian/WWN/{exam}', [Startcontrol::class, 'startWWN'])->name('exam.wwn.start');
-    Route::post('/exam/WWN/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentWawancara'])->name('exam.wwn.verify');
-    Route::post('/exam/WWN/{exam}/submit', [ujiancontrol::class, 'submitWawancara'])->name('exam.wwn.submit');
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

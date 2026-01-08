@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'check_status' => app\Http\Middleware\CheckStatus::class,
             'biodata.valid' => \App\Http\Middleware\checkbiodata::class,
             'check.login' => \App\Http\Middleware\CheckLogin::class,
+            'otp.not.pending' => \App\Http\Middleware\EnsureOtpNotPending::class,
+            'otp.session' => \App\Http\Middleware\otpsessions::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

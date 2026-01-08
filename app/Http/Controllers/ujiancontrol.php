@@ -280,19 +280,24 @@ class ujiancontrol extends Controller
         );
     }
 
+
     public function ShowExamsAdmin()
     {
-        $exams = Exams::with(['seleksi'])
-            ->orderByDesc('created_at')
+        $admin = Auth::user();
+
+        $exams = Exams::with('seleksi')
+            ->where('id_desas', $admin->id_desas)
+            ->latest()
             ->get();
 
         return view('admin.adminexams', [
-            'exams'    => Exams::with('seleksi')->latest()->get(),
-            'seleksis' => seleksi::orderBy('judul')->get(),
+            'exams'    => $exams,
+            'seleksis' => Seleksi::where('id_desas', $admin->id_desas)
+                                ->orderBy('judul')
+                                ->get(),
             'types'    => Exams::TYPES,
         ]);
     }
-
 
     public function edit(exams $exam)
     {

@@ -1,0 +1,285 @@
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            body::before {
+                content: '';
+                position: absolute;
+                width: 400px;
+                height: 400px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                top: -200px;
+                left: -200px;
+                animation: float 6s ease-in-out infinite;
+            }
+
+            body::after {
+                content: '';
+                position: absolute;
+                width: 300px;
+                height: 300px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                bottom: -150px;
+                right: -150px;
+                animation: float 8s ease-in-out infinite;
+            }
+
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(20px);
+                }
+            }
+
+            .login-box {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 40px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                width: 100%;
+                max-width: 500px;
+                position: relative;
+                z-index: 1;
+                animation: slideUp 0.5s ease;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            /* Custom scrollbar */
+            .login-box::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .login-box::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.05);
+                border-radius: 10px;
+            }
+
+            .login-box::-webkit-scrollbar-thumb {
+                background: #667eea;
+                border-radius: 10px;
+            }
+
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .logo {
+                width: 70px;
+                height: 70px;
+                object-fit: contain;
+                margin-bottom: 15px;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            .fw-bold {
+                color: #333;
+                font-weight: 700;
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .form-label {
+                color: #444;
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .input-group-custom {
+                position: relative;
+            }
+
+            .input-icon {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #667eea;
+                font-size: 18px;
+                z-index: 2;
+            }
+
+            .form-control {
+                padding: 12px 15px 12px 45px;
+                border: 2px solid #e0e0e0;
+                border-radius: 10px;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+                outline: none;
+            }
+
+            select.form-control {
+                padding: 12px 15px 12px 45px;
+                background-color: white;
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 15px center;
+                padding-right: 40px;
+            }
+
+            select.form-control:hover {
+                border-color: #667eea;
+                background-color: #f8f9ff;
+            }
+
+            select.form-control option {
+                padding: 10px;
+                background-color: white;
+                color: #333;
+            }
+
+            select.form-control option:hover {
+                background-color: #667eea;
+                color: white;
+            }
+
+            select.form-control option:checked {
+                background-color: #667eea;
+                color: white;
+            }
+
+            /* Loading state untuk select */
+            select.form-control.loading {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 50 50'%3E%3Cpath fill='%23667eea' d='M25,5A20.14,20.14,0,0,1,45,22.88a2.51,2.51,0,0,0,2.49,2.26h0A2.52,2.52,0,0,0,50,22.33a25.14,25.14,0,0,0-50,0,2.52,2.52,0,0,0,2.5,2.81h0A2.51,2.51,0,0,0,5,22.88,20.14,20.14,0,0,1,25,5Z'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 25 25' to='360 25 25' dur='0.6s' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E");
+                background-size: 16px;
+                background-position: right 15px center;
+            }
+
+            .password-toggle {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+                color: #999;
+                transition: color 0.3s ease;
+                z-index: 2;
+            }
+
+            .password-toggle:hover {
+                color: #667eea;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                padding: 14px;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+
+            .card-header {
+                background: transparent;
+                border: none;
+                padding: 20px 0 0 0;
+                display: flex;
+                justify-content: center;
+            }
+
+            .btn-sm {
+                padding: 10px 18px;
+                background: white;
+                border: 2px solid #667eea;
+                color: #667eea;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 13px;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .btn-sm:hover {
+                background: #667eea;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            }
+
+            .alert {
+                border-radius: 10px;
+                padding: 15px;
+                margin-top: 20px;
+                border: none;
+                animation: slideIn 0.3s ease;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .alert-danger {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+            }
+
+            @media (max-width: 576px) {
+                .login-box {
+                    padding: 30px 25px;
+                }
+
+                .fw-bold {
+                    font-size: 24px;
+                }
+            }

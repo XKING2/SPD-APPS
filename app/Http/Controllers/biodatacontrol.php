@@ -67,9 +67,8 @@ class biodatacontrol extends Controller
 
     public function index()
     {
+        $desaId = Auth::user()->id_desas;
         $admin = Auth::user();
-
-            
 
         if (!$admin->id_desas) {
             abort(403, 'Admin tidak terikat dengan desa');

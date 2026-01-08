@@ -19,7 +19,7 @@ class userseeds extends Seeder
             'name' => 'Ade Senior',
             'id_desas' => '15',
             'email' => 'test@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'penguji',
             'password'  => Hash::make('password123'),
         ]);
@@ -28,7 +28,7 @@ class userseeds extends Seeder
             'name' => 'Ade Junior',
             'id_desas' => '15',
             'email' => 'test1@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -37,7 +37,7 @@ class userseeds extends Seeder
             'name' => 'Ari Senior',
             'id_desas' => '15',
             'email' => 'test2@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -46,7 +46,7 @@ class userseeds extends Seeder
             'name' => 'Ari Junior',
             'id_desas' => '15',
             'email' => 'test3@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -55,7 +55,7 @@ class userseeds extends Seeder
             'name' => 'Budhi Senior',
             'id_desas' => '15',
             'email' => 'test4@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -64,7 +64,7 @@ class userseeds extends Seeder
             'name' => 'Budhi Junior',
             'id_desas' => '45',
             'email' => 'test5@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -73,7 +73,7 @@ class userseeds extends Seeder
             'name' => 'Hrida',
             'id_desas' => '45',
             'email' => 'test6@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -82,7 +82,7 @@ class userseeds extends Seeder
             'name' => 'Ngurah ',
             'id_desas' => '41',
             'email' => 'test7@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -91,7 +91,7 @@ class userseeds extends Seeder
             'name' => 'Gita ',
             'id_desas' => '32',
             'email' => 'test8@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'users',
             'password'  => Hash::make('password123'),
         ]);
@@ -100,7 +100,7 @@ class userseeds extends Seeder
             'name' => 'Wahyu Aditya ',
             'id_desas' => '32',
             'email' => 'test9@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'admin',
             'password'  => Hash::make('password123'),
         ]);
@@ -109,7 +109,7 @@ class userseeds extends Seeder
             'name' => 'Wahyu Aditya ',
             'id_desas' => '15',
             'email' => 'test0@example.com',
-            'status' => 'verify',
+            'status' => 'actived',
             'role' => 'admin',
             'password'  => Hash::make('password123'),
         ]);

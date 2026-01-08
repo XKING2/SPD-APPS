@@ -111,45 +111,52 @@ class sidebar2control extends Controller
     {
         $user = Auth::user();
 
-        // Ambil exam berdasarkan desa user
-        $exams = exams::where('id_desas', $user->id_desas)
+        // Ambil exam TPU & WWN berdasarkan desa
+        $exams = Exams::where('id_desas', $user->id_desas)
             ->whereIn('type', ['tpu', 'wwn'])
             ->get()
             ->keyBy('type');
 
+        $examTPU = $exams->get('tpu');
+        $examWWN = $exams->get('wwn');
+
         return view('admin.ujian.index', [
-            'examTPU' => $exams->get('tpu'),
-            'examWWN' => $exams->get('wwn'),
+            'examTPU' => $examTPU,
+            'examWWN' => $examWWN,
             'now'     => now(),
         ]);
     }
 
-    public function generate($examId)
+
+
+    public function generate(Exams $exam)
     {
-        $exam = exams::findOrFail($examId);
+        $admin = Auth::user();
 
-        if ($exam->status === 'draft') {
-            return back()->withErrors('Status Exam Masih Draft.');
+        // 🔒 Role check
+        abort_if($admin->role !== 'admin', 403);
+
+        // 🔒 Desa check
+        abort_if($admin->id_desas !== $exam->id_desas, 403);
+
+        // 🔒 Status exam
+        abort_if($exam->status !== 'active', 403, 'Ujian belum aktif');
+
+        if ($exam->key_expired_at && $exam->key_expired_at->isFuture()) {
+            return back()->withErrors([
+                'enrollment' => 'Enrollment key masih aktif dan belum kedaluwarsa'
+            ]);
         }
 
-        if ($exam->status === 'closed') {
-            return back()->withErrors('Exam sudah ditutup.');
-        }
-
-
+        // ✅ Generate key baru
         $key = strtoupper(Str::random(6));
 
         $exam->update([
-            'enrollment_key'   => $key,
-            'key_generated_at' => now(),
-            'key_expired_at'   => now()->addMinutes(30),
-            'status'           => 'active',
+            'enrollment_key'  => $key,
+            'key_expired_at'  => now()->addMinutes(10),
         ]);
 
-        return back()->with([
-            'enrollment_key' => $key,
-            'expired_at' => $exam->key_expired_at->timestamp
-        ]);
+        return back()->with('enrollment_key', $key);
     }
 
     public function generateWWN($examId)
@@ -242,8 +249,18 @@ class sidebar2control extends Controller
 
     public function FormasiIndex()
     {
-        $formasis = Formasi::with('seleksi')->latest()->get();
-        $seleksis = Seleksi::orderBy('tahun', 'desc')->get();
+        $desaId = Auth::user()->id_desas;
+
+        $formasis = Formasi::with('seleksi')
+            ->whereHas('seleksi', function ($q) use ($desaId) {
+                $q->where('id_desas', $desaId);
+            })
+            ->latest()
+            ->get();
+
+        $seleksis = Seleksi::where('id_desas', $desaId)
+            ->orderBy('tahun', 'desc')
+            ->get();
 
         return view('admin.formasi.addformasimain', compact('formasis', 'seleksis'));
     }

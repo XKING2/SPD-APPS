@@ -1,299 +1,7 @@
 @extends('layouts.main')
 
-
-
 @section('content')
-<style>
-    .welcome-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 30px;
-        color: white;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    .welcome-card h1 {
-        font-size: 28px;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-    .welcome-card p {
-        opacity: 0.95;
-        font-size: 16px;
-        margin: 0;
-    }
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-left: 4px solid #4e73df;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.12);
-    }
-    .stat-card.green { border-left-color: #1cc88a; }
-    .stat-card.orange { border-left-color: #f6c23e; }
-    .stat-card.red { border-left-color: #e74a3b; }
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 15px;
-    }
-    .stat-icon.blue { background: #e3f2fd; color: #1976d2; }
-    .stat-icon.green { background: #e8f5e9; color: #388e3c; }
-    .stat-icon.orange { background: #fff3e0; color: #f57c00; }
-    .stat-icon.red { background: #ffebee; color: #d32f2f; }
-    .stat-card h3 {
-        font-size: 14px;
-        color: #858796;
-        margin-bottom: 8px;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    .stat-card .value {
-        font-size: 32px;
-        font-weight: 700;
-        color: #5a5c69;
-        line-height: 1;
-    }
-    .content-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #f1f1f1;
-    }
-    .card-header h2 {
-        font-size: 18px;
-        color: #5a5c69;
-        font-weight: 700;
-        margin: 0;
-    }
-    .badge {
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    .badge.success { background: #d4edda; color: #155724; }
-    .badge.warning { background: #fff3cd; color: #856404; }
-    .badge.danger { background: #f8d7da; color: #721c24; }
-    .badge.info { background: #d1ecf1; color: #0c5460; }
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 10px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #e3e6f0;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 25px;
-    }
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -24px;
-        top: 5px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: white;
-        border: 3px solid #858796;
-    }
-    .timeline-item.completed::before {
-        background: #1cc88a;
-        border-color: #1cc88a;
-    }
-    .timeline-item.pending::before {
-        background: #f6c23e;
-        border-color: #f6c23e;
-    }
-    .timeline-item h4 {
-        font-size: 15px;
-        color: #5a5c69;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-    .timeline-item p {
-        font-size: 13px;
-        color: #858796;
-        margin: 0;
-    }
-    .progress-bar-custom {
-        background: #e3e6f0;
-        border-radius: 10px;
-        height: 10px;
-        margin: 15px 0;
-        overflow: hidden;
-    }
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #4e73df 0%, #224abe 100%);
-        border-radius: 10px;
-        transition: width 0.3s ease;
-    }
-    .info-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .info-list li {
-        padding: 12px 0;
-        border-bottom: 1px solid #f1f1f1;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .info-list li:last-child {
-        border-bottom: none;
-    }
-    .info-list .label {
-        color: #858796;
-        font-size: 14px;
-    }
-    .info-list .value {
-        color: #5a5c69;
-        font-weight: 600;
-        font-size: 14px;
-    }
-    .action-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 14px 25px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        width: 100%;
-        font-size: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-    .action-button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    .action-button:disabled {
-        background: #e3e6f0;
-        color: #858796;
-        cursor: not-allowed;
-        transform: none;
-    }
-    .tips-card {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 20px;
-    }
-    .tips-card h4 {
-        color: #856404;
-        font-size: 14px;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-    .tips-card ul {
-        margin: 0;
-        padding-left: 20px;
-    }
-    .tips-card li {
-        color: #856404;
-        font-size: 13px;
-        line-height: 1.8;
-    }
-    .dashboard-cards-bottom {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-    .dashboard-card-bottom {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        transition: transform 0.3s ease;
-    }
-    .dashboard-card-bottom:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.12);
-    }
-    .dashboard-card-bottom .icon-wrapper {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-    .dashboard-card-bottom .icon-wrapper.blue { background: #e3f2fd; color: #1976d2; }
-    .dashboard-card-bottom .icon-wrapper.green { background: #e8f5e9; color: #388e3c; }
-    .dashboard-card-bottom .icon-wrapper.orange { background: #fff3e0; color: #f57c00; }
-    .dashboard-card-bottom .icon-wrapper.purple { background: #f3e5f5; color: #7b1fa2; }
-    .dashboard-card-bottom h3 {
-        font-size: 14px;
-        color: #858796;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-    .dashboard-card-bottom .number {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-    .dashboard-card-bottom .number.blue { color: #4e73df; }
-    .dashboard-card-bottom .number.green { color: #1cc88a; }
-    .dashboard-card-bottom .number.orange { color: #f6c23e; }
-    .dashboard-card-bottom .number.purple { color: #36b9cc; }
-    @media (max-width: 768px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-        .welcome-card h1 {
-            font-size: 22px;
-        }
-        .welcome-card p {
-            font-size: 14px;
-        }
-    }
-</style>
+
 
 <div class="container-fluid">
     <!-- Welcome Card -->
@@ -324,20 +32,34 @@
         
         <div class="stat-card green">
             <div class="stat-icon green">✅</div>
-            <h3>Ujian Diselesaikan</h3>
-            <div class="value">0 / 1</div>
+            <h3>Ujian Tersedia</h3>
+            <div class="value">
+                {{ ($examTPU ? 1 : 0) + ($examWawancara ? 1 : 0) }}
+            </div>
         </div>
         
         <div class="stat-card orange">
             <div class="stat-icon orange">⏱️</div>
-            <h3>Waktu Tersisa</h3>
-            <div class="value">3 Hari</div>
+            <h3>Status TPU</h3>
+            <div class="value" style="font-size: 18px;">
+                @if($examTPU)
+                    {{ ucfirst($examTPU->status) }}
+                @else
+                    Tidak Tersedia
+                @endif
+            </div>
         </div>
         
         <div class="stat-card red">
             <div class="stat-icon red">🎯</div>
-            <h3>Nilai Terakhir</h3>
-            <div class="value">-</div>
+            <h3>Status Wawancara</h3>
+            <div class="value" style="font-size: 18px;">
+                @if($examWawancara)
+                    {{ ucfirst($examWawancara->status) }}
+                @else
+                    Belum Tersedia
+                @endif
+            </div>
         </div>
     </div>
 
@@ -378,14 +100,18 @@
                 <div class="timeline-item {{ auth()->user()->biodata && auth()->user()->biodata->status === 'valid' ? 'pending' : '' }}">
                     <h4>
                         @if(auth()->user()->biodata && auth()->user()->biodata->status === 'valid')
-                            ⏳ Ujian Tertulis
+                            ⏳ Ujian Seleksi
                         @else
-                            ○ Ujian Tertulis
+                            ○ Ujian Seleksi
                         @endif
                     </h4>
                     <p>
                         @if(auth()->user()->biodata && auth()->user()->biodata->status === 'valid')
-                            Belum dimulai - Deadline: 9 Januari 2025
+                            @if($examTPU || $examWawancara)
+                                Ujian tersedia - Lihat detail di samping
+                            @else
+                                Ujian belum tersedia
+                            @endif
                         @else
                             Lengkapi biodata terlebih dahulu
                         @endif
@@ -394,7 +120,7 @@
                 
                 <div class="timeline-item">
                     <h4>○ Pengumuman Hasil</h4>
-                    <p>Menunggu - 15 Januari 2025</p>
+                    <p>Menunggu - Akan diumumkan setelah semua ujian selesai</p>
                 </div>
             </div>
 
@@ -409,49 +135,239 @@
             </div>
         </div>
 
-        <!-- Info Card -->
-        <div class="card">
-            <div class="card-header">
-                <h2>ℹ️ Informasi Ujian</h2>
-            </div>
-            
-            <ul class="info-list">
-                <li>
-                    <span class="label">Jenis Ujian</span>
-                    <span class="value">Pilihan Ganda</span>
-                </li>
-                <li>
-                    <span class="label">Jumlah Soal</span>
-                    <span class="value">50 Soal</span>
-                </li>
-                <li>
-                    <span class="label">Durasi</span>
-                    <span class="value">90 Menit</span>
-                </li>
-                <li>
-                    <span class="label">Batas Waktu</span>
-                    <span class="value">9 Jan 2025</span>
-                </li>
-                <li>
-                    <span class="label">Passing Grade</span>
-                    <span class="value">70</span>
-                </li>
-            </ul>
+        <!-- Exam Selection Cards (Right Column) -->
+        <div>
+            <div class="exam-selection-container">
+                {{-- Tab Navigation --}}
+                <div class="exam-tabs">
+                    <button class="exam-tab active" data-exam-type="TPU" onclick="switchExamTab('TPU')">
+                        <i class="fas fa-book-open"></i>
+                        <span>TPU</span>
+                    </button>
+                    <button class="exam-tab" data-exam-type="Wawancara" onclick="switchExamTab('Wawancara')">
+                        <i class="fas fa-comments"></i>
+                        <span>Wawancara</span>
+                    </button>
+                </div>
 
-            @if(auth()->user()->biodata && auth()->user()->biodata->status === 'valid')
-                <a href="{{ route('showmainujian') }}" class="action-button" style="margin-top: 20px; text-decoration: none;">
-                    <i class="fas fa-play"></i>
-                    Mulai Ujian Sekarang
-                </a>
-            @else
-                <button class="action-button" disabled style="margin-top: 20px;">
-                    <i class="fas fa-lock"></i>
-                    Lengkapi Biodata Terlebih Dahulu
-                </button>
-            @endif
+                {{-- TPU Card --}}
+                @if($examTPU)
+                <div class="exam-card" id="card-TPU" style="display: block;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>
+                                <i class="fas fa-book-open"></i>
+                                {{ $examTPU->judul }}
+                            </h2>
+                            <span class="exam-status status-{{ $examTPU->status }}">
+                                {{ ucfirst($examTPU->status) }}
+                            </span>
+                        </div>
+                        
+                        <ul class="info-list">
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-tag"></i>
+                                    Jenis Ujian
+                                </span>
+                                <span class="value">TPU</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-list-ol"></i>
+                                    Jumlah Soal
+                                </span>
+                                <span class="value">40 Soal</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-clock"></i>
+                                    Durasi
+                                </span>
+                                <span class="value">{{ $examTPU->duration }} Menit</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Waktu Mulai
+                                </span>
+                                <span class="value">{{ \Carbon\Carbon::parse($examTPU->start_at)->format('d M Y, H:i') }}</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-calendar-times"></i>
+                                    Batas Waktu
+                                </span>
+                                <span class="value">{{ \Carbon\Carbon::parse($examTPU->end_at)->format('d M Y, H:i') }}</span>
+                            </li>
+                            @if($examTPU->enrollment_key)
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-key"></i>
+                                    Kode Akses
+                                </span>
+                                <span class="value enrollment-key">{{ $examTPU->enrollment_key }}</span>
+                            </li>
+                            @endif
+                        </ul>
+
+                        @php
+                            $now = \Carbon\Carbon::now();
+                            $isOpen = $examTPU->status === 'active' && 
+                                      $now->between($examTPU->start_at, $examTPU->end_at);
+                            $isBiodataValid = auth()->user()->biodata && 
+                                              auth()->user()->biodata->status === 'valid';
+                        @endphp
+
+                        @if($isBiodataValid)
+                            @if($isOpen)
+                                <a href="{{ route('showmainujian') }}"
+                                class="action-button action-button-primary">
+                                    <i class="fas fa-play"></i>
+                                    Mulai Ujian TPU
+                                </a>
+                            @else
+                                <button class="action-button action-button-disabled" disabled>
+                                    <i class="fas fa-clock"></i>
+                                    Ujian Belum Dibuka / Sudah Ditutup
+                                </button>
+                            @endif
+                        @else
+                            <button class="action-button action-button-warning" disabled>
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Lengkapi Biodata Terlebih Dahulu
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                @else
+                <div class="exam-card" id="card-TPU" style="display: block;">
+                    <div class="card card-empty">
+                        <i class="fas fa-inbox empty-icon"></i>
+                        <h3>Tidak Ada Ujian TPU</h3>
+                        <p>Ujian Tes Potensi Umum belum tersedia saat ini</p>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Wawancara Card --}}
+                @if($examWawancara)
+                <div class="exam-card" id="card-Wawancara" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>
+                                <i class="fas fa-comments"></i>
+                                {{ $examWawancara->judul }}
+                            </h2>
+                            <span class="exam-status status-{{ $examWawancara->status }}">
+                                {{ ucfirst($examWawancara->status) }}
+                            </span>
+                        </div>
+                        
+                        <ul class="info-list">
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-tag"></i>
+                                    Jenis Ujian
+                                </span>
+                                <span class="value">{{ $examWawancara->type }}</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-list-ol"></i>
+                                    Jumlah Soal
+                                </span>
+                                <span class="value">40 Soal</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-clock"></i>
+                                    Durasi
+                                </span>
+                                <span class="value">{{ $examWawancara->duration }} Menit</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Waktu Mulai
+                                </span>
+                                <span class="value">{{ \Carbon\Carbon::parse($examWawancara->start_at)->format('d M Y, H:i') }}</span>
+                            </li>
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-calendar-times"></i>
+                                    Batas Waktu
+                                </span>
+                                <span class="value">{{ \Carbon\Carbon::parse($examWawancara->end_at)->format('d M Y, H:i') }}</span>
+                            </li>
+                            @if($examWawancara->enrollment_key)
+                            <li>
+                                <span class="label">
+                                    <i class="fas fa-key"></i>
+                                    Kode Akses
+                                </span>
+                                <span class="value enrollment-key">{{ $examWawancara->enrollment_key }}</span>
+                            </li>
+                            @endif
+                        </ul>
+
+                        @php
+                            $now = \Carbon\Carbon::now();
+                            $isOpen = $examWawancara->status === 'active' && 
+                                      $now->between($examWawancara->start_at, $examWawancara->end_at);
+                            $isBiodataValid = auth()->user()->biodata && 
+                                              auth()->user()->biodata->status === 'valid';
+                        @endphp
+
+                        @if($isBiodataValid)
+                            @if($isOpen)
+                                <a href="{{ route('showmainujian') }}"
+                                class="action-button action-button-primary">
+                                    <i class="fas fa-play"></i>
+                                    Mulai Ujian {{ $examWawancara->type }}
+                                </a>
+                            @else
+                                <button class="action-button action-button-disabled" disabled>
+                                    <i class="fas fa-clock"></i>
+                                    Ujian Belum Dibuka / Sudah Ditutup
+                                </button>
+                            @endif
+                        @else
+                            <button class="action-button action-button-warning" disabled>
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Lengkapi Biodata Terlebih Dahulu
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                @else
+                <div class="exam-card" id="card-Wawancara" style="display: none;">
+                    <div class="card card-empty">
+                        <i class="fas fa-inbox empty-icon"></i>
+                        <h3>Tidak Ada Ujian Wawancara</h3>
+                        <p>Ujian Wawancara belum tersedia saat ini</p>
+                    </div>
+                </div>
+                @endif
+            </div>
         </div>
     </div>
-    </div>
 </div>
+
+<script>
+function switchExamTab(type) {
+    // Update tab buttons
+    document.querySelectorAll('.exam-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`.exam-tab[data-exam-type="${type}"]`).classList.add('active');
+    
+    // Show/hide cards
+    document.querySelectorAll('.exam-card').forEach(card => {
+        card.style.display = 'none';
+    });
+    document.getElementById(`card-${type}`).style.display = 'block';
+}
+</script>
 
 @endsection

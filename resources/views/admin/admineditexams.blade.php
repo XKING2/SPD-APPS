@@ -96,7 +96,7 @@
 
                 {{-- ACTION --}}
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('addexams') }}" class="btn btn-secondary">
+                    <a href="{{ route('adminexams') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
 

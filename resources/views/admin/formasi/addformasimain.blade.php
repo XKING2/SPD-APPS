@@ -82,7 +82,7 @@
 
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Simpan & Import
+                    <i class="fas fa-save"></i> Simpan
                 </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     Batal

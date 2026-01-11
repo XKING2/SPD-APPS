@@ -18,6 +18,16 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('orb_questions', function (Blueprint $table) {
+            $table->id();
+            $table->string('subject');
+            $table->text('pertanyaan');
+            $table->string('image_path')->nullable();
+            $table->timestamps();
+        });
+
+        
     }
 
     /**
@@ -25,6 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exam_wawancara');
+        Schema::dropIfExists('wwn_questions');
+        Schema::dropIfExists('orb_questions');
     }
 };

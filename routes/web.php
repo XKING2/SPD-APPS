@@ -76,6 +76,9 @@ Route::middleware(['auth','check.role:users'])->group(function () {
     Route::get('/ujian/WWN/{exam}', [Startcontrol::class, 'startWWN'])->name('exam.wwn.start');
     Route::post('/exam/WWN/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentWawancara'])->name('exam.wwn.verify');
     Route::post('/exam/WWN/{exam}/submit', [ujiancontrol::class, 'submitWawancara'])->name('exam.wwn.submit');
+    Route::get('/ujian/ORB/{exam}', [Startcontrol::class, 'startORB'])->name('exam.orb.start');
+    Route::post('/exam/ORB/{exam}/verify', [Enrollcontrol::class, 'verifyEnrollmentORB'])->name('exam.orb.verify');
+    Route::post('/exam/ORB/{exam}/submit', [ujiancontrol::class, 'submitorb'])->name('exam.orb.submit');
 });
 
 
@@ -85,6 +88,7 @@ Route::middleware(['auth','check.role:admin'])->group(function () {
     Route::get('/ujian', [sidebar2control::class, 'startexams'])->name('adminujian');
     Route::post('/admin/exam/{exam}/generate',[sidebar2control::class, 'generate'])->name('admin.tpu.generate');
     Route::post('/admin/exams/{exam}/generateWWN',[sidebar2control::class, 'generateWWN'])->name('admin.wwn.generate');
+    Route::post('/admin/exams/{exam}/generateORB',[sidebar2control::class, 'generateOrb'])->name('admin.orb.generate');
     Route::get('/validasi-biodata', [biodatacontrol::class, 'index'])->name('validasi.index');
     Route::post('/validasi-biodata/{biodata}', [BiodataControl::class, 'validasi'])->name('validasi.submit');
     Route::get('/validasi-biodata/{hash}', [BiodataControl::class, 'show'])->name('validasi.show');
@@ -121,7 +125,8 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/exam/{exam}/edit', [ujiancontrol::class, 'edit'])->name('exam.edit');
     Route::put('/exam/{exam}', [ujiancontrol::class, 'update'])->name('exam.update');
     Route::delete('/exam/{exam}', [ujiancontrol::class, 'destroy'])->name('exam.destroy');
-    Route::post('/exam/{exam}/validasi',[ujiancontrol::class, 'validasiExam'])->name('exam.validasi');
+    Route::post('/exam/{exam}/validasi', [ujiancontrol::class, 'validasiExam'])
+    ->name('exam.validasi');
 
     Route::get('/Penguji/Main/TPU', [sidebar3control::class, 'showMainTPU'])->name('showtpuMain');
     Route::get('/Penguji/Nilai/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa3'])->name('praktik.resolve');
@@ -151,6 +156,8 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/nilai/Prak/{seleksiHash}/{userHash}', [PrakControl::class, 'addnilaiprak'])->name('add.praktik');
     Route::post('/nilai/praktik/{seleksiHash}/{userHash}', [PrakControl::class, 'storePrak'])->name('nilaiprakstore');
 
+    Route::post('/penguji/add-SOAL/orb',[OrbControl::class, 'storeORBs'])->name('orb-questions.import');
+    Route::get('/penguji/add-SOAL/orb',[OrbControl::class, 'showTambahORB'])->name('addorb');
     Route::get('/Penguji/Main/ORB', [sidebar3control::class, 'showMainOrb'])->name('showOrbMain');
     Route::get('/Penguji/Nilai/Observasi/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa2'])->name('praktik.resolve');
     Route::get('/Penguji/Nilai/Observasi/{seleksiHash}/desa/{desaHash}', [OrbControl::class, 'shownilaiobservasi'])->name('showobservasi');

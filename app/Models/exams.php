@@ -23,33 +23,17 @@ class exams extends Model
         'id_desas'
     ];
 
+    
+    protected $casts = [
+        'key_generated_at' => 'datetime',
+        'key_expired_at'   => 'datetime',
+        'start_at'         => 'datetime',
+        'end_at'           => 'datetime',
+    ];
+
     public function seleksi()
     {
-        return $this->belongsTo(
-            seleksi::class,
-            'id_seleksi'
-        );
-    }
-
-
-    public function questions()
-    {
-        return $this->hasMany(
-            ExamQuestion::class,
-            'id_exam', 
-            'id'       
-        );
-    }
-
-    
-
-    public function wawancara()
-    {
-        return $this->hasMany(
-            wawancaraquest::class,
-            'id_exams', // foreign key di wwn_questions
-            'id'       // primary key di exams
-        );
+        return $this->belongsTo(seleksi::class, 'id_seleksi');
     }
 
     public function creator()
@@ -65,11 +49,12 @@ class exams extends Model
     public const TYPES = [
         'tpu' => 'TPU',
         'wwn' => 'Wawancara',
+        'orb' => 'Observasi',
     ];
 
-    public function isKeyActive()
+    public function isKeyActive(): bool
     {
-        return $this->key_expired_at && $this->key_expired_at->isFuture();
+        return $this->key_expired_at?->isFuture() ?? false;
     }
 
 

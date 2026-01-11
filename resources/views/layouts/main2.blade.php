@@ -114,19 +114,20 @@
              </li>
 
 
-             <li class="nav-item {{ Request::routeIs('showbiodata') || Request::routeIs('showverivikasi') ? 'active' : '' }}">
+             <li class="nav-item {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTambahSoal"
-                    aria-expanded="{{ Request::routeIs('showbiodata') || Request::routeIs('showverivikasi') ? 'true' : 'false' }}"
+                    aria-expanded="{{ Request::routeIs('addTPU') || Request::routeIs('addWWN')  || Request::routeIs('addorb') ? 'true' : 'false' }}"
                     aria-controls="collapseTambahSoal">
                     <i class="fas fa-fw fa-file-alt"></i>
                     <span>Tambah Soal</span>
                 </a>
                 <div id="collapseTambahSoal"
-                    class="collapse {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') ? 'show' : '' }}"
+                    class="collapse {{ Request::routeIs('addTPU') || Request::routeIs('addWWN')  || Request::routeIs('addorb')? 'show' : '' }}"
                     aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item {{ Request::routeIs('addTPU') ? 'active' : '' }}" href="{{ route('addTPU') }}">TPU</a>
                         <a class="collapse-item {{ Request::routeIs('addWWN') ? 'active' : '' }}" href="{{ route('addWWN') }}">Wawancara</a>
+                        <a class="collapse-item {{ Request::routeIs('addorb') ? 'active' : '' }}" href="{{ route('addorb') }}">Observasi</a>
                     </div>
                 </div>
              </li>

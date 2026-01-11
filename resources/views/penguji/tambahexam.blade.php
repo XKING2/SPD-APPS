@@ -66,12 +66,12 @@
 
                             <td>
                                 {{-- VALIDASI --}}
-                                <form action="{{ route('exam.validasi', $exam->id) }}"
-                                    method="POST"
+                                <form action="{{ route('exam.validasi', $exam->id) }}" method="POST"
                                     class="d-inline">
                                     @csrf
-                                    <button class="btn btn-sm btn-primary btn-valid-exam"
-                                            {{ $exam->status === 'valid' ? 'disabled' : '' }}>
+                                    <button
+                                        class="btn btn-sm btn-primary btn-valid-exam"
+                                        {{ $exam->status !== 'draft' ? 'disabled' : '' }}>
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </form>
@@ -242,63 +242,59 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tangkap semua tombol Edit
-    const editButtons = document.querySelectorAll('.btn-valid-exam');
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.btn-valid-exam');
 
-    editButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Cegah langsung pindah halaman
-            const editUrl = this.getAttribute('data-edit-url');
+    buttons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const form = this.closest('form');
 
             Swal.fire({
-                title: "Apakah Anda yakin ingin Validasi data ini?",
+                title: "Apakah Anda yakin ingin memvalidasi Ujian ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, lanjutkan",
+                confirmButtonText: "Ya, validasi",
                 cancelButtonText: "Batal"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect ke halaman edit
-                    window.location.href = editUrl;
+                    form.submit(); // 🔥 INI KUNCINYA
                 }
             });
         });
     });
-
 });
 </script>
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tangkap semua tombol Edit
-    const editButtons = document.querySelectorAll('.btn-delete-exam');
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.btn-delete-exam');
 
-    editButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Cegah langsung pindah halaman
-            const editUrl = this.getAttribute('data-edit-url');
+    buttons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const form = this.closest('form');
 
             Swal.fire({
-                title: "Apakah Anda yakin ingin Menghapus Data ini?",
+                title: "Apakah Anda yakin ingin menghapus Ujian ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, lanjutkan",
+                confirmButtonText: "Ya, Hapus",
                 cancelButtonText: "Batal"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect ke halaman edit
-                    window.location.href = editUrl;
+                    form.submit();
                 }
             });
         });
     });
-
 });
 </script>
 

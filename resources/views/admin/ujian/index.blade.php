@@ -11,6 +11,7 @@
         // default biar aman dipakai di bawah
         $tpuHasKey = false;
         $wwnHasKey = false;
+        $orbHasKey = false;
     @endphp
 
     <div class="row">
@@ -26,6 +27,7 @@
                     @if(isset($examTPU))
 
                         @php
+                            
                             $now       = Carbon::now();
                             $tpuStart  = Carbon::parse($examTPU->start_at);
                             $tpuEnd    = Carbon::parse($examTPU->end_at);
@@ -97,6 +99,7 @@
                     @if(isset($examWWN))
 
                         @php
+                            
                             $wwnStart  = Carbon::parse($examWWN->start_at);
                             $wwnEnd    = Carbon::parse($examWWN->end_at);
 
@@ -131,6 +134,78 @@
 
                         @elseif($wwnCanGenerate)
                             <form action="{{ route('admin.wwn.generate', $examWWN->id) }}" method="POST">
+                                @csrf
+                                <button class="btn btn-primary">
+                                    Generate Enrollment Key
+                                </button>
+                            </form>
+
+                        @else
+                            <button class="btn btn-primary" disabled>
+                                Generate Enrollment Key
+                            </button>
+                            <small class="text-warning d-block mt-2">
+                                Aktif 30 menit sebelum ujian
+                            </small>
+                        @endif
+
+                    @else
+                        <p class="text-danger fw-bold">
+                            Ujian belum dibuat
+                        </p>
+                    @endif
+
+                </div>
+            </div>
+        </div>
+
+        {{-- ================= Observasi ================= --}}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+
+                    <i class="fas fa-book-open fa-3x text-success mb-3"></i>
+                    <h4 class="card-title">Tes Observasi</h4>
+
+                    @if(isset($examORB))
+
+                        @php
+                            $orbHasKey = false;
+                            $now       = Carbon::now();
+                            $orbStart  = Carbon::parse($examORB->start_at);
+                            $orbEnd    = Carbon::parse($examORB->end_at);
+
+                            $orbFinished = $now->greaterThan($orbEnd);
+                            $orbDraft    = $examORB->status === 'draft';
+
+                            $orbHasKey = !empty($examORB->enrollment_key)
+                                && $examORB->key_expired_at
+                                && Carbon::parse($examORB->key_expired_at)->isFuture();
+
+                            $orbCanGenerate =
+                                !$orbFinished &&
+                                !$orbHasKey &&
+                                $now->greaterThanOrEqualTo($orbStart->copy()->subMinutes(30));
+                        @endphp
+
+                        @if($orbFinished)
+                            <p class="text-secondary fw-bold">
+                                Jadwal ujian sudah selesai
+                            </p>
+
+                        @elseif($orbDraft)
+                            <button class="btn btn-secondary" disabled>
+                                Generate Enrollment Key
+                            </button>
+
+                        @elseif($orbHasKey)
+                            <button class="btn btn-outline-primary"
+                                    onclick="openKeyModal('orb')">
+                                Lihat Enrollment Key Aktif
+                            </button>
+
+                        @elseif($orbCanGenerate)
+                            <form action="{{ route('admin.orb.generate', $examORB->id) }}" method="POST">
                                 @csrf
                                 <button class="btn btn-primary">
                                     Generate Enrollment Key
@@ -198,12 +273,27 @@
 </div>
 @endif
 
+{{-- ================= MODAL OBSERVASI ================= --}}
+@if($orbHasKey)
+<div class="modal fade" id="keyModal-orb" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <h4 class="text-success">Enrollment Key Observasi</h4>
+
+            <div class="display-4 fw-bold text-primary mb-3">
+                {{ $examORB->enrollment_key }}
+            </div>
+
+            <p class="text-muted mb-1">Berlaku hingga</p>
+            <h5 class="text-danger fw-bold" id="countdown-orb"></h5>
+        </div>
+    </div>
+</div>
+@endif
+
 <script>
 function openKeyModal(type) {
-    const modalId = type === 'tpu'
-        ? 'keyModal-tpu'
-        : 'keyModal-wwn';
-
+    const modalId = `keyModal-${type}`;
     const modalEl = document.getElementById(modalId);
 
     if (!modalEl) {
@@ -218,7 +308,8 @@ function openKeyModal(type) {
 
 <div id="exam-data"
      data-tpu="{{ $tpuHasKey ? $examTPU->key_expired_at : '' }}"
-     data-wwn="{{ $wwnHasKey ? $examWWN->key_expired_at : '' }}">
+     data-wwn="{{ $wwnHasKey ? $examWWN->key_expired_at : '' }}"
+     data-orb="{{ $orbHasKey ? $examORB->key_expired_at : '' }}">
 </div>
 
 <script>
@@ -227,14 +318,23 @@ const examData = document.getElementById('exam-data');
 const examKeys = {
     tpu: examData.dataset.tpu || null,
     wwn: examData.dataset.wwn || null,
+    orb: examData.dataset.orb || null,
 };
+</script>
 
+<script>
 function startCountdown(expiredAt, elementId) {
     const expired = new Date(expiredAt).getTime();
 
-    setInterval(() => {
+    const interval = setInterval(() => {
         const diff = expired - Date.now();
-        if (diff <= 0) return;
+
+        if (diff <= 0) {
+            clearInterval(interval);
+            const el = document.getElementById(elementId);
+            if (el) el.innerText = '00:00';
+            return;
+        }
 
         const m = Math.floor(diff / 60000);
         const s = Math.floor((diff % 60000) / 1000);
@@ -247,13 +347,9 @@ function startCountdown(expiredAt, elementId) {
     }, 1000);
 }
 
-if (examKeys.tpu) {
-    startCountdown(examKeys.tpu, 'countdown-tpu');
-}
-
-if (examKeys.wwn) {
-    startCountdown(examKeys.wwn, 'countdown-wwn');
-}
+if (examKeys.tpu) startCountdown(examKeys.tpu, 'countdown-tpu');
+if (examKeys.wwn) startCountdown(examKeys.wwn, 'countdown-wwn');
+if (examKeys.orb) startCountdown(examKeys.orb, 'countdown-orb');
 </script>
 
 

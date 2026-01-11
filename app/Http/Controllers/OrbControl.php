@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\OrbQuestionImport;
 use App\Models\Desas;
 use App\Models\FuzzyRule;
 use App\Models\FuzzyScore;
+use App\Models\OrbQuest;
 use App\Models\OrbResult;
 use App\Models\ResultExam;
 use App\Models\seleksi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
 
 class OrbControl extends Controller
@@ -138,5 +141,85 @@ class OrbControl extends Controller
             'seleksiHash' => $seleksiHashForForm,
             'desaHash'    => $desaHashForForm,
         ]);
+    }
+
+    public function showTambahORB()
+    {
+        // Ambil semua soal TPU (atau semua soal kalau mau)
+        $questions = OrbQuest::latest()->get();
+
+        return view('penguji.tambahsoalorbmain', [
+            'questions' => $questions,
+        ]);
+    }
+
+    public function storeORBs(Request $request)
+    {
+        $request->validate([
+            'excel' => 'required|file|mimes:xlsx,xls',
+            'zip'   => 'nullable|file|mimes:zip',
+        ]);
+
+        $tempDir = storage_path('app/temp_images/' . uniqid());
+
+        try {
+
+            // Buat folder temp
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+
+            // Extract ZIP jika ada
+            if ($request->hasFile('zip')) {
+                $zip = new \ZipArchive;
+                if ($zip->open($request->file('zip')->getRealPath()) === true) {
+                    $zip->extractTo($tempDir);
+                    $zip->close();
+                } else {
+                    throw new \Exception('Gagal membuka file ZIP');
+                }
+            }
+
+            // Import Excel
+            Excel::import(
+                new OrbQuestionImport($tempDir),
+                $request->file('excel')
+            );
+
+            // Bersihkan folder temp
+            $this->deleteDirectory($tempDir);
+
+            return back()->with('success', 'Soal Observasi berhasil diimport');
+
+        } catch (\Throwable $e) {
+
+            if (is_dir($tempDir)) {
+                $this->deleteDirectory($tempDir);
+            }
+
+            report($e);
+
+            return back()->withErrors(
+                'Gagal import soal: ' . $e->getMessage()
+            );
+        }
+    }
+
+
+    protected function deleteDirectory(string $dir): void
+    {
+        if (!file_exists($dir)) return;
+
+        foreach (scandir($dir) as $item) {
+            if ($item === '.' || $item === '..') continue;
+
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+            is_dir($path)
+                ? $this->deleteDirectory($path)
+                : unlink($path);
+        }
+
+        rmdir($dir);
     }
 }

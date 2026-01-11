@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orb_result', function (Blueprint $table) {
+        Schema::create('orb_option_order', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('exam_id')->constrained('exams')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('orb_question')->constrained('orb_questions')->cascadeOnDelete();
-            $table->foreignId('orb_option')->constrained('orb_options')->cascadeOnDelete();
+            $table->foreignId('question_id')->constrained('orb_questions') ->cascadeOnDelete();
+            $table->json('option_order');
             $table->timestamps();
-            $table->unique(['user_id', 'orb_question']);
+            $table->unique(['exam_id', 'user_id', 'question_id']);
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orb_result');
+        Schema::dropIfExists('orb_option_order');
     }
 };

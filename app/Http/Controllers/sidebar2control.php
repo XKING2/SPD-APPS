@@ -113,16 +113,18 @@ class sidebar2control extends Controller
 
         // Ambil exam TPU & WWN berdasarkan desa
         $exams = Exams::where('id_desas', $user->id_desas)
-            ->whereIn('type', ['tpu', 'wwn'])
+            ->whereIn('type', ['tpu', 'wwn','orb'])
             ->get()
             ->keyBy('type');
 
         $examTPU = $exams->get('tpu');
         $examWWN = $exams->get('wwn');
+        $examORB = $exams->get('orb');
 
         return view('admin.ujian.index', [
             'examTPU' => $examTPU,
             'examWWN' => $examWWN,
+            'examORB' => $examORB,
             'now'     => now(),
         ]);
     }
@@ -153,22 +155,31 @@ class sidebar2control extends Controller
 
         $exam->update([
             'enrollment_key'  => $key,
+            'key_generated_at' => now(),
             'key_expired_at'  => now()->addMinutes(10),
         ]);
 
         return back()->with('enrollment_key', $key);
     }
 
-    public function generateWWN($examId)
+    public function generateWWN(Exams $exam)
     {
-        $exam = exams::findOrFail($examId);
+        $admin = Auth::user();
 
-        if ($exam->status === 'draft') {
-            return back()->withErrors('Status Exam Masih Draft.');
-        }
+        // 🔒 Role check
+        abort_if($admin->role !== 'admin', 403);
 
-        if ($exam->status === 'closed') {
-            return back()->withErrors('Exam sudah ditutup.');
+        // 🔒 Desa check
+        abort_if($admin->id_desas !== $exam->id_desas, 403);
+
+        // 🔒 Status exam
+        abort_if($exam->status !== 'active', 403, 'Ujian belum aktif');
+
+        
+        if ($exam->key_expired_at && $exam->key_expired_at->isFuture()) {
+            return back()->withErrors([
+                'enrollment' => 'Enrollment key masih aktif dan belum kedaluwarsa'
+            ]);
         }
 
 
@@ -177,16 +188,51 @@ class sidebar2control extends Controller
         $exam->update([
             'enrollment_key'   => $key,
             'key_generated_at' => now(),
-            'key_expired_at'   => now()->addMinutes(30),
-            'status'           => 'active',
+            'key_expired_at'  => now()->addMinutes(10),
         ]);
 
         return back()->with([
             'success' => 'Enrollment key berhasil dibuat.',
             'enrollment_key' => $key,
-            'expired_at' => $exam->key_expired_at->timestamp
         ]);
     }
+
+    public function generateOrb(Exams $exam)
+    {
+        $admin = Auth::user();
+
+        // 🔒 Role check
+        abort_if($admin->role !== 'admin', 403);
+
+        // 🔒 Desa check
+        abort_if($admin->id_desas !== $exam->id_desas, 403);
+
+        // 🔒 Status exam
+        abort_if($exam->status !== 'active', 403, 'Ujian belum aktif');
+
+        if ($exam->key_expired_at && $exam->key_expired_at->isFuture()) {
+            return back()->withErrors([
+                'enrollment' => 'Enrollment key masih aktif dan belum kedaluwarsa'
+            ]);
+        }
+
+        // ✅ Generate key baru
+        $key = strtoupper(Str::random(6));
+
+        $exam->update([
+            'enrollment_key'  => $key,
+            'key_generated_at' => now(),
+            'key_expired_at'  => now()->addMinutes(10),
+        ]);
+
+        return back()->with([
+            'success' => 'Enrollment key berhasil dibuat.',
+            'enrollment_key' => $key,
+        ]);
+    }
+
+
+    
 
     public function generatePageSaw(Request $request)
     {
@@ -225,7 +271,7 @@ class sidebar2control extends Controller
     {
         $request->validate([
             'judul'      => 'required|string',
-            'type'       => 'required|in:tpu,wwn',
+            'type'       => 'required|in:tpu,wwn,orb',
             'duration'   => 'required|integer|min:1',
             'id_seleksi' => 'required|exists:selections,id',
             'start_at'   => 'required|date',

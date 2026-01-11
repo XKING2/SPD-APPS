@@ -25,7 +25,7 @@ return new class extends Migration
         Schema::create('exams', function (Blueprint $table) {
             $table->id();
             $table->string('judul');
-            $table->enum('type', ['tpu', 'wwn']);
+            $table->enum('type', ['tpu', 'wwn', 'orb']);
             $table->integer('duration')->nullable();
             $table->enum('status', ['draft', 'active', 'closed'])->default('draft');
             $table->timestamp('start_at')->nullable();

@@ -22,7 +22,7 @@ class sidebarcontrol extends Controller
         // Ambil ujian TPU
         $examTPU = exams::where('type', 'tpu')
             ->where('id_desas', $user->id_desas) // Filter by user's desa
-            ->where('status', 'active')// Get questions count
+            ->where('status', 'active')
             ->first();
         
         // Ambil ujian Wawancara
@@ -31,12 +31,37 @@ class sidebarcontrol extends Controller
             ->where('status', 'active')
             ->first();
 
+        // Ambil ujian Observasi
+        $examORB = exams::where('type', 'orb')
+            ->where('id_desas', $user->id_desas) // Filter by user's desa
+            ->where('status', 'active') 
+            ->first();
+
+        // Ambil hasil ujian TPU
+        $ExamResultTPU = ResultExam::where('user_id', $user->id)
+            ->where('exam_id', $examTPU?->id)
+            ->first();
+
+        // Ambil hasil ujian Wawancara
+        $ExamResultWWN = ResultExam::where('user_id', $user->id)
+            ->where('exam_id', $examWawancara?->id)
+            ->first();
+
+        // Ambil hasil ujian Observasi
+        $ExamResultORB = ResultExam::where('user_id', $user->id)
+            ->where('exam_id', $examORB?->id)
+            ->first();
+
         return view('users.dashboard', compact(
             'user',
             'biodata',
             'profileImg',
             'examTPU',
-            'examWawancara'
+            'examWawancara',
+            'examORB',
+            'ExamResultTPU',
+            'ExamResultWWN',
+            'ExamResultORB'
         ));
     }
     
@@ -82,10 +107,16 @@ class sidebarcontrol extends Controller
             ->where('status', 'active')
             ->first();
 
+        $examORB = exams::where('id_desas', $user->id_desas)
+            ->where('type', 'orb')
+            ->where('status', 'active')
+            ->first();
+
         $profileImg = $biodata->profile_img ?? 'img/undraw_profile.svg';
 
         $ExamResultTPU = $this->getExamResult($examTPU, $user->id);
         $ExamResultWWN = $this->getExamResult($examWWN, $user->id);
+        $ExamResultORB = $this->getExamResult($examORB, $user->id);
 
         return view('ujian.mainujian', compact(
             'user',
@@ -93,8 +124,10 @@ class sidebarcontrol extends Controller
             'profileImg',
             'examTPU',
             'examWWN',
+            'examORB',
             'ExamResultTPU',
-            'ExamResultWWN'
+            'ExamResultWWN',
+            'ExamResultORB'
         ));
     }
 

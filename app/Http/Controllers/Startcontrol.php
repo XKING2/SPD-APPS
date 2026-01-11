@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ExamQuestion;
 use App\Models\exams;
+use App\Models\OrbOptionOrder;
+use App\Models\OrbQuest;
 use App\Models\ResultExam;
 use App\Models\TpuOptionOrder;
 use App\Models\wawancaraquest;
@@ -142,6 +144,71 @@ class Startcontrol extends Controller
         })->filter()->values();
 
         return view('ujian.ujianWWNpage', [
+            'exam'      => $exam,
+            'questions' => $sortedQuestions,
+            'result'    => $result,
+        ]);
+
+    }
+
+    public function startORB(string $exam)
+    {
+        $user = Auth::user();
+        // ================= DECODE HASH =================
+        $decoded = Hashids::decode($exam);
+        abort_if(empty($decoded), 404);
+
+        $examId = $decoded[0];
+
+        // ================= AMBIL EXAM =================
+        $exam = Exams::findOrFail($examId);
+
+        if ($exam->id_desas !== $user->id_desas) {
+            abort(403);
+        }
+
+        $result = ResultExam::where('exam_id', $exam->id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $questionOrder = $result->question_order;
+
+        $questions = OrbQuest::with('options')
+            ->whereIn('id', $questionOrder)
+            ->get()
+            ->keyBy('id');
+
+        $optionOrders = OrbOptionOrder::where('exam_id', $exam->id)
+            ->where('user_id', $user->id)
+            ->get()
+            ->keyBy('question_id');
+
+        $sortedQuestions = collect($questionOrder)->map(function ($qid) use ($questions, $optionOrders) {
+
+            if (!isset($questions[$qid])) {
+                return null; 
+            }
+
+            $question = $questions[$qid];
+
+            if (isset($optionOrders[$qid])) {
+                $order = $optionOrders[$qid]->option_order;
+
+                $question->setRelation(
+                    'options',
+                    collect($order)
+                        ->map(fn ($oid) =>
+                            $question->options->firstWhere('id', $oid)
+                        )
+                        ->filter()
+                        ->values()
+                );
+            }
+
+            return $question;
+        })->filter()->values();
+
+        return view('ujian.ujianOrbpage', [
             'exam'      => $exam,
             'questions' => $sortedQuestions,
             'result'    => $result,

@@ -2,37 +2,41 @@
 
 @section('pageheads')
 <div class="container-fluid px-4">
-    <h1 class="h3 mb-3"> Test seleksi Perangkat Desa </h1>
+    <h1 class="h3 mb-3 fw-bold text-gradient">
+        <i class="fas fa-clipboard-list me-2"></i>
+        Tes Seleksi Perangkat Desa
+    </h1>
 </div>
 @endsection
 
 @section('content')
-    <div class="container-fluid">
 
-        <div class="card shadow-lg border-left-primary mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h5 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-clipboard-check mr-2"></i> Test Pengetahuan Umum
+<div class="container-fluid exam-container">
+
+    {{-- TPU EXAM CARD --}}
+    <div class="exam-card">
+        <div class="exam-card-header">
+            <h5>
+                <i class="fas fa-book-open"></i>
+                Tes Potensi Umum (TPU)
             </h5>
+            <span class="exam-type-badge">Pilihan Ganda</span>
         </div>
+
         @php
             use Carbon\Carbon;
         @endphp
 
-        <div class="card-body">
-
-            {{-- Deskripsi singkat --}}
-            <div class="alert alert-info d-flex align-items-center" style="border-left: 4px solid #0d6efd;">
-                <i class="fas fa-info-circle fa-lg mr-3"></i>
+        <div class="exam-card-body">
+            <div class="info-alert">
+                <i class="fas fa-info-circle"></i>
                 <div>
-                    Silakan tinjau data Administrasi sebelum memulai ujian. Pastikan data anda sudah benar.
+                    Silakan tinjau data Administrasi sebelum memulai ujian. Pastikan data Anda sudah benar.
                 </div>
             </div>
 
-              @if($examTPU)
-
+            @if($examTPU)
                 @php     
-
                     $now        = Carbon::now();
                     $startAt    = Carbon::parse($examTPU->start_at);
                     $endAt      = Carbon::parse($examTPU->end_at);
@@ -43,72 +47,75 @@
 
                 {{-- ================= SUDAH DIKERJAKAN ================= --}}
                 @if($ExamResultTPU && $ExamResultTPU->is_submitted)
-                <div class="alert alert-success mt-3">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Anda sudah mengerjakan ujian TPU.</strong>
-                </div>
+                    <div class="success-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Anda sudah mengerjakan ujian TPU</span>
+                    </div>
 
                 {{-- ================= UJIAN SELESAI ================= --}}
                 @elseif($isFinished)
-                    <p class="text-secondary mt-3 fw-bold">
+                    <div class="exam-finished">
+                        <i class="fas fa-clock me-2"></i>
                         Jadwal ujian sudah selesai
-                    </p>
+                    </div>
 
                 {{-- ================= BISA MULAI UJIAN ================= --}}
                 @elseif($canGenerate)
                     <button
-                        class="btn btn-lg btn-primary btn-enroll"
+                        class="btn-start-exam btn-enroll"
                         data-action="{{ route('exam.tpu.verify', $examTPU->id) }}"
                         data-title="Ujian TPU">
+                        <i class="fas fa-play-circle"></i>
                         Mulai Ujian TPU
                     </button>
 
                 {{-- ================= BELUM WAKTUNYA ================= --}}
                 @else
-                    <button class="btn btn-lg btn-primary" disabled>
+                    <button class="btn-disabled" disabled>
+                        <i class="fas fa-lock"></i>
                         Mulai Ujian TPU
                     </button>
 
-                    <small class="text-warning d-block mt-2">
+                    <div class="warning-text">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
                         Tombol akan aktif 5 menit sebelum ujian dimulai
-                    </small>
+                    </div>
 
-                    <small class="text-muted d-block">
-                        Waktu ujian: {{ $startAt->format('d M Y H:i') }}
-                    </small>
+                    <div class="time-info">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Waktu ujian: {{ $startAt->format('d M Y H:i') }}</span>
+                    </div>
                 @endif
 
             @else
-                <div class="alert alert-warning">
-                    Ujian TPU belum tersedia
+                <div class="alert-no-exam">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Ujian TPU belum tersedia</span>
                 </div>
             @endif
-
-
         </div>
     </div>
 
-<div class="card shadow-lg border-left-primary mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h5 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-clipboard-check mr-2"></i> Test Wawancara
+    {{-- WAWANCARA EXAM CARD --}}
+    <div class="exam-card">
+        <div class="exam-card-header">
+            <h5>
+                <i class="fas fa-comments"></i>
+                Tes Wawancara
             </h5>
+            <span class="exam-type-badge">Pilihan Ganda</span>
         </div>
 
-    <div class="card-body">
-
-            {{-- Deskripsi singkat --}}
-            <div class="alert alert-info d-flex align-items-center" style="border-left: 4px solid #0d6efd;">
-                <i class="fas fa-info-circle fa-lg mr-3"></i>
+        <div class="exam-card-body">
+            <div class="info-alert">
+                <i class="fas fa-info-circle"></i>
                 <div>
-                    Silakan tinjau data Administrasi sebelum memulai ujian. Pastikan data anda sudah benar.
+                    Silakan tinjau data Administrasi sebelum memulai ujian. Pastikan data Anda sudah benar.
                 </div>
             </div>
 
-              @if($examWWN)
-
+            @if($examWWN)
                 @php     
-
                     $now        = Carbon::now();
                     $startAt    = Carbon::parse($examWWN->start_at);
                     $endAt      = Carbon::parse($examWWN->end_at);
@@ -119,54 +126,135 @@
 
                 {{-- ================= SUDAH DIKERJAKAN ================= --}}
                 @if($ExamResultWWN && $ExamResultWWN->is_submitted)
-                <div class="alert alert-success mt-3">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Anda sudah mengerjakan ujian Wawancara.</strong>
-                </div>
+                    <div class="success-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Anda sudah mengerjakan ujian Wawancara</span>
+                    </div>
 
                 {{-- ================= UJIAN SELESAI ================= --}}
                 @elseif($isFinished)
-                    <p class="text-secondary mt-3 fw-bold">
+                    <div class="exam-finished">
+                        <i class="fas fa-clock me-2"></i>
                         Jadwal ujian sudah selesai
-                    </p>
+                    </div>
 
                 {{-- ================= BISA MULAI UJIAN ================= --}}
                 @elseif($canGenerate)
                     <button
-                        class="btn btn-lg btn-primary btn-enroll"
+                        class="btn-start-exam btn-enroll"
                         data-action="{{ route('exam.wwn.verify', $examWWN->id) }}"
                         data-title="Ujian Wawancara">
+                        <i class="fas fa-play-circle"></i>
                         Mulai Ujian Wawancara
                     </button>
 
                 {{-- ================= BELUM WAKTUNYA ================= --}}
                 @else
-                    <button class="btn btn-lg btn-primary" disabled>
-                        Mulai Ujian TPU
+                    <button class="btn-disabled" disabled>
+                        <i class="fas fa-lock"></i>
+                        Mulai Ujian Wawancara
                     </button>
 
-                    <small class="text-warning d-block mt-2">
+                    <div class="warning-text">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
                         Tombol akan aktif 5 menit sebelum ujian dimulai
-                    </small>
+                    </div>
 
-                    <small class="text-muted d-block">
-                        Waktu ujian: {{ $startAt->format('d M Y H:i') }}
-                    </small>
+                    <div class="time-info">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Waktu ujian: {{ $startAt->format('d M Y H:i') }}</span>
+                    </div>
                 @endif
 
             @else
-                <div class="alert alert-warning">
-                    Ujian TPU belum tersedia
+                <div class="alert-no-exam">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Ujian Wawancara belum tersedia</span>
                 </div>
             @endif
-
-
         </div>
     </div>
+
+    {{-- ORB EXAM CARD --}}
+    <div class="exam-card">
+        <div class="exam-card-header">
+            <h5>
+                <i class="fas fa-user-tie"></i>
+                Tes Observasi
+            </h5>
+            <span class="exam-type-badge">Penilaian</span>
+        </div>
+
+        <div class="exam-card-body">
+            <div class="info-alert">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    Silakan tinjau data Administrasi sebelum memulai ujian. Pastikan data Anda sudah benar.
+                </div>
+            </div>
+
+            @if($examORB)
+                @php     
+                    $now        = Carbon::now();
+                    $startAt    = Carbon::parse($examORB->start_at);
+                    $endAt      = Carbon::parse($examORB->end_at);
+
+                    $isFinished  = $now->greaterThan($endAt);
+                    $canGenerate = $now->greaterThanOrEqualTo($startAt->copy()->subMinutes(5));
+                @endphp 
+
+                {{-- ================= SUDAH DIKERJAKAN ================= --}}
+                @if($ExamResultORB && $ExamResultORB->is_submitted)
+                    <div class="success-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Anda sudah mengerjakan ujian Observasi</span>
+                    </div>
+
+                {{-- ================= UJIAN SELESAI ================= --}}
+                @elseif($isFinished)
+                    <div class="exam-finished">
+                        <i class="fas fa-clock me-2"></i>
+                        Jadwal ujian sudah selesai
+                    </div>
+
+                {{-- ================= BISA MULAI UJIAN ================= --}}
+                @elseif($canGenerate)
+                    <button
+                        class="btn-start-exam btn-enroll"
+                        data-action="{{ route('exam.orb.verify', $examORB->id) }}"
+                        data-title="Ujian Observasi">
+                        <i class="fas fa-play-circle"></i>
+                        Mulai Ujian Observasi
+                    </button>
+
+                {{-- ================= BELUM WAKTUNYA ================= --}}
+                @else
+                    <button class="btn-disabled" disabled>
+                        <i class="fas fa-lock"></i>
+                        Mulai Ujian Observasi
+                    </button>
+
+                    <div class="warning-text">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Tombol akan aktif 5 menit sebelum ujian dimulai
+                    </div>
+
+                    <div class="time-info">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Waktu ujian: {{ $startAt->format('d M Y H:i') }}</span>
+                    </div>
+                @endif
+
+            @else
+                <div class="alert-no-exam">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Ujian Observasi belum tersedia</span>
+                </div>
+            @endif
+        </div>
     </div>
 
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -186,11 +274,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 inputAttributes: {
                     maxlength: 6,
                     autocapitalize: 'characters',
-                    autocorrect: 'off'
+                    autocorrect: 'off',
+                    style: 'text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: bold;'
                 },
                 showCancelButton: true,
                 confirmButtonText: 'Verifikasi & Mulai',
                 cancelButtonText: 'Batal',
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#6c757d',
                 preConfirm: (value) => {
                     if (!value || value.length !== 6) {
                         Swal.showValidationMessage('Enrollment key harus 6 karakter');
@@ -200,6 +291,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (!enrollment) return;
+
+            // Show loading
+            Swal.fire({
+                title: 'Memverifikasi...',
+                text: 'Mohon tunggu sebentar',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
             // Kirim POST via fetch
             try {
@@ -220,76 +321,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const text = await res.text();
-                Swal.fire('Gagal', text || 'Enrollment key salah', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: text || 'Enrollment key salah',
+                    confirmButtonColor: '#667eea'
+                });
 
             } catch (err) {
-                Swal.fire('Error', 'Terjadi kesalahan saat verifikasi', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat verifikasi',
+                    confirmButtonColor: '#667eea'
+                });
             }
         });
     });
 });
 </script>
 
-<script>
-document.getElementById('startExamBtn')?.addEventListener('click', function () {
-    // kirim niat fullscreen ke halaman ujian
-    sessionStorage.setItem('exam_fullscreen_intent', '1');
-
-    // redirect normal
-    window.location.href = this.dataset.url;
-});
-</script>
-
-
 @endsection
-
-
-{{-- 🔹 SweetAlert Script --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const editButtons = document.querySelectorAll('.btn-edit');
-    editButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const editUrl = this.getAttribute('data-edit-url');
-            Swal.fire({
-                title: "Edit data ini?",
-                text: "Perubahan akan mempengaruhi data terkait.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, lanjutkan",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) window.location.href = editUrl;
-            });
-        });
-    });
-
-    const deleteForms = document.querySelectorAll('.form-delete');
-    deleteForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            Swal.fire({
-                title: "Hapus data ini?",
-                text: "Data yang dihapus tidak dapat dikembalikan!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Ya, hapus",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const btn = form.querySelector('button[type="submit"]');
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-                    form.submit();
-                }
-            });
-        });
-    });
-});
-</script>

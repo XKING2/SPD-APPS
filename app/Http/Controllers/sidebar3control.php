@@ -69,10 +69,10 @@ class sidebar3control extends Controller
 
     public function showExams()
     {
+        
         $exams = Exams::with(['seleksi'])
             ->orderByDesc('created_at')
             ->get();
-
         return view('penguji.tambahexam', [
             'exams'    => Exams::with('seleksi')->latest()->get(),
             'seleksis' => seleksi::orderBy('judul')->get(),

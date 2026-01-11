@@ -6,16 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrbResult extends Model
 {
-    protected $table = 'nilai_orb';
+    protected $table = 'orb_result';
+
     protected $fillable = [
         'user_id',
-        'kerapian',
-        'kecepatan',
-        'ketepatan',
-        'efektifitas'
+        'orb_question',
+        'orb_option',
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class, 'user_id');
+    public function options()
+    {
+        return $this->belongsTo(OrbOption::class, 'orb_option');
+    }
+
+    public function question()
+    {
+        return $this->belongsTo(OrbQuest::class, 'orb_question');
     }
 }

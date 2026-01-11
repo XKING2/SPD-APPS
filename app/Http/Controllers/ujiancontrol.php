@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ExamTPUanswer;
 use App\Models\FuzzyRule;
 use App\Models\FuzzyScore;
+use App\Models\OrbOption;
+use App\Models\OrbQuest;
+use App\Models\OrbResult;
 use App\Models\ResultExam;
 use App\Models\seleksi;
 use App\Models\wawancaranswer;
@@ -245,39 +248,150 @@ class ujiancontrol extends Controller
         ]);
     }
 
-
-    public function validasiExam(Exams $exam)
+    public function submitorb(Request $request, exams $exam)
     {
+        $user = Auth::user();
+
+        if (!$request->has('answers') || !is_array($request->answers)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format jawaban tidak valid'
+            ], 422);
+        }
+
+        if (
+            ResultExam::where('user_id', $user->id)
+                ->where('exam_id', $exam->id)
+                ->where('is_submitted', true)
+                ->exists()
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Orbservasi sudah disubmit'
+            ], 409);
+        }
+
+        $answers = $request->answers;
+        $score   = 0;
+
+        try {
+
+            DB::transaction(function () use ($answers, $user, $exam, &$score) {
+
+
+                $questions = OrbQuest::pluck('id')->toArray();
+
+                if (empty($questions)) {
+                    throw new \Exception('Pertanyaan wawancara tidak ditemukan');
+                }
+
+                $options = OrbOption::whereIn('id', array_values($answers))
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($answers as $questionId => $optionId) {
+
+                    if (!in_array($questionId, $questions)) {
+                        throw new \Exception('Soal tidak valid');
+                    }
+
+                    if (!isset($options[$optionId])) {
+                        continue;
+                    }
+
+                    $option = $options[$optionId];
+
+                    OrbResult::updateOrCreate(
+                        [
+                            'user_id'            => $user->id,
+                            'wawancara_question' => $questionId,
+                        ],
+                        [
+                            'wawancara_option' => $optionId,
+                        ]
+                    );
+
+                    $score += (int) $option->point;
+                }
+
+
+                ResultExam::updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'exam_id' => $exam->id,
+                        'type'    => 'ORB',
+                    ],
+                    [
+                        'score'        => $score,
+                        'is_submitted' => true,
+                        'submitted_at' => now(),
+                    ]
+                );
+
+                $fuzzyRule = FuzzyRule::where('min_value', '<=', $score)
+                    ->where('max_value', '>=', $score)
+                    ->first();
+
+                if (!$fuzzyRule) {
+                    throw new \Exception("Fuzzy rule tidak ditemukan untuk nilai wawancara: {$score}");
+                }
+
+                FuzzyScore::updateOrCreate(
+                    [
+                        'user_id'    => $user->id,
+                        'id_seleksi' => $exam->id_seleksi, 
+                        'type'       => 'WWN',
+                    ],
+                    [
+                        'score_raw'     => $score,
+                        'score_crisp'   => $fuzzyRule->crisp_value,
+                        'fuzzy_rule_id' => $fuzzyRule->id,
+                    ]
+                );
+
+            });
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server'
+            ], 500);
+        }
+
+        return response()->json([
+            'success'  => true,
+            'redirect' => route('showmainujian')
+        ]);
+    }
+
+
+    public function validasiExam(exams $exam)
+    {
+        // 🔍 Logging ringan (opsional tapi sangat membantu)
+        Log::info('VALIDASI EXAM', [
+            'exam_id' => $exam->id,
+            'status_lama' => $exam->status,
+        ]);
+
+        // 🔒 Hanya boleh dari draft → active
         if ($exam->status !== 'draft') {
             return back()->withErrors([
-                'status' => 'Exam sudah divalidasi sebelumnya'
+                'status' => 'Exam tidak bisa divalidasi karena status bukan draft'
             ]);
         }
 
-        if ($exam->type === 'TPU') {
-            if ($exam->questions()->count() === 0) {
-                return back()->withErrors([
-                    'soal' => 'Tidak bisa validasi, soal TPU masih kosong'
-                ]);
-            }
-        }
-
-        if ($exam->type === 'WWN') {
-            if ($exam->wawancara()->count() === 0) {
-                return back()->withErrors([
-                    'soal' => 'Tidak bisa validasi, soal wawancara masih kosong'
-                ]);
-            }
-        }
-
+        // ✅ Update status saja
         $exam->update([
             'status' => 'active'
         ]);
 
-        return back()->with(
-            'success',
-            "Exam {$exam->type} berhasil divalidasi dan diaktifkan"
-        );
+        Log::info('STATUS EXAM DIUPDATE', [
+            'exam_id' => $exam->id,
+            'status_baru' => $exam->status,
+        ]);
+
+        return back()->with('success', 'Exam berhasil divalidasi');
     }
 
 
@@ -312,7 +426,7 @@ class ujiancontrol extends Controller
     {
         $request->validate([
             'judul'      => 'required|string',
-            'type'       => 'required|in:tpu,wwn',
+            'type'       => 'required|in:tpu,wwn,orb',
             'duration'   => 'required|integer|min:1',
             'id_seleksi' => 'required|exists:selections,id',
             'start_at'   => 'required|date',

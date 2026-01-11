@@ -19,6 +19,15 @@ return new class extends Migration
             $table->unsignedTinyInteger('point'); // 1–5 (atau bebas nanti)
             $table->timestamps();
         });
+
+        Schema::create('orb_options', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('id_orb')->constrained('orb_questions')->cascadeOnDelete();
+            $table->string('label', 2); // A, B, C, D, E
+            $table->text('opsi_tulisan');
+            $table->unsignedTinyInteger('point'); // 1–5 (atau bebas nanti)
+            $table->timestamps();
+        });
     }
 
     /**
@@ -27,5 +36,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('wwn_options');
+        Schema::dropIfExists('orb_options');
     }
 };

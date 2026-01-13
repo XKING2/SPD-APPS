@@ -18,8 +18,7 @@ use App\Models\OrbResult;
 use App\Models\ResultExam;
 use App\Models\seleksi;
 use App\Models\wawancaranswer;
-
-
+use Vinkla\Hashids\Facades\Hashids;
 
 class ujiancontrol extends Controller
 {
@@ -85,6 +84,7 @@ class ujiancontrol extends Controller
                 }
 
                 $result->update([
+                    'id_seleksi'   => $exam->id_seleksi, // ✅ FIX UTAMA
                     'score'        => $score,
                     'is_submitted' => true,
                     'submitted_at' => now(),
@@ -202,6 +202,7 @@ class ujiancontrol extends Controller
                     [
                         'user_id' => $user->id,
                         'exam_id' => $exam->id,
+                        'id_seleksi' => $exam->id_seleksi, // ✅ PENTING
                         'type'    => 'WWN',
                     ],
                     [
@@ -282,7 +283,7 @@ class ujiancontrol extends Controller
                 $questions = OrbQuest::pluck('id')->toArray();
 
                 if (empty($questions)) {
-                    throw new \Exception('Pertanyaan wawancara tidak ditemukan');
+                    throw new \Exception('Pertanyaan Observasi tidak ditemukan');
                 }
 
                 $options = OrbOption::whereIn('id', array_values($answers))
@@ -304,10 +305,10 @@ class ujiancontrol extends Controller
                     OrbResult::updateOrCreate(
                         [
                             'user_id'            => $user->id,
-                            'wawancara_question' => $questionId,
+                            'orb_question' => $questionId,
                         ],
                         [
-                            'wawancara_option' => $optionId,
+                            'orb_option' => $optionId,
                         ]
                     );
 
@@ -317,9 +318,10 @@ class ujiancontrol extends Controller
 
                 ResultExam::updateOrCreate(
                     [
-                        'user_id' => $user->id,
-                        'exam_id' => $exam->id,
-                        'type'    => 'ORB',
+                        'user_id'    => $user->id,
+                        'exam_id'    => $exam->id,
+                        'id_seleksi' => $exam->id_seleksi, // ✅ PENTING
+                        'type'       => 'ORB',
                     ],
                     [
                         'score'        => $score,
@@ -340,7 +342,7 @@ class ujiancontrol extends Controller
                     [
                         'user_id'    => $user->id,
                         'id_seleksi' => $exam->id_seleksi, 
-                        'type'       => 'WWN',
+                        'type'       => 'ORB',
                     ],
                     [
                         'score_raw'     => $score,
@@ -385,6 +387,13 @@ class ujiancontrol extends Controller
         $exam->update([
             'status' => 'active'
         ]);
+        activity_log(
+            'Validasi',
+            'Penguji Memvalidasi Data Ujian Untuk Seleksi : ' . optional($exam->seleksi)->judul,
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
 
         Log::info('STATUS EXAM DIUPDATE', [
             'exam_id' => $exam->id,
@@ -413,8 +422,18 @@ class ujiancontrol extends Controller
         ]);
     }
 
-    public function edit(exams $exam)
+    public function edit(string $hashexam)
     {
+        $decoded = Hashids::decode($hashexam);
+
+        if (empty($decoded)) {
+            abort(404);
+        }
+        
+        $id = $decoded[0];
+
+        $exam = exams::all()->findOrFail($id);
+
         return view('penguji.editexams', [
             'exam'     => $exam,
             'seleksi'  => seleksi::orderBy('judul')->get(),
@@ -448,6 +467,14 @@ class ujiancontrol extends Controller
             'end_at'     => $request->end_at,
         ]);
 
+        activity_log(
+            'Update',
+            'Penguji Merubah Data Ujian Untuk Seleksi : ' . optional($exam->seleksi)->judul,
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
+
         return redirect()
             ->route('addexams')
             ->with('success', 'Exam berhasil diperbarui');
@@ -462,6 +489,14 @@ class ujiancontrol extends Controller
         }
 
         $exam->delete();
+
+        activity_log(
+            'Delete',
+            'Penguji Menghapus Data Ujian Untuk Seleksi : ' . optional($exam->seleksi)->judul,
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
 
         return back()->with('success', 'Exam berhasil dihapus');
     }

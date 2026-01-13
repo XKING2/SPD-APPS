@@ -890,4 +890,43 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+
+@if(session('login_notifications'))
+<script id="login-notifications-data" type="application/json">
+{!! json_encode(session('login_notifications')) !!}
+</script>
+@endif
+
+@if(session('user_notifications'))
+<script id="user-notifications" type="application/json">
+{!! json_encode(session('user_notifications')) !!}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const notif = JSON.parse(
+        document.getElementById('user-notifications').textContent
+    );
+
+    await Swal.fire({
+        title: "Login Berhasil",
+        icon: "success",
+        confirmButtonText: "Lanjutkan"
+    });
+
+    if (notif.status) {
+        await Swal.fire({
+            title: "Status Biodata",
+            text: notif.status === 'valid'
+                ? "Biodata Anda telah divalidasi"
+                : "Biodata Anda ditolak",
+            icon: notif.status === 'valid' ? 'success' : 'warning',
+            confirmButtonText: "OK"
+        });
+    }
+});
+</script>
+@endif
+
+
 @endsection

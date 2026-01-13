@@ -37,6 +37,12 @@
     <link href="{{ asset('css/footer.css') }}" rel="stylesheet">
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('css/penguji.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/Sawpage.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/adduser.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/seleksiedit.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/examsedit.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/tambahTPU.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/tambahwwn.css') }}" rel="stylesheet">
     <style>
         .status-label {
             font-size: 0.85rem;
@@ -56,21 +62,17 @@
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion position-fixed" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center px-3" 
-                href="{{ route('pengujidashboard') }}">
-                
+           <a class="sidebar-brand d-flex align-items-center px-3" 
+                href="{{ route('pengujidashboard') }}" style="gap: 12px;">
                 <div class="sidebar-brand-icon d-flex align-items-center justify-content-center"
-                        style="width: 40px; height: 40px; border-radius: 12px; overflow: hidden;">
-                        <img src="{{ asset('images/logo1.png') }}" alt="Logo E-SPJ"
-                            style="width:100%; height:100%; object-fit:cover;">
+                    style="width: 40px; height: 40px; border-radius: 12px; overflow: hidden;">
+                    <img src="{{ asset('images/logo1.png') }}" alt="Logo E-SPJ" style="width:100%; height:100%; object-fit:cover;">
                 </div>
 
-                <div class="sidebar-brand-text text-white fw-bold ms-3" style="font-size: 1.1rem;">
+                <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
                     Si SSD
                 </div>
-
-                </a>
-
+            </a>
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item {{ Request::routeIs('pengujidashboard') ? 'active' : '' }}">
@@ -80,21 +82,28 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ Request::routeIs('addseleksi') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::routeIs('datauser') || Request::routeIs('user.edit') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('datauser') }}">
+                    <i class="fas fa-user "></i>
+                    <span>Data User</span>
+                </a>
+            </li>
+
+            <li class="nav-item {{ Request::routeIs('addseleksi') || Request::routeIs('seleksi.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addseleksi') }}">
                     <i class="fas fa-file-alt "></i>
                     <span>Tambah Seleksi</span>
                 </a>
             </li>
 
-            <li class="nav-item {{ Request::routeIs('addexams') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::routeIs('addexams') || Request::routeIs('exam.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addexams') }}">
                     <i class="fas fa-file-alt"></i>
                     <span>Tambah Ujian </span>
                 </a>
             </li>
 
-            <li class="nav-item {{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::routeIs('showtpuMain') || Request::routeIs('showtpu') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBeritaAcara"
                     aria-expanded="{{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'true' : 'false' }}"
                     aria-controls="collapseBeritaAcara">
@@ -102,7 +111,7 @@
                     <span>Nilai Ujian</span>
                 </a>
                 <div id="collapseBeritaAcara"
-                    class="collapse {{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'show' : '' }}"
+                    class="collapse {{ Request::routeIs('showtpuMain') || Request::routeIs('showtpu') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'show' : '' }}"
                     aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item {{ Request::routeIs('showtpuMain') ? 'active' : '' }}" href="{{ route('showtpuMain') }}">TPU</a>
@@ -136,6 +145,13 @@
                 <a class="nav-link" href="{{ route('generate.page') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Generate Perengkingan</span>
+                </a>
+            </li>
+
+            <li class="nav-item {{ Request::routeIs('activityindex') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('activityindex') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Log Kegiatan</span>
                 </a>
             </li>
 

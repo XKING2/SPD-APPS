@@ -159,6 +159,15 @@ class sidebar2control extends Controller
             'key_expired_at'  => now()->addMinutes(10),
         ]);
 
+         // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Generate',
+            'Generate Enrollment Key TPU',
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
+
         return back()->with('enrollment_key', $key);
     }
 
@@ -190,6 +199,15 @@ class sidebar2control extends Controller
             'key_generated_at' => now(),
             'key_expired_at'  => now()->addMinutes(10),
         ]);
+
+         // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Generate',
+            'Generate Enrollment Key Wawancara',
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
 
         return back()->with([
             'success' => 'Enrollment key berhasil dibuat.',
@@ -225,26 +243,19 @@ class sidebar2control extends Controller
             'key_expired_at'  => now()->addMinutes(10),
         ]);
 
+         // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Generate',
+            'Generate Enrollment Key Observasi',
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
+
         return back()->with([
             'success' => 'Enrollment key berhasil dibuat.',
             'enrollment_key' => $key,
         ]);
-    }
-
-
-    
-
-    public function generatePageSaw(Request $request)
-    {
-        $seleksis = seleksi::orderBy('created_at', 'desc')->get();
-
-        $selectedSeleksi = null;
-
-        if ($request->has('seleksi_id')) {
-            $selectedSeleksi = Seleksi::find($request->seleksi_id);
-        }
-
-        return view('admin.generatesaws', compact('seleksis', 'selectedSeleksi'));
     }
 
 
@@ -287,6 +298,14 @@ class sidebar2control extends Controller
             'end_at'     => $request->end_at,
             'status'     => 'draft'
         ]);
+
+        activity_log(
+            'Update',
+            'Admin Mengubah data exams dengan seleksi: ' . optional($exam->seleksi)->judul,
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
 
         return redirect()
             ->route('adminexams')

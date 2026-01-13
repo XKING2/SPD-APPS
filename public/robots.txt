@@ -2,11 +2,36 @@ User-agent: *
 Disallow:
 
 
-<script id="exam-data" type="application/json">
-{!! json_encode([
-    'examId'    => $exam->id,
-    'questions' => $questions,
-    'duration'  => (int) $exam->duration * 60,
-    'submitUrl' => route('exam.wwn.submit', $exam->id),
-], JSON_UNESCAPED_UNICODE) !!}
-</script>
+
+{{ route('showobservasi', ['seleksiHash' => $seleksiHash,'desaHash' => $desaHash]) }}
+
+@php
+                            $seleksiHash = Hashids::encode($seleksi->id);
+                        @endphp
+
+                        @forelse ($users as $user)
+                            @php
+                                $userHash = Hashids::encode($user->id);
+                            @endphp
+
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $user->no_peserta ?? $user->id }}</td>
+                                <td class="text-left">{{ $user->name }}</td>
+                                <td>
+                                    <a href="{{ route('add.observasi', [
+                                        'seleksiHash' => $seleksiHash,
+                                        'userHash'    => $userHash
+                                    ]) }}"
+                                    class="btn btn-primary">
+                                        <i class="fas fa-edit"></i> Beri Nilai Praktek
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Data tidak tersedia
+                                </td>
+                            </tr>
+                        @endforelse

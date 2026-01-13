@@ -36,6 +36,8 @@
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/footer.css') }}" rel="stylesheet">
     <link href="{{ asset('css/biodata.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/Sawpage.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/validasibio.css') }}" rel="stylesheet">
  
 
 
@@ -104,7 +106,7 @@
             <li class="nav-item {{ Request::routeIs('generate.admin') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('generate.admin') }}">
                     <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Generate Saw</span>
+                    <span>Generate Perengkingan</span>
                 </a>
             </li>
 
@@ -313,6 +315,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @stack('scripts')
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>

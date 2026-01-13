@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('biodata', function (Blueprint $table) {
             $table->id(); // BIGINT UNSIGNED AUTO_INCREMENT
             $table->foreignId('id_user')->nullable()->constrained('users') ->cascadeOnDelete();
+            $table->foreignId('id_desas')->nullable()->constrained('desas') ->cascadeOnDelete();
             $table->string('kartu_keluarga')->nullable();
             $table->string('ktp')->nullable();
             $table->string('ijazah')->nullable();
@@ -22,6 +23,7 @@ return new class extends Migration
             $table->string('profile_img')->nullable();
             $table->enum('status', ['valid','draft','ditolak'])->default('draft');
             $table->boolean('notified')->default(false);
+            $table->boolean('notified_admin')->default(false);
             $table->timestamp('validated_at')->nullable();
             $table->timestamps();
         });

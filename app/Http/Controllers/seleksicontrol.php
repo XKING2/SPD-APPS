@@ -41,6 +41,15 @@ class seleksicontrol extends Controller
             ]);
         });
 
+        // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Create',
+            'Menambah Data Seleksi',
+            $request,
+            null,
+            collect($request)->toArray()
+        );
+
         return redirect()
             ->back()
             ->with('success', 'Data seleksi berhasil dibuat');
@@ -77,6 +86,15 @@ class seleksicontrol extends Controller
 
         $seleksi->update($request->all());
 
+        // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Update',
+            'Mengubah Data Seleksi',
+            $seleksi,
+            null,
+            collect($seleksi)->toArray()
+        );
+
         return redirect()
             ->route('addseleksi')
             ->with('success', 'Data seleksi berhasil diperbarui');
@@ -92,6 +110,15 @@ class seleksicontrol extends Controller
         }
 
         $seleksi->delete();
+
+         // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Delete',
+            'Menghapus Data Seleksi',
+            $seleksi,
+            null,
+            collect($seleksi)->toArray()
+        );
 
         return back()->with('success', 'Data seleksi berhasil dihapus');
     }

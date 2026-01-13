@@ -1,0 +1,220 @@
+
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .selection-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+
+    .selection-card label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+
+
+    .info-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .info-card h5 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .info-card p {
+        opacity: 0.95;
+        margin-bottom: 15px;
+    }
+
+    .btn-generate {
+        background: white;
+        color: #667eea;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 255, 255, 0.4);
+        color: #764ba2;
+    }
+
+    .table-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .table-section h6 {
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #667eea;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-section h6 i {
+        color: #667eea;
+        font-size: 20px;
+    }
+
+    .custom-table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .custom-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .custom-table thead th {
+        padding: 15px;
+        font-weight: 600;
+        border: none;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .custom-table thead th:first-child {
+        border-top-left-radius: 10px;
+    }
+
+    .custom-table thead th:last-child {
+        border-top-right-radius: 10px;
+    }
+
+    .custom-table tbody td {
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+        text-align: center;
+        color: #5a5c69;
+    }
+
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .custom-table tbody tr:hover {
+        background: #f8f9ff;
+    }
+
+    .rank-badge {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin: 0 auto;
+    }
+
+    .rank-1 {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        color: #856404;
+        box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .rank-2 {
+        background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+        color: #495057;
+        box-shadow: 0 4px 10px rgba(192, 192, 192, 0.3);
+    }
+
+    .rank-3 {
+        background: linear-gradient(135deg, #cd7f32 0%, #daa06d 100%);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(205, 127, 50, 0.3);
+    }
+
+    .rank-other {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .max-value-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+    }
+
+    .max-value-box p {
+        margin: 5px 0;
+        color: #856404;
+        font-weight: 600;
+    }
+
+    .score-value {
+        font-weight: 700;
+        font-size: 16px;
+        color: #667eea;
+    }
+
+    .final-score {
+        background: linear-gradient(135deg, #23d5ab 0%, #1cc88a 100%);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-weight: 700;
+        display: inline-block;
+        box-shadow: 0 4px 10px rgba(28, 200, 138, 0.3);
+    }
+
+    .alert {
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: none;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #a8edea 0%, #23d5ab 100%);
+        color: white;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .table-section {
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        .custom-table {
+            font-size: 12px;
+        }
+
+        .custom-table thead th,
+        .custom-table tbody td {
+            padding: 8px;
+        }
+    }

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\activitycontrol;
 use App\Http\Controllers\Authcontroller;
 use App\Http\Controllers\biodatacontrol;
+use App\Http\Controllers\datausercontrol;
 use App\Http\Controllers\sidebar2control;
 use App\Http\Controllers\sidebarcontrol;
 use App\Http\Controllers\Enrollcontrol;
@@ -9,6 +11,7 @@ use App\Http\Controllers\formasicontrol;
 use App\Http\Controllers\OrbControl;
 use App\Http\Controllers\PrakControl;
 use App\Http\Controllers\Sawcontrol;
+use App\Http\Controllers\SawExport;
 use App\Http\Controllers\seleksicontrol;
 use App\Http\Controllers\sidebar3control;
 use App\Http\Controllers\Startcontrol;
@@ -67,6 +70,7 @@ Route::get('/ajax/desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
 Route::middleware(['auth','check.role:users'])->group(function () {
     Route::get('/User/Dashboard', [sidebarcontrol::class, 'showdashboard'])->name('userdashboard');
     Route::get('/User/Biodata', [sidebarcontrol::class, 'showbiodata'])->name('showbiodata');
+    Route::get('/User/Update/Biodata', [sidebarcontrol::class, 'editbio'])->name('biodata.update');
     Route::get('/User/Cekdata', [sidebarcontrol::class, 'preview'])->name('showpreview');
     Route::get('/User/Ujian', [sidebarcontrol::class, 'showmainujian'])->name('showmainujian');
     Route::post('/biodata', [biodatacontrol::class, 'store'])->name('biodata.post');
@@ -92,8 +96,8 @@ Route::middleware(['auth','check.role:admin'])->group(function () {
     Route::get('/validasi-biodata', [biodatacontrol::class, 'index'])->name('validasi.index');
     Route::post('/validasi-biodata/{biodata}', [BiodataControl::class, 'validasi'])->name('validasi.submit');
     Route::get('/validasi-biodata/{hash}', [BiodataControl::class, 'show'])->name('validasi.show');
-    Route::get('/Admin/Generate', [sidebar2control::class, 'generatePageSaw'])->name('generate.admin');
-    Route::post('/Admin/saw/generate/{seleksi}',[Sawcontrol::class, 'generateAdminSaw'])->name('saw.admin.generate');
+    Route::get('/Admin/Generate', [Sawcontrol::class, 'generateAdminPage'])->name('generate.admin');
+    Route::post('/Admin/saw/generate/{seleksiId}', [Sawcontrol::class, 'generateAdmin'])->name('saw.admin.generate');
     Route::get('/Admin/Exams', [ujiancontrol  ::class, 'ShowExamsAdmin'])->name('adminexams');
     Route::get('/exams/{hashexam}/edits', [sidebar2control::class, 'editExams'])->name('adminexam.edit');
     Route::put('/exams/{exam}', [sidebar2control::class, 'updateExams'])->name('Adminexam.update');
@@ -114,6 +118,17 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/desa/by-kecamatan/{id}', [sidebar3control::class, 'getDesaByKecamatan']);
     Route::get('/cek-seleksi-desa/{desa}', [sidebar3control::class, 'cekSeleksiDesa']);
 
+    Route::get('/Penguji/DataUser', [datausercontrol  ::class, 'showDataUser'])->name('datauser');
+    Route::get('/Penguji/Add/DataUser', [datausercontrol  ::class, 'create'])->name('createuser');
+    Route::get('/ajax/desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
+    ->middleware('throttle:60,1');
+    Route::post('/penguji/data-user', [datausercontrol::class, 'store'])
+        ->name('user.store');
+    Route::get('/Datauser/{hashuser}/edit', [datausercontrol ::class, 'edit'])->name('user.edit');
+    Route::put('/Datauser/{user}', [datausercontrol::class, 'update'])->name('user.update');
+    Route::post('/user/{user}/validasi', [datausercontrol::class, 'validasiUser'])->name('user.validasi');
+    Route::delete('Delete/User/{user}', [ujiancontrol::class, 'destroy'])->name('user.destroy');
+
     Route::get('/Penguji/Seleksi', [sidebar3control  ::class, 'showSeleksi'])->name('addseleksi');
     Route::post('/Seleksi/import', [seleksicontrol::class, 'store'])->name('seleksi.import');
     Route::get('/seleksi/{hashseleksi}/edit', [seleksicontrol ::class, 'edit'])->name('seleksi.edit');
@@ -122,7 +137,7 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
 
     Route::get('/Penguji/Exams', [sidebar3control  ::class, 'showExams'])->name('addexams');
     Route::post('/Exams/import', [sidebar3control::class, 'storeExams'])->name('exams.import');
-    Route::get('/exam/{exam}/edit', [ujiancontrol::class, 'edit'])->name('exam.edit');
+    Route::get('/exam/{hashexam}/edit', [ujiancontrol::class, 'edit'])->name('exam.edit');
     Route::put('/exam/{exam}', [ujiancontrol::class, 'update'])->name('exam.update');
     Route::delete('/exam/{exam}', [ujiancontrol::class, 'destroy'])->name('exam.destroy');
     Route::post('/exam/{exam}/validasi', [ujiancontrol::class, 'validasiExam'])
@@ -133,11 +148,13 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/Penguji/Nilai/TPU/{seleksiHash}/desa/{desaHash}', [tpuControl::class, 'shownilaiTPU'])->name('showtpu');
     Route::get('/Penguji/AddSeleksi/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa5'])->name('praktik.resolve');
     Route::get('/Penguji/AddSeleksi',[sidebar3control::class, 'showTambahTPUMain'])->name('tambahtpu');
-    Route::post('/penguji/add-SOAL/tpu',[tpuControl::class, 'storeTPU'])->name('exam-questions.import');
-    Route::get('/penguji/add-SOAL/tpu',[tpuControl::class, 'showTambahTPU'])->name('addTPU');
-    Route::get('/TPU/{id}/edit', [tpuControl::class, 'editTPU'])->name('TPU.edit');
+    Route::post('/penguji/add-SOAL1/tpu',[tpuControl::class, 'storeTPU'])->name('exam-questions.import');
+    Route::get('/penguji/add-SOAL2/tpu',[tpuControl::class, 'showTambahTPU'])->name('addTPU');
+    Route::get('/penguji/add-SOAL3/tpu',[tpuControl::class, 'create'])->name('createTPU');
+    Route::post('/penguji/add-SOAL4/tpu',[tpuControl::class, 'store'])->name('TPU.store');
+    Route::get('/TPU/{hashTPU}/edit', [tpuControl::class, 'editTPU'])->name('TPU.edit');
     Route::put('/TPU/{id}', [tpuControl::class, 'updateTPU'])->name('TPU.update');
-    Route::delete('/TPU/{id}', [tpuControl::class, 'destroyTPU'])->name('TPU.destroy');
+    Route::delete('/TPU/multi-delete', [tpuControl::class, 'multiDelete'])->name('TPU.multiDelete');
 
     Route::get('/Penguji/Main/WWN', [sidebar3control::class, 'showMainWWN'])->name('showWwnMain');
     Route::get('/Penguji/Nilai/Wawancara/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa4'])->name('praktik.resolve');
@@ -146,9 +163,11 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/Penguji/AddSeleksi/WWN/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa6'])->name('praktik.resolve');
     Route::post('/Penguji/Post/Add-Soal//WWN', [WWNControl::class, 'storeWawancara'])->name('exam-wawancara.import');
     Route::get('/Penguji/Add-Soal/WWN', [WWNControl::class, 'showtambahwawancara'])->name('addWWN');
-    Route::get('/Wawancara/{id}/edit', [ujiancontrol::class, 'editWawancara'])->name('wawan.edit');
-    Route::put('/Wawancara/{id}', [ujiancontrol::class, 'updateWawancara'])->name('wawan.update');
-    Route::delete('/wawancara/{id}', [ujiancontrol::class, 'destroy'])->name('wawancara.destroy');
+    Route::get('/penguji/add-SOAL3/WWN',[WWNControl::class, 'create'])->name('createWWN');
+    Route::post('/penguji/add-SOAL4/WWN',[WWNControl::class, 'store'])->name('WWN.store');
+    Route::get('/Wawancara/{hashWWN}/edit', [WWNControl::class, 'editWawancara'])->name('wawan.edit');
+    Route::put('/Wawancara/{id}', [WWNControl::class, 'updateWawancara'])->name('wawan.update');
+    Route::delete('/WWN/multi-delete', [WWNControl::class, 'multiDelete'])->name('wwn.multiDelete');
 
     Route::get('/Penguji/Main/PRAK', [sidebar3control::class, 'showMainPrak'])->name('showPrakMain');
     Route::get('/Penguji/Nilai/Praktik/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa'])->name('praktik.resolve');
@@ -163,8 +182,18 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/Penguji/Nilai/Observasi/{seleksiHash}/desa/{desaHash}', [OrbControl::class, 'shownilaiobservasi'])->name('showobservasi');
     Route::get('/nilai/ORB/{seleksiHash}/{userHash}', [OrbControl::class, 'addnilaiorb'])->name('add.observasi');
     Route::post('/nilai/Observasi/{seleksiHash}/{userHash}',[OrbControl::class, 'storeOrb'])->name('nilaiorbstore');
+    Route::get('/penguji/add-SOAL3/ORB',[OrbControl::class, 'create'])->name('createORB');
+    Route::post('/penguji/add-SOAL4/ORB',[OrbControl::class, 'store'])->name('orb.store');
+    Route::get('/Observasi/{hashorb}/edit', [OrbControl::class, 'editObservasi'])->name('orb.edit');
+    Route::put('/Observasi/{id}', [OrbControl::class, 'updateObservasi'])->name('orb.update');
+    Route::delete('/Orb/multi-delete', [OrbControl::class, 'multiDelete'])->name('orb.multiDelete');
 
-    Route::get('/Penguji/Generate', [sidebar3control::class, 'generatePage'])->name('generate.page');
-    Route::post('/Penguji/saw/generate/{seleksi}',[Sawcontrol::class, 'generate'])->name('saw.generate');
+    Route::get('/Penguji/Activity', [activitycontrol  ::class, 'index'])->name('activityindex');
+
+
+
+    Route::get('/penguji/saw/generate', [Sawcontrol::class, 'generatePage'])->name('generate.page');
+    Route::post('/Penguji/saw/generate/{seleksiId}', [Sawcontrol::class, 'generate'])->name('saw.generate');
+    Route::get('/saw/export/pdf/{seleksi}',[SawExport::class, 'convertRankingSawToPdf'])->name('saw.export.pdf');
 
 });

@@ -114,6 +114,14 @@ class sidebar3control extends Controller
                 'created_by' => Auth::id(),
             ]);
 
+        activity_log(
+            'Create',
+            'Penguji Membuat Data Ujian Untuk Seleksi : ' . optional($exam->seleksi)->judul,
+            $exam,
+            null,
+            collect($exam)->toArray()
+        );
+
         return redirect()
             ->back()
             ->with('success', 'Exam berhasil dibuat');

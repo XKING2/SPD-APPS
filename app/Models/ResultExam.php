@@ -14,6 +14,7 @@ class ResultExam extends Model
     protected $fillable = [
         'user_id',
         'exam_id',
+        'id_seleksi',
         'type',
         'score',
         'question_order',

@@ -9,13 +9,14 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Data Anggota</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Data Nilai  Anggota</h6>
         </div>
 
         <div class="card-body">
 
             <!-- Search -->
             <div class="d-flex justify-content-between mb-3">
+
                 <form action="{{ route('showobservasi', ['seleksiHash' => $seleksiHash,'desaHash' => $desaHash]) }}" method="GET">
                     <input type="text" name="search"
                         class="form-control form-control-sm mr-2"
@@ -33,33 +34,22 @@
                             <th style="width: 50px;">No</th>
                             <th>No Peserta</th>
                             <th>Nama</th>
-                            <th style="width: 200px;">Aksi</th>
+                            <th>Score</th>
                         </tr>
                     </thead>
                     <tbody>
 
-                        @php
-                            $seleksiHash = Hashids::encode($seleksi->id);
-                        @endphp
-
-                        @forelse ($users as $user)
+                        @forelse ($results as $result)
                             @php
+                                $user = $result->user;
                                 $userHash = Hashids::encode($user->id);
                             @endphp
 
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $user->no_peserta ?? $user->id }}</td>
+                                <td>{{ $result->no_peserta ?? $user->id }}</td>
                                 <td class="text-left">{{ $user->name }}</td>
-                                <td>
-                                    <a href="{{ route('add.observasi', [
-                                        'seleksiHash' => $seleksiHash,
-                                        'userHash'    => $userHash
-                                    ]) }}"
-                                    class="btn btn-primary">
-                                        <i class="fas fa-edit"></i> Beri Nilai Praktek
-                                    </a>
-                                </td>
+                                <td>{{ $result->score }}</td>
                             </tr>
                         @empty
                             <tr>

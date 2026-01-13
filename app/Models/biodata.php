@@ -14,6 +14,7 @@ class biodata extends Model
         'id_user',
         'id_formasi',
         'id_kebutuhan',
+        'id_desas',
         'kartu_keluarga',
         'ktp',
         'ijazah',
@@ -21,7 +22,9 @@ class biodata extends Model
         'surat_pendaftaran',
         'profile_img',
         'validated_at',
-        'status'
+        'status',
+        'notified',
+        'notified_admin'
     ];
 
     public function formasi() {

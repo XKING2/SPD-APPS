@@ -15,8 +15,8 @@ class biodatacontrol extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_formasi'   => 'required|exists:formasis,id',
-            'id_kebutuhan' => 'required|exists:kebutuhan_formasi,id',
+            'id_formasi'        => 'required|exists:formasis,id',
+            'id_kebutuhan'      => 'required|exists:kebutuhan_formasi,id',
             'profile_img'       => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'kartu_keluarga'    => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'ktp'               => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -59,6 +59,7 @@ class biodatacontrol extends Controller
             }
         }
 
+        $biodata->id_desas = $user->id_desas;
         $biodata->status = 'draft';
         $biodata->save();
 
@@ -127,6 +128,26 @@ class biodatacontrol extends Controller
         return redirect()->route('validasi.index')->with('success', 'Validasi berhasil.');
     }
 
+
+    public function editbio(Request $request, Biodata $biodata)
+    {
+        // 🔒 Guard: hanya boleh dari pending
+        if ($biodata->status !== 'draft') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Biodata tidak dalam status pending'
+            ], 400);
+        }
+
+        // 🔁 Update status
+        $biodata->update([
+            'status'       => 'valid',
+            'validated_at' => Carbon::now(),
+        ]);
+
+
+        return redirect()->route('validasi.index')->with('success', 'Validasi berhasil.');
+    }
 
 
 

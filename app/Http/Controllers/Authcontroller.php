@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Verification;
 use App\Mail\OtpMail;
+use App\Models\biodata;
 use App\Models\Desas;
 use App\Models\Kecamatans;
 use Illuminate\Support\Facades\Mail;
@@ -24,7 +25,7 @@ class Authcontroller extends Controller
 
     public function login(Request $request)
     {
-        // VALIDASI INPUT
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -34,21 +35,66 @@ class Authcontroller extends Controller
             'password.required' => 'Password wajib diisi.'
         ]);
 
-        // CREDENTIALS
         $credentials = $request->only('email', 'password');
 
-        // COBA LOGIN
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            $user = Auth::user(); // ambil data user setelah login
+            $user = Auth::user();
 
-            // 🔥 REDIRECT BERDASARKAN ROLE
-            return match ($user->role) {
-                'admin'     => redirect()->route('admindashboard')->with('success', 'Login berhasil!'),
-                'penguji'   => redirect()->route('pengujidashboard')->with('success', 'Login berhasil!'),
-                'users'     => redirect()->route('userdashboard')->with('success', 'Login berhasil!'),
-                default     => redirect()->route('login')->with('error', 'Role tidak dikenali.')
+            // ================= ADMIN =================
+            if ($user->role === 'admin') {
+
+                $count = Biodata::where('status', 'draft')
+                    ->where('id_desas', $user->id_desas)
+                    ->where(function ($q) {
+                        $q->where('notified_admin', 0)
+                        ->orWhereNull('notified_admin');
+                    })
+                    ->count();
+
+                if ($count > 0) {
+                    Biodata::where('status', 'draft')
+                        ->where('id_desas', $user->id_desas)
+                        ->update(['notified_admin' => 1]);
+                }
+
+                session()->flash('admin_notifications', [
+                    'login_success' => true,
+                    'draft_count'   => $count
+                ]);
+            }
+
+
+            // ================= USER =================
+            if ($user->role === 'users') {
+
+                $biodata = Biodata::where('id_user', $user->id)
+                    ->whereIn('status', ['valid', 'rejected'])
+                    ->where(function ($q) {
+                        $q->where('notified', 0)
+                        ->orWhereNull('notified');
+                    })
+                    ->first();
+
+                if ($biodata) {
+                    $biodata->notified = 1;
+                    $biodata->save();
+                }
+
+                session()->flash('user_notifications', [
+                    'login_success' => true,
+                    'status'        => $biodata?->status
+                ]);
+            }
+
+
+        return match ($user->role) {
+            'admin'     => redirect()->route('admindashboard'),
+            'penguji'   => redirect()->route('pengujidashboard')->with('success', 'Login berhasil!'),
+            'users'     => redirect()->route('userdashboard'),
+            default     => redirect()->route('login')->with('error', 'Role tidak dikenali.')
             };
         }
 

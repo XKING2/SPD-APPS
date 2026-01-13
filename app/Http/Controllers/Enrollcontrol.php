@@ -53,9 +53,11 @@ class Enrollcontrol extends Controller
 
             // 👉 Ambil SEMUA soal TPU, bukan berdasarkan exam
             $questionIds = ExamQuestion::query()
-                ->where('subject', 'TPU')
-                ->pluck('id')
-                ->toArray();
+            ->where('subject', 'TPU')
+            ->inRandomOrder()
+            ->limit(40)
+            ->pluck('id')
+            ->toArray();
 
             if (count($questionIds) === 0) {
                 return back()->withErrors([
@@ -63,13 +65,20 @@ class Enrollcontrol extends Controller
                 ]);
             }
 
-            $shuffledQuestions = Arr::shuffle($questionIds);
+            if (count($questionIds) < 40) {
+                return back()->withErrors([
+                    'enrollment_key' => 'Jumlah soal TPU belum mencukupi (minimal 40 soal)'
+                ]);
+            }
+
+            $shuffledQuestions = $questionIds;
 
             $result = ResultExam::create([
                 'exam_id'        => $exam->id,
+                'id_seleksi'     => $exam->id_seleksi, // ⚠️ jangan lupa ini
                 'user_id'        => $user->id,
                 'type'           => 'TPU',
-                'question_order' => $shuffledQuestions,
+                'question_order' => $questionIds,
                 'started_at'     => now(),
                 'is_submitted'   => false,
             ]);
@@ -142,7 +151,26 @@ class Enrollcontrol extends Controller
         if (!$result) {
 
             /** ================= AMBIL SOAL GLOBAL ================= */
-            $questionIds = wawancaraquest::pluck('id')->toArray();
+            // 👉 Ambil SEMUA soal TPU, bukan berdasarkan exam
+            $questionIds = wawancaraquest::query()
+            ->where('subject', 'ORB')
+            ->inRandomOrder()
+            ->limit(20)
+            ->pluck('id')
+            ->toArray();
+
+            if (count($questionIds) === 0) {
+                return back()->withErrors([
+                    'enrollment_key' => 'Soal Wawancara belum tersedia'
+                ]);
+            }
+
+            if (count($questionIds) < 20) {
+                return back()->withErrors([
+                    'enrollment_key' => 'Jumlah soal Wawancara belum mencukupi (minimal 40 soal)'
+                ]);
+            }
+
 
             if (count($questionIds) === 0) {
                 return back()->withErrors([
@@ -150,10 +178,11 @@ class Enrollcontrol extends Controller
                 ]);
             }
 
-            $shuffledQuestions = Arr::shuffle($questionIds);
+            $shuffledQuestions = $questionIds;
 
             $result = ResultExam::create([
                 'exam_id'        => $exam->id,
+                'id_seleksi'     => $exam->id_seleksi,
                 'user_id'        => $user->id,
                 'type'           => 'WWN',
                 'question_order' => $shuffledQuestions,
@@ -204,6 +233,7 @@ class Enrollcontrol extends Controller
 
         $user = Auth::user();
 
+        // ================= VALIDASI EXAM =================
         if (
             $exam->type !== 'orb' ||
             $exam->enrollment_key !== strtoupper($request->enrollment_key) ||
@@ -215,6 +245,7 @@ class Enrollcontrol extends Controller
             ]);
         }
 
+        // ================= CEK ATTEMPT =================
         $result = ResultExam::where('exam_id', $exam->id)
             ->where('user_id', $user->id)
             ->first();
@@ -222,33 +253,41 @@ class Enrollcontrol extends Controller
         if ($result && $result->is_submitted) {
             return redirect()
                 ->route('showmainujian')
-                ->with('error', 'Ujian wawancara sudah pernah diselesaikan');
+                ->with('error', 'Ujian Observasi sudah pernah diselesaikan');
         }
 
-       
+        // ================= BUAT ATTEMPT BARU =================
         if (!$result) {
 
-            $questionIds = OrbQuest::pluck('id')->toArray();
+            // 👉 Validasi bank soal minimal 20
+            $totalSoal = OrbQuest::where('subject', 'ORB')->count();
 
-            if (count($questionIds) === 0) {
+            if ($totalSoal < 20) {
                 return back()->withErrors([
-                    'enrollment_key' => 'Soal wawancara belum tersedia'
+                    'enrollment_key' => 'Jumlah soal Observasi belum mencukupi (minimal 20 soal)'
                 ]);
             }
 
-            $shuffledQuestions = Arr::shuffle($questionIds);
+            // 👉 Ambil 20 soal random
+            $questionIds = OrbQuest::where('subject', 'ORB')
+                ->inRandomOrder()
+                ->limit(20)
+                ->pluck('id')
+                ->toArray();
 
             $result = ResultExam::create([
                 'exam_id'        => $exam->id,
+                'id_seleksi'     => $exam->id_seleksi,
                 'user_id'        => $user->id,
-                'type'           => 'orb',
-                'question_order' => $shuffledQuestions,
+                'type'           => 'ORB',
+                'question_order' => $questionIds,
                 'started_at'     => now(),
                 'is_submitted'   => false,
             ]);
 
+            // ================= RANDOM OPTION =================
             $questions = OrbQuest::with('options')
-                ->whereIn('id', $shuffledQuestions)
+                ->whereIn('id', $questionIds)
                 ->get();
 
             foreach ($questions as $question) {
@@ -268,7 +307,7 @@ class Enrollcontrol extends Controller
             }
         }
 
-        /** ================= SESSION ================= */
+        // ================= SESSION =================
         session([
             'exam_access_'.$exam->id => true,
             'result_exam_id'         => $result->id

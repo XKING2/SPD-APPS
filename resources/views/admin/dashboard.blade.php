@@ -5,6 +5,7 @@
 @endsection
 
 @section('content')
+
 <div class="container-fluid">
 
     {{-- STATISTIK --}}
@@ -91,7 +92,44 @@
     </div>
 
 </div>
+
+@if(session('admin_notifications'))
+<script id="admin-notifications" type="application/json">
+{!! json_encode(session('admin_notifications')) !!}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const notif = JSON.parse(
+        document.getElementById('admin-notifications').textContent
+    );
+
+    await Swal.fire({
+        title: "Login Berhasil",
+        icon: "success",
+        confirmButtonText: "Lanjutkan"
+    });
+
+    if (notif.draft_count > 0) {
+        const result = await Swal.fire({
+            title: "Biodata Menunggu Validasi",
+            html: `<b>${notif.draft_count}</b> biodata menunggu validasi`,
+            icon: "info",
+            confirmButtonText: "Periksa"
+        });
+
+        if (result.isConfirmed) {
+            window.location.href = "{{ route('validasi.index') }}";
+        }
+    }
+});
+</script>
+@endif
+
+
 @endsection
+
+
 
 @push('scripts')
     <script src="{{ $weeklyPendaftarChart->cdn() }}"></script>

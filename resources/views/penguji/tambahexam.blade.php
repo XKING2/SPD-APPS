@@ -79,7 +79,7 @@
 
                                 <button type="button"
                                         class="btn btn-sm btn-success btn-edit-exam"
-                                        data-url="{{ route('exam.edit', $exam->id) }}">
+                                        data-url="{{ route('exam.edit',Hashids::encode($exam->id)) }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
                             

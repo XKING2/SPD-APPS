@@ -6,6 +6,7 @@ use App\Imports\OrbQuestionImport;
 use App\Models\Desas;
 use App\Models\FuzzyRule;
 use App\Models\FuzzyScore;
+use App\Models\OrbOption;
 use App\Models\OrbQuest;
 use App\Models\OrbResult;
 use App\Models\ResultExam;
@@ -13,6 +14,7 @@ use App\Models\seleksi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -41,72 +43,8 @@ class OrbControl extends Controller
         ]);
     }
 
-    public function storeOrb(Request $request, string $seleksiHash, string $userHash)
-    {
+   
 
-        $seleksiId = Hashids::decode($seleksiHash)[0] ?? null;
-        $userId    = Hashids::decode($userHash)[0] ?? null;
-
-        if (!$seleksiId || !$userId) {
-            abort(404);
-        }
-
-        $seleksi = Seleksi::findOrFail($seleksiId);
-        $user    = User::findOrFail($userId);
-
-        $validated = $request->validate([
-            'kerapian'    => 'required|integer|min:0|max:100',
-            'kecepatan'   => 'required|integer|min:0|max:100',
-            'ketepatan'   => 'required|integer|min:0|max:100',
-            'efektifitas' => 'required|integer|min:0|max:100',
-        ]);
-
-        $totalScore = array_sum($validated);
-
-        DB::transaction(function () use ($validated, $totalScore, $user, $seleksi) {
-
-            /** ================= ORB RESULT ================= */
-            OrbResult::create(array_merge($validated, [
-                'user_id'    => $user->id,
-            ]));
-
-            /** ================= RESULT EXAM ================= */
-            ResultExam::updateOrCreate(
-                [
-                    'user_id'    => $user->id,
-                    'type'       => 'ORB',
-                ],
-                [
-                    'score'        => $totalScore,
-                    'is_submitted' => true,
-                    'submitted_at' => now(),
-                ]
-            );
-
-            /** ================= FUZZY ================= */
-            $fuzzyRule = FuzzyRule::where('min_value', '<=', $totalScore)
-                ->where('max_value', '>=', $totalScore)
-                ->firstOrFail();
-
-            FuzzyScore::create([
-                'user_id'        => $user->id,
-                'id_seleksi'     => $seleksi->id,
-                'type'           => 'ORB',
-                'score_raw'      => $totalScore,
-                'score_crisp'    => $fuzzyRule->crisp_value,
-                'fuzzy_rule_id'  => $fuzzyRule->id,
-            ]);
-        });
-        
-
-        return redirect()->route(
-            'showobservasi',
-            [
-                'seleksi' => $seleksi->id,
-                'desa'    => $user->id_desas,
-            ]
-        )->with('success', 'Nilai observasi berhasil disimpan.');
-    }
 
     public function shownilaiobservasi(Request $request, string $seleksiHash, string $desaHash)
     {
@@ -117,29 +55,33 @@ class OrbControl extends Controller
             abort(404);
         }
 
-        $seleksi = Seleksi::findOrFail($seleksiId);
-        $desa    = Desas::findOrFail($desaId);
-
-        $seleksiHashForForm = Hashids::encode($seleksi->id);
-        $desaHashForForm    = Hashids::encode($desa->id);
-
-        // Ambil seleksi DAN pastikan seleksi itu memang milik desa ini
         $seleksi = Seleksi::where('id', $seleksiId)
             ->where('id_desas', $desaId)
             ->firstOrFail();
 
-        // Ambil user berdasarkan desa
-        $users = User::where('id_desas', $desaId)
-            ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
+        $desa = Desas::findOrFail($desaId);
+
+        // 🔍 Ambil hasil ujian (bukan user)
+        $results = ResultExam::with('user')
+            ->where('id_seleksi', $seleksi->id)
+            ->where('type', 'ORB') // ✅ hanya ORB
+            ->whereHas('user', function ($q) use ($desaId, $request) {
+                $q->where('role', 'users')
+                ->where('id_desas', $desaId)
+                ->when($request->search, function ($qq) use ($request) {
+                    $qq->where('name', 'like', '%' . $request->search . '%');
+                });
             })
-            ->orderBy('name')
+            ->orderByDesc('score')
             ->get();
 
-        return view('penguji.nilai.nilaiobservasi', compact('users', 'desa', 'seleksi'
+        return view('penguji.nilai.nilaiobservasi', compact(
+            'results',
+            'desa',
+            'seleksi'
         ))->with([
-            'seleksiHash' => $seleksiHashForForm,
-            'desaHash'    => $desaHashForForm,
+            'seleksiHash' => Hashids::encode($seleksi->id),
+            'desaHash'    => Hashids::encode($desa->id),
         ]);
     }
 
@@ -163,13 +105,10 @@ class OrbControl extends Controller
         $tempDir = storage_path('app/temp_images/' . uniqid());
 
         try {
-
-            // Buat folder temp
             if (!is_dir($tempDir)) {
                 mkdir($tempDir, 0755, true);
             }
 
-            // Extract ZIP jika ada
             if ($request->hasFile('zip')) {
                 $zip = new \ZipArchive;
                 if ($zip->open($request->file('zip')->getRealPath()) === true) {
@@ -180,14 +119,25 @@ class OrbControl extends Controller
                 }
             }
 
-            // Import Excel
+            // ⬇️ IMPORT
             Excel::import(
                 new OrbQuestionImport($tempDir),
                 $request->file('excel')
             );
 
-            // Bersihkan folder temp
             $this->deleteDirectory($tempDir);
+
+            // 🔐 LOG AKTIVITAS (IMPORT)
+            activity_log(
+                'import',
+                'Import soal ORB melalui Excel',
+                null,
+                null,
+                [
+                    'file' => $request->file('excel')->getClientOriginalName(),
+                    'with_images' => $request->hasFile('zip')
+                ]
+            );
 
             return back()->with('success', 'Soal Observasi berhasil diimport');
 
@@ -206,6 +156,7 @@ class OrbControl extends Controller
     }
 
 
+
     protected function deleteDirectory(string $dir): void
     {
         if (!file_exists($dir)) return;
@@ -221,5 +172,200 @@ class OrbControl extends Controller
         }
 
         rmdir($dir);
+    }
+
+    public function create()
+    {
+        return view('penguji.tambahsoal.tambahorb'); // sesuaikan path blade
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'subject'        => 'required|string|max:100',
+            'pertanyaan'     => 'required|string',
+            'image'          => 'nullable|image|max:2048',
+
+            'options'                    => 'required|array|size:5',
+            'options.*.label'            => 'required|in:A,B,C,D,E',
+            'options.*.opsi_tulisan'     => 'required|string',
+            'options.*.point'            => 'required|integer|between:1,5',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $imagePath = null;
+
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')
+                    ->store('Observasi/' . strtolower($request->subject), 'public');
+            }
+
+            $question = OrbQuest::create([
+                'subject'    => $request->subject,
+                'pertanyaan' => $request->pertanyaan,
+                'image_path' => $imagePath,
+            ]);
+
+            foreach ($request->options as $opt) {
+                OrbOption::create([
+                    'id_orb'       => $question->id,
+                    'label'        => $opt['label'],
+                    'opsi_tulisan' => $opt['opsi_tulisan'],
+                    'point'        => $opt['point'],
+                ]);
+            }
+
+            DB::commit();
+
+            // 🔐 LOG AKTIVITAS (AMAN)
+            activity_log(
+                'Store',
+                'Menambah Data Soal Orb',
+                $question,
+                null,
+                collect($question)->toArray()
+            );
+
+            return redirect()
+                ->route('addorb')
+                ->with('success', 'Soal Observasi berhasil ditambahkan');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            return back()->withInput()->withErrors([
+                'error' => 'Gagal menyimpan soal: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function editobservasi(string $hashWWN)
+    {
+
+        $decoded = Hashids::decode($hashWWN);
+
+        if (empty($decoded)) {
+            abort(404);
+        }
+
+        $id = $decoded[0];
+
+        $question = OrbQuest::with('options')->findOrFail($id);
+
+        $labels = ['A','B','C','D','E'];
+
+        foreach ($labels as $label) {
+            if (!$question->options->firstWhere('label', $label)) {
+                $question->options->push(
+                    new OrbOption([
+                        'label' => $label,
+                        'opsi_tulisan' => '',
+                        'point' => 1,
+                    ])
+                );
+            }
+        }
+
+        return view('penguji.updatesoal.updateORB', [
+            'question'    => $question,
+           
+        ]);
+
+    }
+
+    public function updateobservasi(Request $request, $id)
+    {
+        $question = OrbQuest::findOrFail($id);
+
+        $request->validate([
+            'subject'      => 'required|string',
+            'pertanyaan'   => 'required|string',
+            'image'        => 'nullable|image|max:2048',
+
+            'options'              => 'required|array|size:5',
+            'options.*.id'         => 'nullable|exists:orb_options,id',
+            'options.*.label'      => 'required|in:A,B,C,D,E',
+            'options.*.opsi'       => 'required|string',
+            'options.*.point'      => 'required|integer|min:1|max:5',
+        ]);
+
+        
+        $imagePath = $question->image_path;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')
+                ->store('Observasi/' . strtolower($request->subject), 'public');
+        }
+
+        
+        $question->update([
+            'subject'     => $request->subject,
+            'pertanyaan'  => $request->pertanyaan,
+            'image_path'  => $imagePath,
+        ]);
+
+        
+        foreach ($request->options as $opt) {
+            OrbOption::updateOrCreate(
+                [
+                    'id' => $opt['id'] ?? null,
+                ],
+                [
+                    'id_orb'      => $question->id,
+                    'label'        => $opt['label'],
+                    'opsi_tulisan' => $opt['opsi'],
+                    'point'        => $opt['point'],
+                ]
+            );
+        }
+
+        // 🔐 LOG AKTIVITAS (AMAN)
+            activity_log(
+                'Update',
+                'Mengubah Data Soal Orb',
+                $question,
+                null,
+                collect($question)->toArray()
+            );
+
+        
+
+        return redirect()
+            ->route('addorb')
+            ->with('success', 'Soal wawancara berhasil diperbarui');
+    }
+
+    public function multiDelete(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*'=> 'exists:orb_quests,id'
+        ]);
+
+        // 🔁 SIMPAN DATA SEBELUM DIHAPUS (RINGKAS)
+        $count = OrbQuest::whereIn('id', $request->ids)->count();
+
+        DB::transaction(function () use ($request) {
+            OrbQuest::whereIn('id', $request->ids)->delete();
+        });
+
+        // 🔐 LOG AKTIVITAS (BULK DELETE)
+        activity_log(
+            'delete',
+            'Menghapus beberapa soal ORB',
+            null,
+            [
+                'total_deleted' => $count,
+                'ids' => $request->ids
+            ],
+            null
+        );
+
+        return back()->with('success', 'Soal terpilih berhasil dihapus');
     }
 }

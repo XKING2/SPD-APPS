@@ -38,14 +38,17 @@
                     </thead>
                     <tbody>
 
-                        @forelse ($users as $user)
+                        @forelse ($results as $result)
+                            @php
+                                $user = $result->user;
+                                $userHash = Hashids::encode($user->id);
+                            @endphp
+
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $user->no_peserta ?? $user->id }}</td>
+                                <td>{{ $result->no_peserta ?? $user->id }}</td>
                                 <td class="text-left">{{ $user->name }}</td>
-                                <td class="text-center">
-                                    {{ $user->score_raw ?? '-' }}
-                                </td>
+                                <td>{{ $result->score }}</td>
                             </tr>
                         @empty
                             <tr>

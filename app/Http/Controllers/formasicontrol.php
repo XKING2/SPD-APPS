@@ -18,11 +18,20 @@ class formasicontrol extends Controller
 
         $seleksi = Seleksi::findOrFail($request->id_seleksi);
 
-        Formasi::create([
+        $formasi = Formasi::create([
             'id_seleksi' => $seleksi->id,
             'id_desas'   => $seleksi->id_desas,
             'tahun'      => $seleksi->tahun,
         ]);
+
+        // 🔐 LOG AKTIVITAS (AMAN)
+        activity_log(
+            'Store',
+            'Menambah Data user',
+            $formasi,
+            null,
+            collect($formasi)->toArray()
+        );
 
 
 
@@ -58,6 +67,14 @@ class formasicontrol extends Controller
             'jumlah'       => $request->jumlah,
             'tahun'        => $formasi->tahun,
         ]);
+
+        activity_log(
+            'Store',
+            'Menambah data Kebutuhan Formasi',
+            $formasi,
+            null,
+            collect($formasi)->toArray()
+        );
         
 
         return back()->with('success', 'Kebutuhan berhasil ditambahkan');

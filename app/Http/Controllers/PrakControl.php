@@ -81,6 +81,7 @@ class PrakControl extends Controller
             ResultExam::updateOrCreate(
                 [
                     'user_id'    => $user->id,
+                    'id_seleksi'    => $seleksi->id,
                     'type'       => 'PRAK',
                 ],
                 [
@@ -110,12 +111,11 @@ class PrakControl extends Controller
             );
         });
 
-        // 🔁 Redirect BALIK ke list user desa + seleksi
         return redirect()->route(
             'showpraktik',
             [
-                'seleksi' => $seleksi->id,
-                'desa'    => $user->id_desas,
+                'seleksiHash' => Hashids::encode($seleksi->id),
+                'desaHash'    => Hashids::encode($user->id_desas),
             ]
         )->with('success', 'Nilai praktik berhasil disimpan.');
     }
@@ -142,8 +142,8 @@ class PrakControl extends Controller
             ->where('id_desas', $desaId)
             ->firstOrFail();
 
-        // Ambil user berdasarkan desa
         $users = User::where('id_desas', $desaId)
+            ->where('role', 'users') // ✅ hanya user biasa
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%');
             })

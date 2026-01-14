@@ -13,7 +13,7 @@
 
 <body>
     <div class="login-box text-center">
-        <img src="{{ asset('images/Logo1.png') }}" class="logo" alt="Logo">
+        <img src="{{ asset('images/logo1.png') }}" class="logo" alt="Logo">
         <h4 class="fw-bold">Si SSD</h4>
 
         <form method="POST" action="{{ route('login.post') }}">

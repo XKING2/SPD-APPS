@@ -6,12 +6,13 @@
 
 @section('content')
 <div class="container-fluid">
-        
+
     <form id="multiDeleteForm"
           action="{{ route('orb.multiDelete') }}"
           method="POST">
         @csrf
         @method('DELETE')
+
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">Data Soal Observasi</h6>
@@ -24,8 +25,8 @@
                         <i class="fas fa-trash"></i> Hapus Terpilih
                     </button>
 
-                    <button class="btn btn-primary"
-                            type="button"
+                    <button type="button"
+                            class="btn btn-primary"
                             data-toggle="modal"
                             data-target="#importSoalModal">
                         <i class="fas fa-file-import"></i> Tambah Soal Via Excel
@@ -34,7 +35,6 @@
                     <a href="{{ route('createORB') }}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Tambah Soal
                     </a>
-
                 </div>
             </div>
 
@@ -48,6 +48,7 @@
                                 </th>
                                 <th width="50">No</th>
                                 <th>Subject</th>
+                                <th>Aspek</th>
                                 <th>Pertanyaan</th>
                                 <th width="180">Aksi</th>
                             </tr>
@@ -55,30 +56,29 @@
                         <tbody>
                             @forelse ($questions as $index => $item)
                                 <tr>
-                                    <td class="text-center">
+                                    <td>
                                         <input type="checkbox"
-                                            name="ids[]"
-                                            value="{{ $item->id }}"
-                                            class="checkItem">
+                                               name="ids[]"
+                                               value="{{ $item->id }}"
+                                               class="checkItem">
                                     </td>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->subject }}</td>
+                                    <td>{{ $item->subject_penilaian }}</td>
                                     <td class="text-start">
                                         {{ Str::limit($item->pertanyaan, 80) }}
                                     </td>
                                     <td>
                                         <a href="{{ route('orb.edit', Hashids::encode($item->id)) }}"
-                                            class="btn btn-sm btn-success btn-edit-orb"
-                                            data-url="{{ route('orb.edit', Hashids::encode($item->id)) }}">
-                                                <i class="fas fa-edit"></i>
+                                           class="btn btn-sm btn-success btn-edit-orb"
+                                           data-url="{{ route('orb.edit', Hashids::encode($item->id)) }}">
+                                            <i class="fas fa-edit"></i>
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">
-                                        Data soal belum tersedia
-                                    </td>
+                                    <td colspan="6">Data soal belum tersedia</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -86,65 +86,63 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="modal fade" id="importSoalModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <form method="POST"
-                action="{{route('orb-questions.import')}}"
-                enctype="multipart/form-data"
-                class="modal-content">
-
-                @csrf
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Import Soal TPU</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-
-                    <h6 class="mb-3 text-primary">Import Soal</h6>
-
-                    <div class="form-group">
-                        <label>File Excel Soal <span class="text-danger">*</span></label>
-                        <input type="file"
-                            name="excel"
-                            class="form-control"
-                            required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>ZIP Gambar (Opsional)</label>
-                        <input type="file"
-                            name="zip"
-                            class="form-control">
-                    </div>
-
-                    <small class="text-muted">
-                        Nama file gambar di ZIP harus sama dengan kolom
-                        <code>image_name</code> di Excel.
-                    </small>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-file-import"></i> Import Soal
-                    </button>
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-dismiss="modal">
-                        Batal
-                    </button>
-                </div>
-
-            </form>
-        </div>
     </form>
 </div>
+
+
+   <div class="modal fade" id="importSoalModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form method="POST"
+              action="{{ route('orb-questions.import') }}"
+              enctype="multipart/form-data"
+              class="modal-content">
+
+            @csrf
+
+            <div class="modal-header">
+                <h5 class="modal-title">Import Soal Observasi</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>File Excel Soal <span class="text-danger">*</span></label>
+                    <input type="file"
+                           name="excel"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>ZIP Gambar (Opsional)</label>
+                    <input type="file"
+                           name="zip"
+                           class="form-control">
+                </div>
+
+                <small class="text-muted">
+                    Nama file gambar di ZIP harus sama dengan kolom
+                    <code>image_name</code> di Excel.
+                </small>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-file-import"></i> Import
+                </button>
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal">
+                    Batal
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

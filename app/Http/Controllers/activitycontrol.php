@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\Desas;
 use Illuminate\Http\Request;
 
 class activitycontrol extends Controller
@@ -15,4 +16,6 @@ class activitycontrol extends Controller
 
         return view('penguji.activityindex', compact('logs'));
     }
+
+    
 }

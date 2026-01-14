@@ -71,6 +71,7 @@ class OrbQuestionImport implements  ToCollection, WithHeadingRow, SkipsEmptyRows
                  * ===================== */
                 $question = OrbQuest::create([
                     'subject'    => trim($row['subject']),
+                    'subject_penilaian'    => trim($row['subject_penilaian']),
                     'pertanyaan' => trim($row['pertanyaan']),
                     'image_path' => $imagePath,
                 ]);

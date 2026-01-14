@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <title>Sistem Si SSD - Login</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo1.png') }}">
+    
+    <!-- Session Alerts -->
     @if(session('success'))
         <meta name="alert-success" content="{{ session('success') }}">
     @endif
-    
     @if(session('error'))
         <meta name="alert-error" content="{{ session('error') }}">
     @endif
-    
     @if(session('warning'))
         <meta name="alert-warning" content="{{ session('warning') }}">
     @endif
-    
     @if(session('info'))
         <meta name="alert-info" content="{{ session('info') }}">
     @endif
 
     <title>Seleksi Perangkat Desa</title>
 
-    <!-- Custom fonts for this template-->
+    <!-- Custom fonts -->
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-    <!-- Custom styles for this template-->
+    <!-- Custom styles -->
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/footer.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/main.css') }}" rel="stylesheet">
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('css/penguji.css') }}" rel="stylesheet">
     <link href="{{ asset('css/Sawpage.css') }}" rel="stylesheet">
@@ -43,6 +40,9 @@
     <link href="{{ asset('css/examsedit.css') }}" rel="stylesheet">
     <link href="{{ asset('css/tambahTPU.css') }}" rel="stylesheet">
     <link href="{{ asset('css/tambahwwn.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/fix-white-line.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/responsive.css') }}" rel="stylesheet">
+    
     <style>
         .status-label {
             font-size: 0.85rem;
@@ -50,31 +50,47 @@
             margin-left: 10px;
             white-space: nowrap;
         }
+        
+        /* Loading overlay */
+        .loading::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: none;
+        }
+        
+        body.loading::before {
+            display: block;
+        }
     </style>
-
-
 </head>
 
 <body id="page-top">
-
     <!-- Page Wrapper -->
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion position-fixed" id="accordionSidebar">
-           <a class="sidebar-brand d-flex align-items-center px-3" 
-                href="{{ route('pengujidashboard') }}" style="gap: 12px;">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center px-3" 
+               href="{{ route('pengujidashboard') }}" style="gap: 12px;">
                 <div class="sidebar-brand-icon d-flex align-items-center justify-content-center"
-                    style="width: 40px; height: 40px; border-radius: 12px; overflow: hidden;">
-                    <img src="{{ asset('images/logo1.png') }}" alt="Logo E-SPJ" style="width:100%; height:100%; object-fit:cover;">
+                     style="width: 40px; height: 40px; border-radius: 12px; overflow: hidden;">
+                    <img src="{{ asset('images/logo1.png') }}" alt="Logo E-SPJ" 
+                         style="width:100%; height:100%; object-fit:cover;">
                 </div>
-
                 <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
                     Si SSD
                 </div>
             </a>
+            
             <hr class="sidebar-divider my-0">
 
+            <!-- Dashboard -->
             <li class="nav-item {{ Request::routeIs('pengujidashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('pengujidashboard') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -82,65 +98,77 @@
                 </a>
             </li>
 
+            <!-- Data User -->
             <li class="nav-item {{ Request::routeIs('datauser') || Request::routeIs('user.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('datauser') }}">
-                    <i class="fas fa-user "></i>
+                    <i class="fas fa-user"></i>
                     <span>Data User</span>
                 </a>
             </li>
 
+            <!-- Tambah Seleksi -->
             <li class="nav-item {{ Request::routeIs('addseleksi') || Request::routeIs('seleksi.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addseleksi') }}">
-                    <i class="fas fa-file-alt "></i>
+                    <i class="fas fa-file-alt"></i>
                     <span>Tambah Seleksi</span>
                 </a>
             </li>
 
+            <!-- Tambah Ujian -->
             <li class="nav-item {{ Request::routeIs('addexams') || Request::routeIs('exam.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addexams') }}">
                     <i class="fas fa-file-alt"></i>
-                    <span>Tambah Ujian </span>
+                    <span>Tambah Ujian</span>
                 </a>
             </li>
 
+            <!-- Nilai Ujian -->
             <li class="nav-item {{ Request::routeIs('showtpuMain') || Request::routeIs('showtpu') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBeritaAcara"
-                    aria-expanded="{{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'true' : 'false' }}"
-                    aria-controls="collapseBeritaAcara">
+                   aria-expanded="{{ Request::routeIs('showtpuMain') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'true' : 'false' }}"
+                   aria-controls="collapseBeritaAcara">
                     <i class="fas fa-fw fa-file-alt"></i>
                     <span>Nilai Ujian</span>
                 </a>
                 <div id="collapseBeritaAcara"
-                    class="collapse {{ Request::routeIs('showtpuMain') || Request::routeIs('showtpu') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'show' : '' }}"
-                    aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
+                     class="collapse {{ Request::routeIs('showtpuMain') || Request::routeIs('showtpu') || Request::routeIs('showWwnMain') || Request::routeIs('showPrakMain') || Request::routeIs('showOrbMain') ? 'show' : '' }}"
+                     aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Request::routeIs('showtpuMain') ? 'active' : '' }}" href="{{ route('showtpuMain') }}">TPU</a>
-                        <a class="collapse-item {{ Request::routeIs('showPrakMain') ? 'active' : '' }}" href="{{ route('showPrakMain') }}">Praktik</a>
-                        <a class="collapse-item {{ Request::routeIs('showWwnMain') ? 'active' : '' }}" href="{{ route('showWwnMain') }}">Wawancara</a>
-                        <a class="collapse-item {{ Request::routeIs('showOrbMain') ? 'active' : '' }}" href="{{ route('showOrbMain') }}">Observasi</a>
+                        <a class="collapse-item {{ Request::routeIs('showtpuMain') ? 'active' : '' }}" 
+                           href="{{ route('showtpuMain') }}">TPU</a>
+                        <a class="collapse-item {{ Request::routeIs('showPrakMain') ? 'active' : '' }}" 
+                           href="{{ route('showPrakMain') }}">Praktik</a>
+                        <a class="collapse-item {{ Request::routeIs('showWwnMain') ? 'active' : '' }}" 
+                           href="{{ route('showWwnMain') }}">Wawancara</a>
+                        <a class="collapse-item {{ Request::routeIs('showOrbMain') ? 'active' : '' }}" 
+                           href="{{ route('showOrbMain') }}">TKP</a>
                     </div>
                 </div>
-             </li>
+            </li>
 
-
-             <li class="nav-item {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'active' : '' }}">
+            <!-- Tambah Soal -->
+            <li class="nav-item {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTambahSoal"
-                    aria-expanded="{{ Request::routeIs('addTPU') || Request::routeIs('addWWN')  || Request::routeIs('addorb') ? 'true' : 'false' }}"
-                    aria-controls="collapseTambahSoal">
+                   aria-expanded="{{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'true' : 'false' }}"
+                   aria-controls="collapseTambahSoal">
                     <i class="fas fa-fw fa-file-alt"></i>
                     <span>Tambah Soal</span>
                 </a>
                 <div id="collapseTambahSoal"
-                    class="collapse {{ Request::routeIs('addTPU') || Request::routeIs('addWWN')  || Request::routeIs('addorb')? 'show' : '' }}"
-                    aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
+                     class="collapse {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'show' : '' }}"
+                     aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Request::routeIs('addTPU') ? 'active' : '' }}" href="{{ route('addTPU') }}">TPU</a>
-                        <a class="collapse-item {{ Request::routeIs('addWWN') ? 'active' : '' }}" href="{{ route('addWWN') }}">Wawancara</a>
-                        <a class="collapse-item {{ Request::routeIs('addorb') ? 'active' : '' }}" href="{{ route('addorb') }}">Observasi</a>
+                        <a class="collapse-item {{ Request::routeIs('addTPU') ? 'active' : '' }}" 
+                           href="{{ route('addTPU') }}">TPU</a>
+                        <a class="collapse-item {{ Request::routeIs('addWWN') ? 'active' : '' }}" 
+                           href="{{ route('addWWN') }}">Wawancara</a>
+                        <a class="collapse-item {{ Request::routeIs('addorb') ? 'active' : '' }}" 
+                           href="{{ route('addorb') }}">TKP</a>
                     </div>
                 </div>
-             </li>
+            </li>
 
+            <!-- Generate Perengkingan -->
             <li class="nav-item {{ Request::routeIs('generate.page') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('generate.page') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -148,30 +176,41 @@
                 </a>
             </li>
 
+            <!-- Download Hasil -->
+            <li class="nav-item {{ Request::routeIs('downloadindex') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('downloadindex') }}">
+                    <i class="fas fa-fw fa-download"></i>
+                    <span>Download Hasil</span>
+                </a>
+            </li>
+
+            <!-- Log Kegiatan -->
             <li class="nav-item {{ Request::routeIs('activityindex') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('activityindex') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-fw fa-history"></i>
                     <span>Log Kegiatan</span>
                 </a>
             </li>
 
-
             <hr class="sidebar-divider d-none d-md-block">
         </ul>
+        <!-- End of Sidebar -->
 
+        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
+                <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
 
                     <!-- Topbar Search -->
-                    <form
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
-                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                                aria-label="Search" aria-describedby="basic-addon2">
+                            <input type="text" class="form-control bg-light border-0 small" 
+                                   placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" type="button">
                                     <i class="fas fa-search fa-sm"></i>
@@ -182,21 +221,18 @@
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-search fa-fw"></i>
                             </a>
-                            <!-- Dropdown - Messages -->
                             <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
+                                 aria-labelledby="searchDropdown">
                                 <form class="form-inline mr-auto w-100 navbar-search">
                                     <div class="input-group">
                                         <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
+                                               placeholder="Search for..." aria-label="Search">
                                         <div class="input-group-append">
                                             <button class="btn btn-primary" type="button">
                                                 <i class="fas fa-search fa-sm"></i>
@@ -210,17 +246,13 @@
                         <!-- Nav Item - Alerts -->
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
-                                <!-- Counter - Alerts -->
                                 <span class="badge badge-danger badge-counter">3+</span>
                             </a>
-                            <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">
-                                    Alerts Center
-                                </h6>
+                                 aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">Alerts Center</h6>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-primary">
@@ -229,50 +261,26 @@
                                     </div>
                                     <div>
                                         <div class="small text-gray-500">December 12, 2019</div>
-                                        <span class="font-weight-bold">A new monthly report is ready to download!</span>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-success">
-                                            <i class="fas fa-donate text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 7, 2019</div>
-                                        $290.29 has been deposited into your account!
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-warning">
-                                            <i class="fas fa-exclamation-triangle text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 2, 2019</div>
-                                        Spending Alert: We've noticed unusually high spending for your account.
+                                        <span class="font-weight-bold">A new monthly report is ready!</span>
                                     </div>
                                 </a>
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
                             </div>
                         </li>
 
-                        
-
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name ?? 'User' }}</span>
-                                <img class="img-profile rounded-circle"
-                                    src="{{ asset('images/logo1.png') }}">
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                    {{ Auth::user()->name ?? 'User' }}
+                                </span>
+                                <img class="img-profile rounded-circle" src="{{ asset('images/logo1.png') }}">
                             </a>
-                            <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
+                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
@@ -286,22 +294,21 @@
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{route('logout')}}" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="{{route('logout')}}" 
+                                   data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
                             </div>
                         </li>
-
                     </ul>
-
                 </nav>
+                <!-- End of Topbar -->
 
+                <!-- Begin Page Content -->
                 <div class="container-fluid">
-
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         @yield('pageheads')
-                    
                     </div>
 
                     <div class="row">
@@ -309,14 +316,12 @@
                             @yield('content')
                         </div>
                     </div>
-
-                           
                 </div>
+                <!-- End of Page Content -->
             </div>
-        </div>
+            <!-- End of Main Content -->
 
-    </div>
-
+            <!-- Footer -->
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
@@ -324,17 +329,20 @@
                     </div>
                 </div>
             </footer>
-
+            <!-- End of Footer -->
         </div>
-
+        <!-- End of Content Wrapper -->
     </div>
+    <!-- End of Page Wrapper -->
 
+    <!-- Scroll to Top Button -->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -355,14 +363,15 @@
         </div>
     </div>
 
-     
+    <!-- Bootstrap core JavaScript -->
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+    
+    <!-- Custom scripts -->
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script src="{{ asset('js/sweetalert-handler.js') }}"></script>
-
+    <script src="{{ asset('js/responsive.js') }}"></script>
 </body>
-
 </html>

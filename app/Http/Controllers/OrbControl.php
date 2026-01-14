@@ -182,15 +182,18 @@ class OrbControl extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'subject'        => 'required|string|max:100',
-            'pertanyaan'     => 'required|string',
-            'image'          => 'nullable|image|max:2048',
+            'subject'                    => 'required|string|max:100',
+            'subject_penilaian'          => 'required|string|max:100',
+            'pertanyaan'                 => 'required|string',
+            'image'                      => 'nullable|image|max:2048',
 
             'options'                    => 'required|array|size:5',
             'options.*.label'            => 'required|in:A,B,C,D,E',
             'options.*.opsi_tulisan'     => 'required|string',
             'options.*.point'            => 'required|integer|between:1,5',
         ]);
+
+
 
         DB::beginTransaction();
 
@@ -204,6 +207,7 @@ class OrbControl extends Controller
 
             $question = OrbQuest::create([
                 'subject'    => $request->subject,
+                'subject_penilaian' => $request->subject_penilaian,
                 'pertanyaan' => $request->pertanyaan,
                 'image_path' => $imagePath,
             ]);
@@ -344,7 +348,7 @@ class OrbControl extends Controller
     {
         $request->validate([
             'ids'   => 'required|array',
-            'ids.*'=> 'exists:orb_quests,id'
+            'ids.*'=> 'exists:orb_questions,id'
         ]);
 
         // 🔁 SIMPAN DATA SEBELUM DIHAPUS (RINGKAS)

@@ -22,6 +22,7 @@ return new class extends Migration
         Schema::create('orb_questions', function (Blueprint $table) {
             $table->id();
             $table->string('subject');
+            $table->string('subject_penilaian');
             $table->text('pertanyaan');
             $table->string('image_path')->nullable();
             $table->timestamps();

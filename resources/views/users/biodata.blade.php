@@ -26,7 +26,17 @@
     @if($biodata)
         <div class="alert-exists">
             <i class="fas fa-info-circle"></i>
-            <span>Anda sudah mengupload biodata sebelumnya</span>
+
+            @if($biodata->status === 'valid')
+                <span class="text-success fw-semibold">
+                    Biodata anda sudah valid, jangan ganti data anda
+                </span>
+            @else
+                <span>
+                    Anda sudah mengupload biodata sebelumnya
+                </span>
+            @endif
+
         </div>
     @endif
 
@@ -81,12 +91,14 @@
                         <input type="file" name="kartu_keluarga" class="form-control" accept="image/*">
                         
                         <div class="upload-info">
-                            <a href="{{ $kk ? asset('storage/'.$kk) : '#' }}"
-                               class="btn-preview {{ $kk ? '' : 'disabled' }}" 
-                               target="_blank">
-                                <i class="fas fa-eye"></i>
+                            <button type="button"
+                                class="btn-preview {{ $kk ? '' : 'disabled' }}"
+                                data-url="{{ $kk ? asset('storage/'.$kk) : '' }}"
+                                onclick="openPreview(this)"
+                                {{ $kk ? '' : 'disabled' }}>
                                 Lihat Preview KK
-                            </a>
+                            </button>
+
                             <span class="status-badge {{ optional($biodata)->kartu_keluarga ? 'uploaded' : 'not-uploaded' }}">
                                 {{ optional($biodata)->kartu_keluarga ? '✓ Sudah upload' : '✗ Belum upload' }}
                             </span>
@@ -102,12 +114,15 @@
                         <input type="file" name="ktp" class="form-control" accept="image/*">
                         
                         <div class="upload-info">
-                            <a href="{{ $ktp ? asset('storage/'.$ktp) : '#' }}"
-                               class="btn-preview {{ $ktp ? '' : 'disabled' }}" 
-                               target="_blank">
+                            <button type="button"
+                                class="btn-preview {{ $ktp ? '' : 'disabled' }}"
+                                data-url="{{ $ktp ? asset('storage/'.$ktp) : '' }}"
+                                onclick="openPreview(this)"
+                                {{ $ktp ? '' : 'disabled' }}>
                                 <i class="fas fa-eye"></i>
                                 Lihat Preview KTP
-                            </a>
+                            </button>
+        
                             <span class="status-badge {{ optional($biodata)->ktp ? 'uploaded' : 'not-uploaded' }}">
                                 {{ optional($biodata)->ktp ? '✓ Sudah upload' : '✗ Belum upload' }}
                             </span>
@@ -121,14 +136,18 @@
                             Surat Pendaftaran
                         </label>
                         <input type="file" name="surat_pendaftaran" class="form-control" accept="application/pdf">
+
+                        
                         
                         <div class="upload-info">
-                            <a href="{{ $suratPendaftaran ? asset('storage/'.$suratPendaftaran) : '#' }}"
-                               class="btn-preview {{ $suratPendaftaran ? '' : 'disabled' }}" 
-                               target="_blank">
-                                <i class="fas fa-file-pdf"></i>
-                                Lihat Surat Pendaftaran
-                            </a>
+                           <button type="button"
+                                class="btn-preview {{ $suratPendaftaran ? '' : 'disabled' }}"
+                                data-url="{{ $suratPendaftaran ? asset('storage/'.$suratPendaftaran) : '' }}"
+                                onclick="openPreview(this)"
+                                {{ $suratPendaftaran ? '' : 'disabled' }}>
+                                <i class="fas fa-eye"></i>
+                                Lihat Preview Surat Lamaran
+                            </button>
                             <span class="status-badge {{ optional($biodata)->surat_pendaftaran ? 'uploaded' : 'not-uploaded' }}">
                                 {{ optional($biodata)->surat_pendaftaran ? '✓ Sudah upload' : '✗ Belum upload' }}
                             </span>
@@ -152,13 +171,18 @@
                         </label>
                         <input type="file" name="ijazah" class="form-control" accept="image/*">
                         
+                        
                         <div class="upload-info">
-                            <a href="{{ $ijazah ? asset('storage/'.$ijazah) : '#' }}"
-                               class="btn-preview {{ $ijazah ? '' : 'disabled' }}" 
-                               target="_blank">
+                            
+                            <button type="button"
+                                class="btn-preview {{ $ijazah ? '' : 'disabled' }}"
+                                data-url="{{ $ijazah ? asset('storage/'.$ijazah) : '' }}"
+                                onclick="openPreview(this)"
+                                {{ $ijazah ? '' : 'disabled' }}>
                                 <i class="fas fa-eye"></i>
                                 Lihat Preview Ijazah
-                            </a>
+                            </button>
+      
                             <span class="status-badge {{ optional($biodata)->ijazah ? 'uploaded' : 'not-uploaded' }}">
                                 {{ optional($biodata)->ijazah ? '✓ Sudah upload' : '✗ Belum upload' }}
                             </span>
@@ -174,12 +198,14 @@
                         <input type="file" name="cv" class="form-control" accept="application/pdf">
                         
                         <div class="upload-info">
-                            <a href="{{ $cv ? asset('storage/'.$cv) : '#' }}"
-                               class="btn-preview {{ $cv ? '' : 'disabled' }}" 
-                               target="_blank">
-                                <i class="fas fa-file-pdf"></i>
+                            <button type="button"
+                                class="btn-preview {{ $cv ? '' : 'disabled' }}"
+                                data-url="{{ $cv ? asset('storage/'.$cv) : '' }}"
+                                onclick="openPreview(this)"
+                                {{ $cv ? '' : 'disabled' }}>
+                                <i class="fas fa-eye"></i>
                                 Lihat Preview CV
-                            </a>
+                            </button>
                             <span class="status-badge {{ optional($biodata)->cv ? 'uploaded' : 'not-uploaded' }}">
                                 {{ optional($biodata)->cv ? '✓ Sudah upload' : '✗ Belum upload' }}
                             </span>
@@ -231,15 +257,37 @@
             <!-- FORM ACTIONS -->
             <div class="form-actions">
                 @if($biodata)
-                        <a href="{{ route('biodata.update') }}" class="btn-update-biodata">
+                    @if($biodata->status === 'valid')
+                        <button class="btn-update-biodata disabled"
+                                type="button"
+                                style="pointer-events: none; opacity: .6;"
+                                title="Biodata sudah divalidasi dan tidak bisa diubah">
+                            <i class="fas fa-lock me-1"></i>
+                            Biodata Sudah Valid
+                        </button>
+                    @else
+                        <a href="{{ route('edit.biodata', Hashids::encode($biodata->id)) }}"
+                        class="btn-update-biodata">
                             <i class="fas fa-edit"></i>
                             Lanjut Update Biodata
                         </a>
+                    @endif
+
+                    {{-- 🔒 SIMPAN DATA DI-DISABLE --}}
+                    <button type="button"
+                            class="btn-submit disabled"
+                            style="pointer-events: none; opacity: .6;"
+                            title="Anda sudah memiliki biodata, silakan update data">
+                        <i class="fas fa-ban"></i>
+                        Simpan Data
+                    </button>
+                @else
+                    {{-- ✅ USER BELUM PUNYA BIODATA --}}
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-save"></i>
+                        Simpan Data
+                    </button>
                 @endif
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-save"></i>
-                    Simpan Data
-                </button>
             </div>
 
         </div>
@@ -247,6 +295,68 @@
     </form>
 
 </div>
+
+<!-- MODAL PREVIEW -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>Preview Dokumen
+                </h5>
+                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                </button>
+            </div>
+
+            <div class="modal-body text-center">
+                <img id="modalImage" class="img-fluid d-none" style="max-height:80vh;">
+                <iframe id="modalPdf" class="d-none" width="100%" height="600"></iframe>
+
+                <div id="modalEmpty" class="d-none text-muted">
+                    <i class="fas fa-file-times fa-3x mb-3"></i>
+                    <p>File tidak tersedia</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function openPreview(button) {
+    const url = button.getAttribute('data-url');
+
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    const img = document.getElementById('modalImage');
+    const pdf = document.getElementById('modalPdf');
+    const empty = document.getElementById('modalEmpty');
+
+    img.classList.add('d-none');
+    pdf.classList.add('d-none');
+    empty.classList.add('d-none');
+
+    if (!url) {
+        empty.classList.remove('d-none');
+        modal.show();
+        return;
+    }
+
+    const ext = url.split('.').pop().toLowerCase();
+
+    if (['jpg','jpeg','png','webp'].includes(ext)) {
+        img.src = url;
+        img.classList.remove('d-none');
+    } else if (ext === 'pdf') {
+        pdf.src = url;
+        pdf.classList.remove('d-none');
+    }
+
+    modal.show();
+}
+</script>
+
+
 
    
 

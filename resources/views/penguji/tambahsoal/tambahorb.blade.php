@@ -43,7 +43,7 @@
                        name="subject"
                        class="form-control @error('subject') is-invalid @enderror"
                        value="{{ old('subject') }}"
-                       placeholder="Contoh: Kepemimpinan, Komunikasi, Teamwork, dll"
+                       placeholder=" Bisa Diketikan ORB"
                        required>
                 @error('subject')
                     <div class="invalid-feedback">
@@ -53,11 +53,33 @@
                 @enderror
             </div>
 
+            <!-- Subject -->
+            <div class="form-section">
+                <label>
+                    <i class="fas fa-book"></i>
+                    Subject Penilaian
+                    <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       name="subject_penilaian"
+                       class="form-control @error('subject_penilaian') is-invalid @enderror"
+                       value="{{ old('subject_penilaian') }}"
+                       placeholder="Contoh: Kepemimpinan/Kopetensi"
+                       required>
+                @error('subject')
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
+
             <!-- Pertanyaan -->
             <div class="form-section">
                 <label>
                     <i class="fas fa-question-circle"></i>
-                    Pertanyaan / Soal Wawancara
+                    Pertanyaan / Soal Observasi
                     <span class="text-danger">*</span>
                 </label>
                 <textarea name="pertanyaan"

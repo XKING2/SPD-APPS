@@ -10,6 +10,7 @@ class OrbQuest extends Model
 
     protected $fillable = [
         'subject',
+        'subject_penilaian',
         'pertanyaan',
         'image_path',
     ];

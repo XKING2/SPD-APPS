@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Imports\ExamQuestionImport;
 use App\Models\Desas;
 use App\Models\ExamOption;
@@ -16,9 +17,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
 use ZipArchive;
 
-class tpuControl extends Controller
+class TpuControl extends Controller
 {
-    public function storeTPU(Request $request)
+        public function storeTPU(Request $request)
     {
         $request->validate([
             'excel' => 'required|file|mimes:xlsx,xls',
@@ -392,7 +393,5 @@ class tpuControl extends Controller
 
         return back()->with('success', 'Soal terpilih berhasil dihapus');
     }
-
-    
 
 }

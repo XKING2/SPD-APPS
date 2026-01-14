@@ -240,10 +240,10 @@ class Authcontroller extends Controller
 
     }
 
-    public function getDesa($kecamatanId)
+    public function getDesa($kecamatan)
     {
         return response()->json(
-            Desas::where('id_kecamatans', $kecamatanId)
+            Desas::where('id_kecamatans', $kecamatan)
                 ->orderBy('nama_desa')
                 ->get()
         );

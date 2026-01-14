@@ -1,0 +1,220 @@
+/* ===================================
+   FIX WHITE LINE BETWEEN SIDEBAR AND CONTENT
+   =================================== */
+
+/* Reset all margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Wrapper fix */
+#wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Sidebar - remove all borders and shadows */
+.sidebar {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-right: 1px solid #e3e6f0 !important;
+    background: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+/* Content wrapper - full width minus sidebar */
+#content-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #f8f9fc;
+    display: flex;
+    flex-direction: column;
+}
+
+/* For desktop - add margin for sidebar */
+@media (min-width: 768px) {
+    .sidebar {
+        width: 14rem; /* 224px */
+    }
+    
+    #content-wrapper {
+        margin-left: 14rem !important;
+        width: calc(100% - 14rem) !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .sidebar {
+        width: 14rem;
+    }
+    
+    #content-wrapper {
+        margin-left: 14rem !important;
+        width: calc(100% - 14rem) !important;
+    }
+}
+
+/* Content area */
+#content {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+}
+
+/* Topbar - remove gaps */
+.topbar {
+    margin: 0 !important;
+    padding: 1rem 1.5rem !important;
+    border: none !important;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+}
+
+/* Container fluid - proper padding */
+.container-fluid {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Footer */
+.sticky-footer {
+    margin: 0 !important;
+    padding: 1rem 0 !important;
+    width: 100%;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+    .sidebar {
+        width: 14rem;
+        position: fixed !important;
+        left: -14rem;
+        transition: left 0.3s ease-in-out;
+        z-index: 1050;
+    }
+    
+    .sidebar.show {
+        left: 0 !important;
+    }
+    
+    #content-wrapper {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+}
+
+/* Prevent horizontal scroll */
+.row {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+}
+
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6,
+.col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
+.col-auto, .col-sm, .col-sm-1, .col-sm-2, .col-sm-3,
+.col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8,
+.col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-md,
+.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5,
+.col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10,
+.col-md-11, .col-md-12, .col-lg, .col-lg-1, .col-lg-2,
+.col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7,
+.col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12,
+.col-xl, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4,
+.col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9,
+.col-xl-10, .col-xl-11, .col-xl-12 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Remove any extra spacing */
+.navbar-nav {
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+/* Sidebar items padding */
+.sidebar .nav-item .nav-link {
+    padding: 1rem;
+}
+
+.sidebar .sidebar-brand {
+    padding: 1.5rem 1rem;
+    margin: 0;
+}
+
+/* Additional fixes for specific elements */
+.sidebar-divider {
+    margin: 0 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sidebar .nav-item .collapse,
+.sidebar .nav-item .collapsing {
+    margin: 0;
+}
+
+.sidebar .nav-item .collapse .collapse-inner,
+.sidebar .nav-item .collapsing .collapse-inner {
+    padding: 0.5rem 0;
+    margin: 0;
+}
+
+/* Ensure cards don't create gaps */
+.card {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Fix any Bootstrap default that might cause issues */
+.bg-gradient-primary {
+    background: linear-gradient(180deg, #4e73df 10%, #224abe 100%) !important;
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0.25rem;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}

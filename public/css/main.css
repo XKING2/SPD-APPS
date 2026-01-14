@@ -1,0 +1,493 @@
+/* ===================================
+   RESPONSIVE STYLES FOR DASHBOARD
+   =================================== */
+
+/* Base styles - Mobile First Approach */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Fix white line between sidebar and content */
+#wrapper {
+    overflow-x: hidden;
+}
+
+.sidebar {
+    box-shadow: none !important;
+    border-right: none !important;
+}
+
+#content-wrapper {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Remove any gaps */
+.container-fluid {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Sidebar Responsive */
+@media (max-width: 768px) {
+    /* Hide sidebar by default on mobile */
+    .sidebar {
+        position: fixed !important;
+        left: -250px;
+        transition: left 0.3s ease;
+        z-index: 1050;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .sidebar.show {
+        left: 0 !important;
+    }
+    
+    /* Overlay when sidebar is open */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+    
+    /* Content wrapper full width on mobile */
+    #content-wrapper {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    /* Topbar adjustments */
+    .topbar {
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .topbar .navbar-nav {
+        flex-direction: row;
+    }
+    
+    /* Hide text in topbar on small screens */
+    .topbar .mr-2.d-none.d-lg-inline {
+        display: none !important;
+    }
+    
+    /* Adjust search bar */
+    .navbar-search {
+        display: none !important;
+    }
+    
+    /* Show mobile toggle button */
+    #sidebarToggleTop {
+        display: block !important;
+    }
+    
+    /* Container fluid padding */
+    .container-fluid {
+        padding: 1rem !important;
+    }
+    
+    /* Page heading */
+    .d-sm-flex.align-items-center {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+    
+    /* Cards responsive */
+    .col-xl-3,
+    .col-xl-4,
+    .col-xl-6,
+    .col-xl-8,
+    .col-xl-12 {
+        width: 100% !important;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Table responsive */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        font-size: 0.875rem;
+    }
+    
+    /* Buttons stack on mobile */
+    .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Modal adjustments */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    /* Footer */
+    .footer {
+        padding: 1rem;
+    }
+    
+    /* Dropdown adjustments */
+    .dropdown-menu {
+        position: absolute !important;
+        right: 0;
+        left: auto !important;
+    }
+    
+    /* Alert/notification badges */
+    .badge-counter {
+        font-size: 0.6rem;
+    }
+}
+
+/* Tablet Portrait (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .sidebar {
+        width: 200px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+    }
+    
+    #content-wrapper {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+    }
+    
+    .sidebar-brand-text {
+        font-size: 1rem !important;
+    }
+    
+    .nav-link span {
+        font-size: 0.9rem;
+    }
+    
+    /* Cards in 2 columns */
+    .col-xl-3,
+    .col-xl-4 {
+        width: 50% !important;
+    }
+    
+    .col-xl-6 {
+        width: 50% !important;
+    }
+    
+    .col-xl-8 {
+        width: 66.666% !important;
+    }
+    
+    .container-fluid {
+        padding: 1.5rem !important;
+    }
+}
+
+/* Tablet Landscape & Small Desktop (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .sidebar {
+        width: 220px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+    }
+    
+    #content-wrapper {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+    }
+    
+    /* Cards in proper columns */
+    .col-xl-3 {
+        width: 25% !important;
+    }
+    
+    .col-xl-4 {
+        width: 33.333% !important;
+    }
+    
+    .col-xl-6 {
+        width: 50% !important;
+    }
+    
+    .col-xl-8 {
+        width: 66.666% !important;
+    }
+}
+
+/* Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+    .sidebar {
+        width: 250px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+    }
+    
+    #content-wrapper {
+        margin-left: 250px;
+        width: calc(100% - 250px);
+    }
+    
+    .container-fluid {
+        max-width: 100%;
+        margin: 0;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* Extra Large Desktop (1400px+) */
+@media (min-width: 1400px) {
+    .container-fluid {
+        max-width: 100%;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* ===================================
+   FIX WHITE LINE ISSUE
+   =================================== */
+
+/* Remove any default margins and paddings that cause white lines */
+.sidebar {
+    margin: 0 !important;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#content-wrapper {
+    padding: 0;
+    margin: 0;
+    background-color: #f8f9fc;
+}
+
+#content {
+    padding: 0;
+    margin: 0;
+}
+
+.topbar {
+    margin: 0;
+    border: none !important;
+}
+
+/* Ensure no gap between elements */
+@media (min-width: 768px) {
+    .sidebar {
+        border-right: 1px solid #e3e6f0;
+    }
+    
+    #wrapper {
+        display: flex;
+        width: 100%;
+    }
+    
+    #content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/* ===================================
+   ADDITIONAL RESPONSIVE UTILITIES
+   =================================== */
+
+/* Text truncate for long names */
+.text-truncate-mobile {
+    @media (max-width: 768px) {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* Stack buttons on mobile */
+.btn-toolbar {
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    @media (max-width: 768px) {
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+}
+
+/* Form responsive */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        width: 100% !important;
+        margin-bottom: 1rem;
+    }
+    
+    .form-control {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* Card responsive */
+.card {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Image responsive */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Scroll to top button */
+.scroll-to-top {
+    @media (max-width: 768px) {
+        width: 2.5rem;
+        height: 2.5rem;
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
+
+/* Status label responsive */
+.status-label {
+    @media (max-width: 768px) {
+        font-size: 0.75rem;
+        margin-left: 5px;
+        display: block;
+        margin-top: 0.25rem;
+    }
+}
+
+/* Topbar divider hide on small screens */
+@media (max-width: 768px) {
+    .topbar-divider {
+        display: none !important;
+    }
+}
+
+/* User profile image */
+.img-profile {
+    @media (max-width: 768px) {
+        width: 2rem;
+        height: 2rem;
+    }
+}
+
+/* Collapse menu items */
+.collapse-inner {
+    @media (max-width: 768px) {
+        padding: 0.5rem 0;
+    }
+    
+    @media (max-width: 768px) {
+        .collapse-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+/* Hide elements on mobile */
+.hide-mobile {
+    @media (max-width: 768px) {
+        display: none !important;
+    }
+}
+
+/* Show only on mobile */
+.show-mobile {
+    display: none !important;
+    
+    @media (max-width: 768px) {
+        display: block !important;
+    }
+}
+
+/* Horizontal scroll for tables */
+@media (max-width: 768px) {
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 600px;
+    }
+}
+
+/* Alert responsive */
+.alert {
+    @media (max-width: 768px) {
+        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Badge responsive */
+.badge {
+    @media (max-width: 768px) {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Navigation pills/tabs responsive */
+.nav-pills,
+.nav-tabs {
+    @media (max-width: 768px) {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    @media (max-width: 768px) {
+        .nav-link {
+            white-space: nowrap;
+            font-size: 0.875rem;
+        }
+    }
+}

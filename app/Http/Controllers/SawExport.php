@@ -88,9 +88,10 @@ class SawExport extends Controller
                 );
             }
 
-            return response()->json([
-                'status' => 'success',
-                'file'   => asset("storage/ranking_saw/ranking_saw_{$seleksiId}.pdf")
+            return redirect()
+            ->route('generate.page')
+            ->with([
+                'success' => 'Hasil Generate SAW berhasil dibuat.',
             ]);
 
             activity_log(
@@ -108,10 +109,56 @@ class SawExport extends Controller
 
             Log::error('Gagal generate PDF Ranking SAW: ' . $e->getMessage());
 
-            return response()->json([
-                'status'  => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+             return redirect()
+            ->route('generate.page')
+            ->with('error', $e->getMessage());
+    
+        }
+    }
+
+    public function index()
+    {
+        $files = rankings::with('seleksi')
+            ->orderBy('id_seleksi')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('id_seleksi');
+
+        return view('penguji.downloadhasilsaw', compact('files'));
+    }
+
+    public function downloadRanking($id)
+    {
+        try {
+
+            $file = rankings::findOrFail($id);
+
+            // Nama file fallback
+            $fileName = $file->file_name 
+                ?? "ranking_saw_{$file->id}.pdf";
+
+            // Paksa path sesuai struktur storage
+            $relativePath = 'ranking_saw/' . basename($file->path ?? $fileName);
+
+            if (!Storage::disk('public')->exists($relativePath)) {
+                return redirect()->back()
+                    ->with('error', 'File PDF tidak ditemukan di storage.');
+            }
+
+            $absolutePath = Storage::disk('public')->path($relativePath);
+
+            return response()->download(
+                $absolutePath,
+                $fileName,
+                [
+                    'Content-Type'  => 'application/pdf',
+                    'Cache-Control' => 'no-cache, must-revalidate',
+                ]
+            );
+
+        } catch (\Throwable $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mendownload file.');
         }
     }
 }

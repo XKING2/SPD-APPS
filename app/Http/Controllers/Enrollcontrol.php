@@ -153,7 +153,7 @@ class Enrollcontrol extends Controller
             /** ================= AMBIL SOAL GLOBAL ================= */
             // 👉 Ambil SEMUA soal TPU, bukan berdasarkan exam
             $questionIds = wawancaraquest::query()
-            ->where('subject', 'ORB')
+            ->where('subject', 'WWN')
             ->inRandomOrder()
             ->limit(20)
             ->pluck('id')

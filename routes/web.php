@@ -16,9 +16,11 @@ use App\Http\Controllers\seleksicontrol;
 use App\Http\Controllers\sidebar3control;
 use App\Http\Controllers\Startcontrol;
 use App\Http\Controllers\tpuControl;
+use App\Http\Controllers\TpuControl as ControllersTpuControl;
 use App\Http\Controllers\ujiancontrol;
 use App\Http\Controllers\WWNControl;
 use App\Models\Desas;
+use App\Models\rankings;
 use App\Models\seleksi;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +45,10 @@ Route::middleware(['guest', 'otp.not.pending'])->group(function () {
     Route::post('/login', [Authcontroller::class, 'login'])
         ->middleware('throttle:5,1')
         ->name('login.post');
+
+    Route::get('/regis/get-desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
+    ->middleware('throttle:200,1')
+    ->name('ajax.desa');
 });
 
 Route::post('/otp/verify', [Authcontroller::class, 'verify'])
@@ -62,15 +68,12 @@ Route::post('/logout', [Authcontroller::class, 'logout'])
     ->name('logout');
 
 
-
-
-Route::get('/ajax/desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
-    ->middleware('throttle:60,1');
-
+    
 Route::middleware(['auth','check.role:users'])->group(function () {
     Route::get('/User/Dashboard', [sidebarcontrol::class, 'showdashboard'])->name('userdashboard');
     Route::get('/User/Biodata', [sidebarcontrol::class, 'showbiodata'])->name('showbiodata');
-    Route::get('/User/Update/Biodata', [sidebarcontrol::class, 'editbio'])->name('biodata.update');
+    Route::get('/User/Biodata/{hash}', [biodatacontrol::class, 'edit'])->name('edit.biodata');
+    Route::put('/User/Update/Biodata', [biodatacontrol::class, 'update'])->name('biodata.update');
     Route::get('/User/Cekdata', [sidebarcontrol::class, 'preview'])->name('showpreview');
     Route::get('/User/Ujian', [sidebarcontrol::class, 'showmainujian'])->name('showmainujian');
     Route::post('/biodata', [biodatacontrol::class, 'store'])->name('biodata.post');
@@ -145,16 +148,16 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
 
     Route::get('/Penguji/Main/TPU', [sidebar3control::class, 'showMainTPU'])->name('showtpuMain');
     Route::get('/Penguji/Nilai/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa3'])->name('praktik.resolve');
-    Route::get('/Penguji/Nilai/TPU/{seleksiHash}/desa/{desaHash}', [tpuControl::class, 'shownilaiTPU'])->name('showtpu');
+    Route::get('/Penguji/Nilai/TPU/{seleksiHash}/desa/{desaHash}', [TpuControl::class, 'shownilaiTPU'])->name('showtpu');
     Route::get('/Penguji/AddSeleksi/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa5'])->name('praktik.resolve');
     Route::get('/Penguji/AddSeleksi',[sidebar3control::class, 'showTambahTPUMain'])->name('tambahtpu');
-    Route::post('/penguji/add-SOAL1/tpu',[tpuControl::class, 'storeTPU'])->name('exam-questions.import');
-    Route::get('/penguji/add-SOAL2/tpu',[tpuControl::class, 'showTambahTPU'])->name('addTPU');
-    Route::get('/penguji/add-SOAL3/tpu',[tpuControl::class, 'create'])->name('createTPU');
-    Route::post('/penguji/add-SOAL4/tpu',[tpuControl::class, 'store'])->name('TPU.store');
-    Route::get('/TPU/{hashTPU}/edit', [tpuControl::class, 'editTPU'])->name('TPU.edit');
-    Route::put('/TPU/{id}', [tpuControl::class, 'updateTPU'])->name('TPU.update');
-    Route::delete('/TPU/multi-delete', [tpuControl::class, 'multiDelete'])->name('TPU.multiDelete');
+    Route::post('/penguji/add-SOAL1/tpu',[TpuControl::class, 'storeTPU'])->name('exam-questions.import');
+    Route::get('/penguji/add-SOAL2/tpu',[TpuControl::class, 'showTambahTPU'])->name('addTPU');
+    Route::get('/penguji/add-SOAL3/tpu',[TpuControl::class, 'create'])->name('createTPU');
+    Route::post('/penguji/add-SOAL4/tpu',[TpuControl::class, 'store'])->name('TPU.store');
+    Route::get('/TPU/{hashTPU}/edit', [TpuControl::class, 'editTPU'])->name('TPU.edit');
+    Route::put('/TPU/{id}', [TpuControl::class, 'updateTPU'])->name('TPU.update');
+    Route::delete('/TPU/multi-delete', [TpuControl::class, 'multiDelete'])->name('TPU.multiDelete');
 
     Route::get('/Penguji/Main/WWN', [sidebar3control::class, 'showMainWWN'])->name('showWwnMain');
     Route::get('/Penguji/Nilai/Wawancara/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa4'])->name('praktik.resolve');
@@ -195,5 +198,10 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/penguji/saw/generate', [Sawcontrol::class, 'generatePage'])->name('generate.page');
     Route::post('/Penguji/saw/generate/{seleksiId}', [Sawcontrol::class, 'generate'])->name('saw.generate');
     Route::get('/saw/export/pdf/{seleksi}',[SawExport::class, 'convertRankingSawToPdf'])->name('saw.export.pdf');
+
+    Route::get('/Penguji/Download', [SawExport  ::class, 'index'])->name('downloadindex');
+
+    Route::get('/ranking/download/{id}', [SawExport::class, 'downloadRanking'])
+        ->name('ranking.download');
 
 });

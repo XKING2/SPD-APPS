@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem E-SPD - Login</title>
+    <title>Sistem Si SSD - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="{{ asset('css/costom.css') }}" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo1.png') }}">
 </head>
 
 <body>
     <div class="login-box text-center">
         <img src="{{ asset('images/Logo1.png') }}" class="logo" alt="Logo">
-        <h4 class="fw-bold">Si - SSD</h4>
+        <h4 class="fw-bold">Si SSD</h4>
 
         <form method="POST" action="{{ route('login.post') }}">
             @csrf

@@ -172,10 +172,11 @@
                     <div class="form-group col-md-6">
                         <label>Durasi (menit) <span class="text-danger">*</span></label>
                         <input type="number"
-                               name="duration"
-                               class="form-control"
-                               min="1"
-                               required>
+                            name="duration"
+                            id="duration"
+                            class="form-control"
+                            readonly
+                            required>
                     </div>
                 </div>
 
@@ -183,15 +184,17 @@
                     <div class="form-group col-md-6">
                         <label>Mulai</label>
                         <input type="datetime-local"
-                               name="start_at"
-                               class="form-control">
+                            name="start_at"
+                            id="start_at"
+                            class="form-control">
                     </div>
 
                     <div class="form-group col-md-6">
                         <label>Selesai</label>
                         <input type="datetime-local"
-                               name="end_at"
-                               class="form-control">
+                            name="end_at"
+                            id="end_at"
+                            class="form-control">
                     </div>
                 </div>
 
@@ -210,7 +213,50 @@
     </div>
 </div>
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+function calculateDuration() {
+    const startInput = document.getElementById('start_at');
+    const endInput   = document.getElementById('end_at');
+    const duration   = document.getElementById('duration');
+
+    if (!startInput.value || !endInput.value) {
+        duration.value = '';
+        return;
+    }
+
+    const start = new Date(startInput.value);
+    const end   = new Date(endInput.value);
+
+    // Validasi logika waktu
+    if (end <= start) {
+        duration.value = '';
+        Swal.fire({
+            icon: 'warning',
+            title: 'Waktu tidak valid',
+            text: 'Waktu selesai harus lebih besar dari waktu mulai'
+        });
+        endInput.value = '';
+        return;
+    }
+
+    const diffMs = end - start;
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    duration.value = diffMinutes;
+}
+
+// Trigger saat user mengubah waktu
+document.getElementById('start_at').addEventListener('change', calculateDuration);
+document.getElementById('end_at').addEventListener('change', calculateDuration);
+</script>
+
+
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\biodata;
+use App\Models\Formasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -65,6 +66,84 @@ class biodatacontrol extends Controller
 
         return back()->with('success', 'Biodata dan pilihan formasi berhasil disimpan!');
     }
+
+    public function edit(string $hashbio)
+    {
+        $decoded = Hashids::decode($hashbio);
+
+        if (empty($decoded)) {
+            abort(404);
+        }
+
+        $user = Auth::user();
+
+        $formasis = Formasi::with('kebutuhan')
+            ->where('id_desas', $user->id_desas)
+            ->where('tahun', now()->year)
+            ->get();
+
+
+        $biodata = Biodata::where('id_user', $user->id)
+            ->where('id', $decoded[0])
+            ->firstOrFail();
+
+        $profileImg = $biodata->profile_img ?? 'img/undraw_profile.svg';
+
+        return view('users.updatebio', compact('biodata','formasis','profileImg'));
+    }
+
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+        $biodata = Biodata::where('id_user', $user->id)->firstOrFail();
+
+        // 🔒 jika sudah valid → stop
+        if ($biodata->status === 'valid') {
+            return back()->with('error', 'Biodata sudah valid dan tidak dapat diubah');
+        }
+
+        $request->validate([
+            'id_formasi'        => 'required|exists:formasis,id',
+            'id_kebutuhan'      => 'required|exists:kebutuhan_formasi,id',
+            'profile_img'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'kartu_keluarga'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'ktp'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'ijazah'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'cv'                => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
+            'surat_pendaftaran' => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
+        ]);
+
+        // update relasi formasi
+        $biodata->update([
+            'id_formasi'   => $request->id_formasi,
+            'id_kebutuhan' => $request->id_kebutuhan,
+            'status'       => 'draft', // reset validasi
+        ]);
+
+        // upload file
+        $files = [
+            'profile_img',
+            'kartu_keluarga',
+            'ktp',
+            'ijazah',
+            'cv',
+            'surat_pendaftaran'
+        ];
+
+        foreach ($files as $file) {
+            if ($request->hasFile($file)) {
+                if ($biodata->$file) {
+                    Storage::disk('public')->delete($biodata->$file);
+                }
+
+                $path = $request->file($file)->store('biodata', 'public');
+                $biodata->update([$file => $path]);
+            }
+        }
+
+         return redirect()->route('showbiodata')->with('success', 'Validasi berhasil.');
+    }
+
 
     public function index()
     {

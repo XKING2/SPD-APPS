@@ -1,7 +1,7 @@
 @extends('layouts.main2')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Nilai Observasi Peserta</h1>
+    <h1 class="h3 mb-4 text-gray-800">Nilai Tes Karakteristik Pribadi Peserta</h1>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Data Nilai  Anggota</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Data Nilai Peserta</h6>
         </div>
 
         <div class="card-body">

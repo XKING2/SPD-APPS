@@ -25,12 +25,13 @@ use App\Models\seleksi;
 use Illuminate\Support\Facades\Route;
 
 
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
 
-Route::middleware(['guest', 'otp.not.pending'])->group(function () {
+Route::middleware(['guest','otpsessions'])->group(function () {
 
     Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
         ->name('register.form');
@@ -46,22 +47,52 @@ Route::middleware(['guest', 'otp.not.pending'])->group(function () {
         ->middleware('throttle:5,1')
         ->name('login.post');
 
+    Route::post('/forgot-pass', [Authcontroller::class, 'forgotpass'])
+        ->middleware('throttle:5,1')
+        ->name('forget.post');
+
+    Route::post('/Update-pass', [Authcontroller::class, 'updatepass'])
+        ->middleware('throttle:5,1')
+        ->name('update.pass');
+
     Route::get('/regis/get-desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
     ->middleware('throttle:200,1')
     ->name('ajax.desa');
+
+    Route::get('/forgot-password', function () {
+        return view('auth.forgot-password');
+    })->name('password.request');
+
+    Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token]);
+    })->name('password.reset');
+
+    
+
+
 });
 
-Route::post('/otp/verify', [Authcontroller::class, 'verify'])
+Route::middleware(['otpsessions'])->group(function () {
+
+    Route::post('/otp/verify', [Authcontroller::class, 'verify'])
         ->middleware('throttle:5,1')
         ->name('otp.verify');
 
-Route::get('/otp', [Authcontroller::class, 'otpForm'])
-    ->middleware('otp.session')
-    ->name('otp.form');
+    Route::get('/otp', [Authcontroller::class, 'otpForm'])
+        ->middleware('otpsessions')
+        ->name('otp.form');
 
-Route::post('/otp/resend', [Authcontroller::class, 'resendOtp'])
-    ->middleware(['otp.session', 'throttle:3,10'])
-    ->name('otp.resend');
+    Route::post('/otp/resend', [Authcontroller::class, 'resendOtp'])
+        ->middleware(['otpsessions', 'throttle:3,10'])
+        ->name('otp.resend');
+
+    Route::post('/otp/cancel', [AuthController::class, 'cancelOtp'])
+        ->name('otp.cancel');
+});
+
+
+
+
     
 Route::post('/logout', [Authcontroller::class, 'logout'])
     ->middleware('auth')
@@ -130,7 +161,7 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/Datauser/{hashuser}/edit', [datausercontrol ::class, 'edit'])->name('user.edit');
     Route::put('/Datauser/{user}', [datausercontrol::class, 'update'])->name('user.update');
     Route::post('/user/{user}/validasi', [datausercontrol::class, 'validasiUser'])->name('user.validasi');
-    Route::delete('Delete/User/{user}', [ujiancontrol::class, 'destroy'])->name('user.destroy');
+    Route::delete('Delete/User/{user}', [datausercontrol::class, 'destroy'])->name('user.destroy');
 
     Route::get('/Penguji/Seleksi', [sidebar3control  ::class, 'showSeleksi'])->name('addseleksi');
     Route::post('/Seleksi/import', [seleksicontrol::class, 'store'])->name('seleksi.import');

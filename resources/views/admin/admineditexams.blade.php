@@ -5,7 +5,7 @@
     <div class="card shadow-sm">
         <div class="card-header bg-warning text-dark">
             <h5 class="mb-0">
-                <i class="fas fa-edit"></i> Edit Exam
+                <i class="fas fa-edit"></i> Edit Ujian
             </h5>
         </div>
 
@@ -29,7 +29,7 @@
                 {{-- TYPE --}}
 
                 <div class="form-group">
-                    <label>Judul</label>
+                    <label>Judul <span class="text-danger">*</span></label>
                     <input type="text"
                            name="judul"
                            class="form-control"
@@ -38,7 +38,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Jenis Exam</label>
+                   <label>Jenis Ujian <span class="text-danger">*</span></label>
                     <select name="type" class="form-control" required>
                         @foreach ($types as $key => $label)
                             <option value="{{ $key }}"
@@ -51,7 +51,7 @@
 
                 {{-- SELEKSI --}}
                 <div class="mb-3">
-                    <label class="form-label">Seleksi</label>
+                    <label>Seleksi <span class="text-danger">*</span></label>
                     <select name="id_seleksi" class="form-control" required>
                         <option value="">-- Pilih Seleksi --</option>
                         @foreach ($seleksi as $s)
@@ -65,20 +65,22 @@
 
                 {{-- DURATION --}}
                 <div class="mb-3">
-                    <label class="form-label">Durasi (menit)</label>
+                    <label>Durasi (menit) <span class="text-danger">*</span></label>
                     <input type="number"
                            name="duration"
+                           id="duration"
                            class="form-control"
                            min="1"
                            value="{{ old('duration', $exam->duration) }}"
-                           required>
+                           readonly>
                 </div>
 
                 {{-- START --}}
                 <div class="mb-3">
-                    <label class="form-label">Waktu Mulai</label>
+                    <label>Waktu Mulai <span class="text-danger">*</span></label>
                     <input type="datetime-local"
                            name="start_at"
+                           id="start_at"
                            class="form-control"
                            value="{{ old('start_at', \Carbon\Carbon::parse($exam->start_at)->format('Y-m-d\TH:i')) }}"
                            required>
@@ -86,9 +88,10 @@
 
                 {{-- END --}}
                 <div class="mb-3">
-                    <label class="form-label">Waktu Selesai</label>
+                    <label>Waktu Selesai <span class="text-danger">*</span></label>
                     <input type="datetime-local"
                            name="end_at"
+                           id="end_at"
                            class="form-control"
                            value="{{ old('end_at', \Carbon\Carbon::parse($exam->end_at)->format('Y-m-d\TH:i')) }}"
                            required>
@@ -109,4 +112,41 @@
         </div>
     </div>
 </div>
+
+<script>
+function calculateDuration() {
+    const startInput = document.getElementById('start_at');
+    const endInput   = document.getElementById('end_at');
+    const duration   = document.getElementById('duration');
+
+    if (!startInput.value || !endInput.value) {
+        duration.value = '';
+        return;
+    }
+
+    const start = new Date(startInput.value);
+    const end   = new Date(endInput.value);
+
+    // Validasi logika waktu
+    if (end <= start) {
+        duration.value = '';
+        Swal.fire({
+            icon: 'warning',
+            title: 'Waktu tidak valid',
+            text: 'Waktu selesai harus lebih besar dari waktu mulai'
+        });
+        endInput.value = '';
+        return;
+    }
+
+    const diffMs = end - start;
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    duration.value = diffMinutes;
+}
+
+// Trigger saat user mengubah waktu
+document.getElementById('start_at').addEventListener('change', calculateDuration);
+document.getElementById('end_at').addEventListener('change', calculateDuration);
+</script>
 @endsection

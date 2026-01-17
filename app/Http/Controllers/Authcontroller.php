@@ -15,6 +15,10 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+
+
 
 class Authcontroller extends Controller
 {
@@ -175,12 +179,9 @@ class Authcontroller extends Controller
 
     public function otpForm()
     {
-        $user = Auth::user();
-
         if (!session()->has('otp_user_id')) {
-            abort(403);
+            return redirect()->route('login');
         }
-
 
         return view('auth.otppost');
     }
@@ -211,7 +212,15 @@ class Authcontroller extends Controller
 
         if ($verification->attempts >= 5) {
             $verification->update(['status' => 'blocked']);
-            return back()->withErrors(['otp' => 'OTP diblokir.']);
+
+            // 🔥 HAPUS USER & SESSION
+            User::where('id', $user->id)->delete();
+            session()->forget('otp_user_id');
+
+            return redirect()->route('login')
+                ->withErrors([
+                    'email' => 'Verifikasi gagal. Silakan daftar ulang.'
+                ]);
         }
 
         if (!Hash::check($request->otp, $verification->otp)) {
@@ -226,8 +235,34 @@ class Authcontroller extends Controller
         Auth::login($user);
         session()->forget('otp_user_id');
 
-        return redirect()->route('userdashboard')
-            ->with('success', 'Akun berhasil diaktifkan.');
+        return redirect()->route('login')
+            ->withInput(['email' => $user->email])
+            ->withErrors([
+            'email' => 'Verifikasi gagal. Silakan daftar ulang.'
+        ]);
+
+    }
+
+    public function cancelOtp(Request $request)
+    {
+        $userId = session('otp_user_id');
+
+        if (!$userId) {
+            return redirect()->route('register.form');
+        }
+
+        DB::transaction(function () use ($userId) {
+
+            Verification::where('user_id', $userId)->delete();
+
+            User::where('id', $userId)->delete();
+        });
+
+        // 🔥 Bersihkan session OTP
+        session()->forget('otp_user_id');
+
+        return redirect()->route('register.form')
+            ->with('success', 'Pendaftaran dibatalkan. Silakan daftar ulang.');
     }
 
 
@@ -332,4 +367,47 @@ class Authcontroller extends Controller
 
         return back()->with('success', 'Kode OTP berhasil dikirim ulang.');
     }
+
+    public function forgotpass(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+    
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+    
+        return $status === Password::ResetLinkSent
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+
+    }
+
+    public function updatepass(Request $request)
+    {
+        $request->validate([
+        'token' => 'required',
+        'email' => 'required|email',
+        'password' => 'required|min:8|confirmed',
+    ]);
+ 
+    $status = Password::reset(
+        $request->only('email', 'password', 'password_confirmation', 'token'),
+        function (User $user, string $password) {
+            $user->forceFill([
+                'password' => Hash::make($password)
+            ]);
+ 
+            $user->save();
+ 
+            event(new PasswordReset($user));
+        }
+    );
+ 
+    return $status === Password::PasswordReset
+        ? redirect()->route('login')->with('status', __($status))
+        : back()->withErrors(['email' => [__($status)]]);
+
+    }
+
+    
 }

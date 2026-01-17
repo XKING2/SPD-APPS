@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <title>Sistem Si SSD - Login</title>
+    <title>SI SSD</title>
     <meta name="author" content="">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('images/logo1.png') }}">
@@ -24,7 +24,6 @@
         <meta name="alert-info" content="{{ session('info') }}">
     @endif
 
-    <title>Seleksi Perangkat Desa</title>
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -60,7 +59,7 @@
                 </div>
 
                 <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
-                    Si SSD
+                    SI SSD
                 </div>
             </a>
 
@@ -264,7 +263,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Kingz X DPMD 2025</span>
+                        <span>Copyright &copy;DPMD 2026</span>
                     </div>
                 </div>
             </footer>

@@ -53,10 +53,16 @@ class PrakControl extends Controller
 
         // ✅ Validasi input
         $validated = $request->validate([
-            'kerapian'    => 'required|integer|min:0|max:100',
-            'kecepatan'   => 'required|integer|min:0|max:100',
-            'ketepatan'   => 'required|integer|min:0|max:100',
-            'efektifitas' => 'required|integer|min:0|max:100',
+            'kop_surat'                   => 'required|integer|min:0|max:10',
+            'format_dokumen'              => 'required|integer|min:0|max:10',
+            'layout_ttd'                  => 'required|integer|min:0|max:10',
+            'manajemen_file_waktu'        => 'required|integer|min:0|max:10',
+            'format_visualisasi_tabel'    => 'required|integer|min:0|max:10',
+            'fungsi_logika'               => 'required|integer|min:0|max:10',
+            'fungsi_lanjutan'             => 'required|integer|min:0|max:15',
+            'format_data'                 => 'required|integer|min:0|max:10',
+            'output_ttd'                  => 'required|integer|min:0|max:5',
+            'manajemen_file_excel'        => 'required|integer|min:0|max:10',
         ]);
 
         // ➕ Total skor
@@ -142,13 +148,22 @@ class PrakControl extends Controller
             ->where('id_desas', $desaId)
             ->firstOrFail();
 
-        $users = User::where('id_desas', $desaId)
-            ->where('role', 'users') // ✅ hanya user biasa
+        $users = User::where('role', 'users')
+            ->where('id_desas', $desaId)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%');
             })
-            ->orderBy('name')
-            ->get();
+            ->with([
+                'examResults' => function ($q) use ($seleksi) {
+                    $q->where('id_seleksi', $seleksi->id)
+                    ->where('type', 'PRAK');
+                }
+            ])
+            ->get()
+            ->map(function ($user) {
+                $user->score = optional($user->examResults->first())->score;
+                return $user;
+            });
 
         return view('penguji.nilai.nilaipraktik', compact('users', 'desa', 'seleksi'
         ))->with([

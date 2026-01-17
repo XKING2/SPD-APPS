@@ -1,7 +1,7 @@
 @extends('layouts.main2')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Tambah Data Ujian</h1>
+    <h1 class="h3 mb-4 text-gray-800"> Data Ujian</h1>
 @endsection
 
 @section('content')

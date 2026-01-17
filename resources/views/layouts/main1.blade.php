@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Sistem Si SSD - Login</title>
+    <title>SI SSD</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo1.png') }}">
     
     <!-- Session Alerts -->
@@ -23,7 +23,6 @@
         <meta name="alert-info" content="{{ session('info') }}">
     @endif
 
-    <title>Seleksi Perangkat Desa - Admin</title>
 
     <!-- Custom fonts -->
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -81,7 +80,7 @@
                          style="width:100%; height:100%; object-fit:cover;">
                 </div>
                 <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
-                    Si SSD
+                    SI SSD
                 </div>
             </a>
 
@@ -107,7 +106,7 @@
             <li class="nav-item {{ Request::routeIs('validasi.index') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('validasi.index') }}">
                     <i class="fas fa-user-check"></i>
-                    <span>Validasi Biodata</span>
+                    <span>Validasi Peserta Seleksi</span>
                 </a>
             </li>
 

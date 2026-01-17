@@ -1,7 +1,7 @@
 @extends('layouts.main2')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Tambah Data User</h1>
+    <h1 class="h3 mb-4 text-gray-800"> Data User</h1>
 @endsection
 
 @section('content')
@@ -21,7 +21,7 @@
                 </form>
 
                 <a href="{{ route('createuser') }}" class="btn btn-info btn-sm px-3 py-1 d-flex align-items-center">
-                    <i class="fas fa-plus mr-1"></i> Tambah Anggota
+                    <i class="fas fa-plus mr-1"></i> Tambah User
                 </a>
 
                 
@@ -118,8 +118,8 @@
                 const url = this.dataset.url;
 
                 Swal.fire({
-                    title: 'Edit Ujian?',
-                    text: 'Pastikan Anda yakin ingin mengubah data ujian ini.',
+                    title: 'Edit User?',
+                    text: 'Pastikan Anda yakin ingin mengubah data User ini.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#28a745',
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const form = this.closest('form');
 
             Swal.fire({
-                title: "Apakah Anda yakin ingin memvalidasi Ujian ini?",
+                title: "Apakah Anda yakin ingin memvalidasi User ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",

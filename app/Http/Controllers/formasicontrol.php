@@ -18,25 +18,35 @@ class formasicontrol extends Controller
 
         $seleksi = Seleksi::findOrFail($request->id_seleksi);
 
+        $exists = Formasi::where('id_seleksi', $seleksi->id)->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'id_seleksi' => 'Formasi untuk seleksi ini sudah ada dan tidak bisa dibuat ulang.'
+            ]);
+        }
+
         $formasi = Formasi::create([
             'id_seleksi' => $seleksi->id,
             'id_desas'   => $seleksi->id_desas,
             'tahun'      => $seleksi->tahun,
         ]);
 
-        // 🔐 LOG AKTIVITAS (AMAN)
+        // 🔐 LOG AKTIVITAS
         activity_log(
             'Store',
-            'Menambah Data user',
+            'Menambah data formasi',
             $formasi,
             null,
-            collect($formasi)->toArray()
+            $formasi->toArray()
         );
 
+        return $exists
+            ? back()->withErrors([
+                'id_seleksi' => 'Formasi untuk seleksi ini sudah ada dan tidak bisa dibuat ulang.'
+            ])
+            : back()->with('success', 'Formasi berhasil dibuat');
 
-
-
-        return back()->with('success', 'Formasi berhasil dibuat');
     }
 
     public function show(string $hashFormasi)

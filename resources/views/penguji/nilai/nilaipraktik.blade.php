@@ -1,7 +1,7 @@
 @extends('layouts.main2')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Nilai Praktik Peserta</h1>
+    <h1 class="h3 mb-4 text-gray-800">Nilai Tes Praktik Peserta</h1>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Data Anggota</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Data Nilai Peserta</h6>
         </div>
 
         <div class="card-body">
@@ -33,17 +33,17 @@
                             <th style="width: 50px;">No</th>
                             <th>No Peserta</th>
                             <th>Nama</th>
+                            <th>Score</th>
                             <th style="width: 200px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            $seleksiHash = Hashids::encode($seleksi->id);
-                        @endphp
+                           
 
                         @forelse ($users as $user)
                             @php
                                 $userHash = Hashids::encode($user->id);
+                                $score = $user->score ?? '-';
                             @endphp
 
                             <tr>
@@ -51,18 +51,26 @@
                                 <td>{{ $user->no_peserta ?? $user->id }}</td>
                                 <td class="text-left">{{ $user->name }}</td>
                                 <td>
+                                    @if ($user->score !== null)
+                                        <span class="badge bg-success text-white">{{ $score }}</span>
+                                    @else
+                                        <span class="badge bg-secondary text-white">Belum Dinilai</span>
+                                    @endif
+                                </td>
+                                <td>
                                     <a href="{{ route('add.praktik', [
                                         'seleksiHash' => $seleksiHash,
                                         'userHash'    => $userHash
                                     ]) }}"
-                                    class="btn btn-primary">
-                                        <i class="fas fa-edit"></i> Beri Nilai Praktek
+                                    class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                        {{ $user->score !== null ? 'Edit Nilai' : 'Beri Nilai' }}
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted">
+                                <td colspan="5" class="text-center text-muted">
                                     Data tidak tersedia
                                 </td>
                             </tr>

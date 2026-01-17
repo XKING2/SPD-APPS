@@ -31,4 +31,6 @@ class seleksi extends Model
             'id_desas'
         );
     }
+
+
 }

@@ -1,7 +1,7 @@
 @extends('layouts.main2')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Tambah Seleksi Ujian</h1>
+    <h1 class="h3 mb-4 text-gray-800"> Seleksi Ujian</h1>
 @endsection
 
 @section('content')
@@ -64,7 +64,7 @@
                                         class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                            <button class="btn btn-sm btn-danger btn-delete-exam ">
+                                            <button class="btn btn-sm btn-danger btn-hapus-seleksi ">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                     </form>
@@ -245,32 +245,30 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tangkap semua tombol Edit
-    const editButtons = document.querySelectorAll('.btn-delete-exam');
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.btn-hapus-seleksi');
 
-    editButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Cegah langsung pindah halaman
-            const editUrl = this.getAttribute('data-edit-url');
+    buttons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const form = this.closest('form');
 
             Swal.fire({
-                title: "Apakah Anda yakin ingin Menghapus Data ini?",
+                title: "Apakah Anda yakin ingin Menghapus Seleksi ini?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, lanjutkan",
+                confirmButtonText: "Ya, Hapus",
                 cancelButtonText: "Batal"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect ke halaman edit
-                    window.location.href = editUrl;
+                    form.submit(); // 🔥 INI KUNCINYA
                 }
             });
         });
     });
-
 });
 </script>
 

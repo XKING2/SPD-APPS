@@ -38,24 +38,16 @@
                     </thead>
                     <tbody>
                         @forelse($exams as $index => $exam)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
 
-                            <td>
-                                {{ $exam->judul ?? '-' }}
-                            </td>
+                                <td>{{ $exam->judul ?? '-' }}</td>
 
-                            <td>
-                                {{ $exam->seleksi->tahun ?? '-' }}
-                            </td>
+                                <td>{{ $exam->seleksi->tahun ?? '-' }}</td>
 
-                            <td>
-                                {{ $exam->start_at ?? '-' }}
-                            </td>
+                                <td>{{ $exam->start_at?->format('d-m-Y H:i') ?? '-' }}</td>
 
-                            <td>
-                                {{ $exam->end_at ?? '-' }}
-                            </td>
+                                <td>{{ $exam->end_at?->format('d-m-Y H:i') ?? '-' }}</td>
 
                                 <td>
                                     @if ($exam->status === 'active')
@@ -67,22 +59,32 @@
                                     @endif
                                 </td>
 
-                            <td>
-                                <button type="button"
-                                        class="btn btn-sm btn-success btn-edit-exam"
-                                        data-url="{{ route('adminexam.edit', Hashids::encode($exam->id)) }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                            @empty
-                            <td colspan="7" class="text-center">
-                                Data tidak tersedia
-                            </td>
-                            @endforelse
-                        </tr>
-                        
-                            
-                        
+                                <td>
+                                    @if ($exam->end_at && now()->lessThan($exam->end_at))
+                                        {{-- ✅ MASIH BISA DIEDIT --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-success btn-edit-exam"
+                                                data-url="{{ route('adminexam.edit', Hashids::encode($exam->id)) }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    @else
+                                        {{-- ❌ SUDAH LEWAT --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-secondary"
+                                                disabled
+                                                title="Ujian sudah berakhir">
+                                            <i class="fas fa-lock"></i>
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    Data tidak tersedia
+                                </td>
+                            </tr>
+                        @endforelse
                         </tbody>
 
                 </table>

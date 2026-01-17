@@ -1,7 +1,7 @@
 @extends('layouts.main1')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Tambah Data Formasi</h1>
+    <h1 class="h3 mb-4 text-gray-800">Kelola Data Seleksi</h1>
 @endsection
 
 @section('content')
@@ -9,11 +9,11 @@
     <!-- Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Kelola Data Formasi </h6>
+            <h6 class="m-0 font-weight-bold text-primary">Kelola Data Seleksi </h6>
                     <button class="btn btn-primary"
                             data-toggle="modal"
                             data-target="#createSeleksiModal">
-                        <i class="fas fa-file-import"></i> Tambah Formasi
+                        <i class="fas fa-file-import"></i> Tambah Data Seleksi
                     </button>
         </div>
         <div class="card-body">
@@ -59,7 +59,7 @@
 
             @csrf
             <div class="modal-header">
-                <h5 class="modal-title">Buat Exam & Import Soal</h5>
+                <h5 class="modal-title">Buat Data Seleksi</h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -93,16 +93,56 @@
     </div>
 </div>
 
+@if ($errors->any())
+    <div
+        data-swal-errors="{{ implode('|', $errors->all()) }}"
+        style="display:none"
+    ></div>
+@endif
 
+@if (session('success'))
+    <div
+        data-swal-success="{{ session('success') }}"
+        style="display:none"
+    ></div>
+@endif
 
 
 @endsection
 
-
-
-
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // === ERROR ALERT ===
+    const swalErrors = document.querySelector('[data-swal-errors]');
+    if (swalErrors) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Formasi Tidak Bisa Dibuat',
+            html: swalErrors.getAttribute('data-swal-errors').split('|').join('<br>'),
+            confirmButtonText: 'Mengerti'
+        });
+    }
+
+    // === SUCCESS ALERT ===
+    const swalSuccess = document.querySelector('[data-swal-success]');
+    if (swalSuccess) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: swalSuccess.getAttribute('data-swal-success'),
+            timer: 2500,
+            showConfirmButton: false
+        });
+    }
+
+});
+</script>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

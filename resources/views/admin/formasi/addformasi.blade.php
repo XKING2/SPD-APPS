@@ -1,7 +1,7 @@
 @extends('layouts.main1')
 
 @section('pageheads')
-    <h1 class="h3 mb-4 text-gray-800">Tambah Data Formasi</h1>
+    <h1 class="h3 mb-4 text-gray-800">Kelola Data Seleksi</h1>
 @endsection
 
 @section('content')
@@ -9,11 +9,11 @@
     <!-- Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Kelola Data Formasi </h6>
+            <h6 class="m-0 font-weight-bold text-primary">Kelola Data Seleksi </h6>
             <button class="btn btn-primary"
                         data-toggle="modal"
                         data-target="#createFormasiModal">
-                    <i class="fas fa-plus"></i> Tambah Formasi
+                    <i class="fas fa-plus"></i> Tambah Seleksi
             </button>
 
         </div>
@@ -109,9 +109,15 @@
 </div>
 
 
+
+
 @endsection
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+
+
 
 
 

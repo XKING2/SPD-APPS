@@ -14,9 +14,9 @@
 <body>
     <div class="login-box text-center">
         <img src="{{ asset('images/logo1.png') }}" class="logo" alt="Logo">
-        <h4 class="fw-bold">SI SSD</h4>
+        <h4 class="fw-bold">Si SSD</h4>
 
-        <form method="POST" action="{{ route('login.post') }}">
+        <form method="POST" action="{{route('forget.post')}}">
             @csrf
             <div class="mb-3 text-start">
                 <label class="form-label">Email</label>
@@ -25,29 +25,11 @@
                     <input type="text" name="email" class="form-control" placeholder="Masukkan Email" required>
                 </div>
             </div>
-            <div class="mb-3 text-start">
-                <label class="form-label">Password</label>
-                <div class="input-group-custom">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Masukkan Password" required>
-                    <i class="fas fa-eye password-toggle" id="togglePassword"></i>
-                </div>
-            </div>
-            
+
             <button type="submit" class="btn btn-primary w-100">
-                <i class="fas fa-sign-in-alt me-2"></i>Login
+                <i class="fas fa-sign-in-alt me-2"></i>Send Email
             </button>
         </form>
-        
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <a href="{{ route('register') }}" class="btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-user-plus fa-sm me-1"></i> Register? Account
-            </a>
-
-            <a href="{{ route('password.request') }}" class="btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-key fa-sm me-1"></i> Forgot Password
-            </a>
-        </div>
 
         @if ($errors->any())
             <div class="alert alert-danger mt-3">
@@ -62,6 +44,7 @@
                 {{ session('status') }}
             </div>
         @endif
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

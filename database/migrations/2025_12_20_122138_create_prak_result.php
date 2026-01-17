@@ -14,10 +14,16 @@ return new class extends Migration
         Schema::create('nilai_prak', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('kerapian')->nullable();
-            $table->string('kecepatan')->nullable();
-            $table->string('ketepatan')->nullable();
-            $table->string('efektifitas')->nullable();
+            $table->string('kop_surat')->nullable();
+            $table->string('format_dokumen')->nullable();
+            $table->string('layout_ttd')->nullable();
+            $table->string('manajemen_file_waktu')->nullable();
+            $table->string('format_visualisasi_tabel')->nullable();
+            $table->string('fungsi_logika')->nullable();
+            $table->string('fungsi_lanjutan')->nullable();
+            $table->string('format_data')->nullable();
+            $table->string('output_ttd')->nullable();
+            $table->string('manajemen_file_excel')->nullable();
             $table->timestamps();
         });
     }

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Sistem Si SSD - Login</title>
+    <title>SI SSD</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo1.png') }}">
     
     <!-- Session Alerts -->
@@ -23,7 +23,6 @@
         <meta name="alert-info" content="{{ session('info') }}">
     @endif
 
-    <title>Seleksi Perangkat Desa</title>
 
     <!-- Custom fonts -->
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -84,7 +83,7 @@
                          style="width:100%; height:100%; object-fit:cover;">
                 </div>
                 <div class="sidebar-brand-text text-white fw-bold" style="font-size: 1.1rem;">
-                    Si SSD
+                    SI SSD
                 </div>
             </a>
             
@@ -110,7 +109,7 @@
             <li class="nav-item {{ Request::routeIs('addseleksi') || Request::routeIs('seleksi.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addseleksi') }}">
                     <i class="fas fa-file-alt"></i>
-                    <span>Tambah Seleksi</span>
+                    <span>Data Seleksi</span>
                 </a>
             </li>
 
@@ -118,7 +117,7 @@
             <li class="nav-item {{ Request::routeIs('addexams') || Request::routeIs('exam.edit') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('addexams') }}">
                     <i class="fas fa-file-alt"></i>
-                    <span>Tambah Ujian</span>
+                    <span>Data Ujian</span>
                 </a>
             </li>
 
@@ -135,13 +134,14 @@
                      aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item {{ Request::routeIs('showtpuMain') ? 'active' : '' }}" 
-                           href="{{ route('showtpuMain') }}">TPU</a>
-                        <a class="collapse-item {{ Request::routeIs('showPrakMain') ? 'active' : '' }}" 
-                           href="{{ route('showPrakMain') }}">Praktik</a>
-                        <a class="collapse-item {{ Request::routeIs('showWwnMain') ? 'active' : '' }}" 
-                           href="{{ route('showWwnMain') }}">Wawancara</a>
+                           href="{{ route('showtpuMain') }}">Tes Pengetahuan Umum</a>
                         <a class="collapse-item {{ Request::routeIs('showOrbMain') ? 'active' : '' }}" 
-                           href="{{ route('showOrbMain') }}">TKP</a>
+                           href="{{ route('showOrbMain') }}">Tes Karakteristik Pribadi</a>
+                        <a class="collapse-item {{ Request::routeIs('showWwnMain') ? 'active' : '' }}" 
+                           href="{{ route('showWwnMain') }}">Tes Wawancara</a>
+                        <a class="collapse-item {{ Request::routeIs('showPrakMain') ? 'active' : '' }}" 
+                           href="{{ route('showPrakMain') }}">Tes Praktik</a>
+                        
                     </div>
                 </div>
             </li>
@@ -152,18 +152,19 @@
                    aria-expanded="{{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'true' : 'false' }}"
                    aria-controls="collapseTambahSoal">
                     <i class="fas fa-fw fa-file-alt"></i>
-                    <span>Tambah Soal</span>
+                    <span>Data Soal</span>
                 </a>
                 <div id="collapseTambahSoal"
                      class="collapse {{ Request::routeIs('addTPU') || Request::routeIs('addWWN') || Request::routeIs('addorb') ? 'show' : '' }}"
                      aria-labelledby="headingBeritaAcara" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item {{ Request::routeIs('addTPU') ? 'active' : '' }}" 
-                           href="{{ route('addTPU') }}">TPU</a>
-                        <a class="collapse-item {{ Request::routeIs('addWWN') ? 'active' : '' }}" 
-                           href="{{ route('addWWN') }}">Wawancara</a>
+                           href="{{ route('addTPU') }}">Soal Pengetahuan Umum</a>
                         <a class="collapse-item {{ Request::routeIs('addorb') ? 'active' : '' }}" 
-                           href="{{ route('addorb') }}">TKP</a>
+                           href="{{ route('addorb') }}">Soal Karakteristik Pribadi</a>
+                        <a class="collapse-item {{ Request::routeIs('addWWN') ? 'active' : '' }}" 
+                           href="{{ route('addWWN') }}">Soal Wawancara</a>
+                        
                     </div>
                 </div>
             </li>

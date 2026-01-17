@@ -57,5 +57,10 @@ class exams extends Model
         return $this->key_expired_at?->isFuture() ?? false;
     }
 
+    public function results()
+    {
+        return $this->hasMany(ResultExam::class, 'exam_id');
+    }
+
 
 }

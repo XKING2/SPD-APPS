@@ -232,13 +232,11 @@ class Authcontroller extends Controller
         $verification->update(['status' => 'valid']);
         $user->update(['status' => 'actived']);
 
-        Auth::login($user);
+        // 🔥 HANCURKAN STATE OTP
         session()->forget('otp_user_id');
 
-        return redirect()->route('login')
-            ->withInput(['email' => $user->email])
-            ->withErrors([
-            'email' => 'Verifikasi gagal. Silakan daftar ulang.'
+        return redirect()->route('login')->with([
+            'status' => 'Verifikasi berhasil. Silakan login.'
         ]);
 
     }

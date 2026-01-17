@@ -30,7 +30,7 @@ Route::get('/', function () {
 });
 
 
-Route::middleware(['guest','otpsessions'])->group(function () {
+Route::middleware(['guest'])->group(function () {
 
     Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
         ->name('register.form');
@@ -71,7 +71,7 @@ Route::middleware(['guest','otpsessions'])->group(function () {
 
 });
 
-Route::middleware(['otpsessions'])->group(function () {
+Route::middleware(['guest', 'otpsessions'])->group(function () {
 
     Route::post('/otp/verify', [Authcontroller::class, 'verify'])
         ->middleware('throttle:5,1')

@@ -15,22 +15,20 @@ class otpsessions
      */
     public function handle($request, Closure $next)
     {
+        // Kalau user sedang OTP process
         if (session()->has('otp_user_id')) {
-
-            // whitelist route yang BOLEH diakses
-            $allowedRoutes = [
-                'otp.form',
-                'otp.verify',
-                'otp.cancel',
-            ];
 
             $routeName = optional($request->route())->getName();
 
+            $allowedRoutes = [
+                'otp.form',
+                'otp.verify',
+                'otp.resend',
+                'otp.cancel',
+            ];
+
             if (!in_array($routeName, $allowedRoutes)) {
-                return redirect()->route('otp.form')
-                 ->withErrors([
-                    'otp' => 'Selesaikan verifikasi OTP terlebih dahulu.'
-                ]);
+                return redirect()->route('otp.form');
             }
         }
 

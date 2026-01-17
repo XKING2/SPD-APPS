@@ -176,9 +176,9 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::post('/exam/{exam}/validasi', [ujiancontrol::class, 'validasiExam'])
     ->name('exam.validasi');
 
-    Route::get('/Penguji/Main/TPU', [sidebar3control::class, 'showMainTPU'])->name('showtpuMain');
-    Route::get('/Penguji/Nilai/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa3'])->name('praktik.resolve');
-    Route::get('/Penguji/Nilai/TPU/{seleksiHash}/desa/{desaHash}', [TpuControl::class, 'shownilaiTPU'])->name('showtpu');
+    Route::get('/Penguji/Main/Tpu', [sidebar3control::class, 'showMainTPU'])->name('showtpuMain');
+    Route::get('/Penguji/Nilai/Tpu/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa3'])->name('praktik.resolve');
+    Route::get('/Penguji/Nilai/Tpu/{seleksiHash}/desa/{desaHash}', [TpuControl::class, 'shownilaiTPU'])->name('showtpu');
     Route::get('/Penguji/AddSeleksi/TPU/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa5'])->name('praktik.resolve');
     Route::get('/Penguji/AddSeleksi',[sidebar3control::class, 'showTambahTPUMain'])->name('tambahtpu');
     Route::post('/penguji/add-SOAL1/tpu',[TpuControl::class, 'storeTPU'])->name('exam-questions.import');

@@ -15,7 +15,7 @@
 <body>
     <div class="container-wrapper">
         <div class="otp-box text-center">
-            <img src="{{ asset('images/Logo1.png') }}" class="logo" alt="Logo">
+            <img src="{{ asset('images/logo1.png') }}" class="logo" alt="Logo">
             <h4 class="otp-title">Verifikasi OTP</h4>
             <p class="otp-subtitle">
                 Masukkan kode OTP 6 digit yang telah dikirim ke email Anda

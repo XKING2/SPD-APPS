@@ -15,9 +15,19 @@ class OtpMail extends Mailable implements ShouldQueue
 
     public $otp;
 
+    public $tries = 3;
+    public $timeout = 10;
+
     public function __construct($otp)
     {
         $this->otp = $otp;
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Kode OTP Anda'
+        );
     }
 
     public function content(): Content

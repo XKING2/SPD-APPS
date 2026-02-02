@@ -22,6 +22,9 @@ use App\Models\Desas;
 use App\Models\rankings;
 use App\Models\seleksi;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Http\Middleware\VerifyCsrfToken;
 
 Route::any('/login', fn () => abort(403));
 Route::any('/register', fn () => abort(403));
@@ -29,8 +32,14 @@ Route::any('/forgot-pass', fn () => abort(403));
 Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
 Route::get('/', function () {
-    return response('Security review in progress', 200);
-});
+    return response()
+        ->view('safe-home')
+        ->header('Cache-Control', 'public, max-age=3600');
+})->withoutMiddleware([
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    VerifyCsrfToken::class,
+]);
 
 //Route::get('/', function () {
    // return redirect()->route('login');

@@ -41,13 +41,16 @@ Route::any('/forgot-pass', fn () => abort(403));
 Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
 
-Route::get('/', function () {
-    return response()->view('safe-home');
+Route::match(['GET', 'HEAD'], '/', function () {
+    return response()
+        ->view('safe-home')
+        ->setStatusCode(200);
 })->withoutMiddleware([
     \Illuminate\Session\Middleware\StartSession::class,
     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
     \App\Http\Middleware\VerifyCsrfToken::class,
 ]);
+
 
 
 //Route::get('/', function () {

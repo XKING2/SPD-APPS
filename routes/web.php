@@ -25,21 +25,28 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Support\Facades\Response;
 
 Route::any('/login', fn () => abort(403));
 Route::any('/register', fn () => abort(403));
 Route::any('/forgot-pass', fn () => abort(403));
 Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
+
+
+
+Route::any('/login', fn () => abort(403));
+Route::any('/register', fn () => abort(403));
+Route::any('/forgot-pass', fn () => abort(403));
+Route::any('/otp', fn () => abort(403));
+Route::any('/otp/*', fn () => abort(403));
+
 Route::get('/', function () {
     return response()
         ->view('safe-home')
-        ->header('Cache-Control', 'public, max-age=3600');
-})->withoutMiddleware([
-    StartSession::class,
-    ShareErrorsFromSession::class,
-    VerifyCsrfToken::class,
-]);
+        ->withoutCookie('XSRF-TOKEN')
+        ->withoutCookie('si-ssd-session');
+});
 
 //Route::get('/', function () {
    // return redirect()->route('login');

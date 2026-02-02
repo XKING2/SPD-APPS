@@ -42,11 +42,13 @@ Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
 
 Route::get('/', function () {
-    return response()
-        ->view('safe-home')
-        ->withoutCookie('XSRF-TOKEN')
-        ->withoutCookie('si-ssd-session');
-});
+    return response()->view('safe-home');
+})->withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \App\Http\Middleware\VerifyCsrfToken::class,
+]);
+
 
 //Route::get('/', function () {
    // return redirect()->route('login');

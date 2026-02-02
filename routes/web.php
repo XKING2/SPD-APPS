@@ -40,16 +40,12 @@ Route::any('/register', fn () => abort(403));
 Route::any('/forgot-pass', fn () => abort(403));
 Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
-
-Route::match(['GET', 'HEAD'], '/', function () {
+Route::get('/', function () {
     return response()
         ->view('safe-home')
-        ->setStatusCode(200);
-})->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \App\Http\Middleware\VerifyCsrfToken::class,
-]);
+        ->withoutCookie('XSRF-TOKEN')
+        ->withoutCookie('si-ssd-session');
+});
 
 
 

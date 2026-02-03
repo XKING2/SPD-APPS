@@ -27,42 +27,18 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Response;
 
-Route::any('/login', fn () => abort(403));
-Route::any('/register', fn () => abort(403));
-Route::any('/forgot-pass', fn () => abort(403));
-Route::any('/otp', fn () => abort(403));
-Route::any('/otp/*', fn () => abort(403));
 
 
-<<<<<<< HEAD
-
-Route::any('/login', fn () => abort(403));
-Route::any('/register', fn () => abort(403));
-Route::any('/forgot-pass', fn () => abort(403));
-Route::any('/otp', fn () => abort(403));
-Route::any('/otp/*', fn () => abort(403));
-=======
->>>>>>> 0d8e52b (posts comit)
 Route::get('/', function () {
-    return response()
-        ->view('safe-home')
-        ->withoutCookie('XSRF-TOKEN')
-        ->withoutCookie('si-ssd-session');
+   return redirect()->route('login');
 });
 
 
+Route::middleware(['guest'])->group(function () {
 
-<<<<<<< HEAD
-//Route::get('/', function () {
-   // return redirect()->route('login');
-//});
+   Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
+      ->name('register.form');
 
-
-//Route::middleware(['guest'])->group(function () {
-
-   // Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
-      //  ->name('register.form');
-=======
     Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
       ->name('register.form');
 
@@ -76,73 +52,71 @@ Route::get('/', function () {
      Route::post('/login', [Authcontroller::class, 'login'])
         ->middleware('throttle:5,1')
 ->name('login.post');
->>>>>>> 0d8e52b (posts comit)
 
-   // Route::post('/register', [Authcontroller::class, 'register'])
-       // ->middleware('throttle:5,10')
-      //  ->name('register');
 
-    //Route::get('/login', [Authcontroller::class, 'showLoginForm'])
-       // ->name('login');
+    Route::post('/register', [Authcontroller::class, 'register'])
+        ->middleware('throttle:5,10')
+        ->name('register');
 
-   // Route::post('/login', [Authcontroller::class, 'login'])
-      //  ->middleware('throttle:5,1')
-//->name('login.post');
+    Route::get('/login', [Authcontroller::class, 'showLoginForm'])
+        ->name('login');
 
-    //Route::post('/forgot-pass', [Authcontroller::class, 'forgotpass'])
-       // ->middleware('throttle:5,1')
-      //  ->name('forget.post');
+    Route::post('/login', [Authcontroller::class, 'login'])
+        ->middleware('throttle:5,1')
+->name('login.post');
 
-    //Route::post('/Update-pass', [Authcontroller::class, 'updatepass'])
-     //   ->middleware('throttle:5,1')
-      //  ->name('update.pass');
+    Route::post('/forgot-pass', [Authcontroller::class, 'forgotpass'])
+       ->middleware('throttle:5,1')
+       ->name('forget.post');
 
-   // Route::get('/regis/get-desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
-    //->middleware('throttle:200,1')
-   // ->name('ajax.desa');
+    Route::post('/Update-pass', [Authcontroller::class, 'updatepass'])
+     ->middleware('throttle:5,1')
+      ->name('update.pass');
 
-    //Route::get('/forgot-password', function () {
-       // return view('auth.forgot-password');
-    //})->name('password.request');
+   Route::get('/regis/get-desa/{kecamatan}', [Authcontroller::class, 'getDesa'])
+    ->middleware('throttle:200,1')
+    ->name('ajax.desa');
 
-   // Route::get('/reset-password/{token}', function (string $token) {
-   // return view('auth.reset-password', ['token' => $token]);
-  //  })->name('password.reset');
+    Route::get('/forgot-password', function () {
+       return view('auth.forgot-password');
+    })->name('password.request');
+
+   Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token]);
+  })->name('password.reset');
 
     
 
 
-//});
+});
 
-<<<<<<< HEAD
-//Route::middleware(['guest', 'otpsessions'])->group(function () {
-=======
 Route::middleware(['otpsessions'])->group(function () {
->>>>>>> 0d8e52b (posts comit)
 
-    //Route::post('/otp/verify', [Authcontroller::class, 'verify'])
-        //->middleware('throttle:5,1')
-       // ->name('otp.verify');
+Route::middleware(['otpsessions'])->group(function () {
 
-   // Route::get('/otp', [Authcontroller::class, 'otpForm'])
-       // ->middleware('otpsessions')
-      //  ->name('otp.form');
+    Route::post('/otp/verify', [Authcontroller::class, 'verify'])
+        ->middleware('throttle:5,1')
+       ->name('otp.verify');
 
-    //Route::post('/otp/resend', [Authcontroller::class, 'resendOtp'])
-        //->middleware(['otpsessions', 'throttle:3,10'])
-       // ->name('otp.resend');
+   Route::get('/otp', [Authcontroller::class, 'otpForm'])
+       ->middleware('otpsessions')
+      ->name('otp.form');
 
-    //Route::post('/otp/cancel', [AuthController::class, 'cancelOtp'])
-       // ->name('otp.cancel');
-//});
+    Route::post('/otp/resend', [Authcontroller::class, 'resendOtp'])
+        ->middleware(['otpsessions', 'throttle:3,10'])
+    ->name('otp.resend');
+
+    Route::post('/otp/cancel', [AuthController::class, 'cancelOtp'])
+        ->name('otp.cancel');
+});
 
 
 
 
     
-//Route::post('/logout', [Authcontroller::class, 'logout'])
-   // ->middleware('auth')
-   // ->name('logout');
+Route::post('/logout', [Authcontroller::class, 'logout'])
+   ->middleware('auth')
+   ->name('logout');
 
 
     

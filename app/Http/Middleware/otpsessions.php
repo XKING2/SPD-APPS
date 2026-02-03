@@ -15,24 +15,32 @@ class otpsessions
      */
     public function handle($request, Closure $next)
     {
-        // Kalau user sedang OTP process
-        if (session()->has('otp_user_id')) {
+        if (!session()->has('otp_user_id')) {
+            return $next($request);
+        }
 
-            $routeName = optional($request->route())->getName();
+        $route = $request->route();
 
-            $allowedRoutes = [
-                'otp.form',
-                'otp.verify',
-                'otp.resend',
-                'otp.cancel',
-            ];
+        if (!$route) {
+            return $next($request); // penting: cegah loop head / ajax
+        }
 
-            if (!in_array($routeName, $allowedRoutes)) {
-                return redirect()->route('otp.form');
-            }
+        $routeName = $route->getName();
+
+        $allowedRoutes = [
+            'otp.form',
+            'otp.verify',
+            'otp.resend',
+            'otp.cancel',
+        ];
+
+        // kalau bukan halaman OTP → redirect SATU KALI
+        if (!in_array($routeName, $allowedRoutes)) {
+            return redirect()->route('otp.form');
         }
 
         return $next($request);
     }
+
 
 }

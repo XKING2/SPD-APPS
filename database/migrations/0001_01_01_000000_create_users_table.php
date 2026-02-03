@@ -27,12 +27,31 @@ return new class extends Migration
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('name');
-            $table->foreignId('id_desas')->nullable()->constrained('desas') ->cascadeOnDelete();
+            $table->foreignId('id_desas')
+                ->nullable()
+                ->constrained('desas')
+                ->cascadeOnDelete();
+
             $table->string('email')->unique();
             $table->string('password');
+
             $table->enum('role', ['admin','users','penguji'])->default('users');
-            $table->enum('status', ['verify','actived'])->default('verify');
+
+            // STATUS AKUN (jelas & eksplisit)
+            $table->enum('status', [
+                'unverified', // belum OTP
+                'actived',    // normal
+                'suspended',  // diblok admin
+                'locked'      // auto-lock (abuse)
+            ])->default('unverified');
+
+            // JEJAK KEAMANAN
+            $table->timestamp('email_verified_at')->nullable();
+            $table->unsignedTinyInteger('login_attempts')->default(0);
+            $table->timestamp('locked_until')->nullable();
+
             $table->timestamps();
         });
 

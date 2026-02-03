@@ -125,8 +125,8 @@ class Authcontroller extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users,email',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email:dns|unique:users,email',
             'password' => 'required|min:8',
             'id_desas' => 'required|exists:desas,id',
         ]);
@@ -134,48 +134,75 @@ class Authcontroller extends Controller
         DB::beginTransaction();
 
         try {
+            // 1️⃣ Buat user (BELUM AKTIF)
             $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'password' => Hash::make($request->password),
-                'id_desas' => $request->id_desas,
-                'status'   => 'verify',
-                'role'     => 'users',
+                'name'               => $request->name,
+                'email'              => $request->email,
+                'password'           => Hash::make($request->password),
+                'id_desas'           => $request->id_desas,
+                'role'               => 'users',
+                'status'             => 'unverified',
+                'email_verified_at'  => null,
+                'login_attempts'     => 0,
+                'locked_until'       => null,
             ]);
 
+            // 2️⃣ Nonaktifkan OTP lama (kalau ada, edge case)
+            Verification::where('user_id', $user->id)
+                ->where('type', 'register')
+                ->where('status', 'active')
+                ->update([
+                    'status' => 'expired'
+                ]);
+
+            // 3️⃣ Generate OTP
             $otp = random_int(100000, 999999);
 
             Verification::create([
                 'user_id'    => $user->id,
-                'unique_id'  => Str::uuid(),
+                'unique_id'  => (string) Str::uuid(),
                 'otp'        => Hash::make($otp),
                 'type'       => 'register',
                 'send_via'   => 'email',
-                'resend'     => 0,
                 'attempts'   => 0,
+                'resend'     => 0,
                 'expires_at' => now()->addMinutes(5),
                 'status'     => 'active',
+
+                // audit (penting buat Android & Google)
+                'request_ip' => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
             ]);
 
+            // 4️⃣ Kirim OTP (queue aman)
             Mail::to($user->email)->queue(new OtpMail($otp));
 
             DB::commit();
 
-            // simpan user sementara (BUKAN LOGIN)
-            session(['otp_user_id' => $user->id]);
+            // 5️⃣ Simpan konteks OTP (BUKAN LOGIN)
+            session([
+                'otp_user_id' => $user->id,
+                'otp_type'    => 'register'
+            ]);
 
-            return redirect()->route('otp.form')
-                ->with('success', 'Kode OTP dikirim ke email.');
+            return redirect()
+                ->route('otp.form')
+                ->with('success', 'Kode OTP telah dikirim ke email Anda.');
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error($e);
+
+            Log::error('REGISTER OTP ERROR', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             return back()->withErrors([
-                'register' => 'Terjadi kesalahan sistem.'
+                'register' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
             ]);
         }
     }
+
 
     public function otpForm()
     {
@@ -193,6 +220,11 @@ class Authcontroller extends Controller
         ]);
 
         $userId = session('otp_user_id');
+
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
         $user = User::findOrFail($userId);
 
         $verification = Verification::where('user_id', $user->id)
@@ -202,44 +234,56 @@ class Authcontroller extends Controller
             ->first();
 
         if (!$verification) {
-            return back()->withErrors(['otp' => 'OTP tidak valid.']);
+            return back()->withErrors(['otp' => 'OTP tidak valid atau sudah digunakan.']);
         }
 
         if (now()->greaterThan($verification->expires_at)) {
             $verification->update(['status' => 'expired']);
-            return back()->withErrors(['otp' => 'OTP kadaluarsa.']);
+            return back()->withErrors(['otp' => 'OTP sudah kedaluwarsa.']);
         }
 
         if ($verification->attempts >= 5) {
-            $verification->update(['status' => 'blocked']);
 
-            // 🔥 HAPUS USER & SESSION
-            User::where('id', $user->id)->delete();
-            session()->forget('otp_user_id');
+            $verification->update([
+                'status' => 'blocked',
+                'expires_at' => now()->addMinutes(30) // cooldown
+            ]);
 
-            return redirect()->route('login')
-                ->withErrors([
-                    'email' => 'Verifikasi gagal. Silakan daftar ulang.'
-                ]);
+            return back()->withErrors([
+                'otp' => 'Terlalu banyak percobaan. Silakan tunggu 30 menit sebelum mencoba lagi.'
+            ]);
         }
 
         if (!Hash::check($request->otp, $verification->otp)) {
             $verification->increment('attempts');
-            return back()->withErrors(['otp' => 'OTP salah.']);
+            return back()->withErrors(['otp' => 'Kode OTP salah.']);
         }
 
         // ✅ OTP VALID
-        $verification->update(['status' => 'valid']);
-        $user->update(['status' => 'actived']);
+        DB::transaction(function () use ($user, $verification) {
 
-        // 🔥 HANCURKAN STATE OTP
+            $verification->update(['status' => 'valid']);
+
+            // expire OTP lain
+            Verification::where('user_id', $user->id)
+                ->where('type', 'register')
+                ->where('status', 'active')
+                ->update(['status' => 'expired']);
+
+            $user->update([
+                'status'             => 'actived',
+                'email_verified_at'  => now(),
+                'login_attempts'     => 0,
+                'locked_until'       => null,
+            ]);
+        });
+
         session()->forget('otp_user_id');
 
-        return redirect()->route('login')->with([
-            'status' => 'Verifikasi berhasil. Silakan login.'
-        ]);
-
+        return redirect()->route('login')
+            ->with('status', 'Verifikasi berhasil. Silakan login.');
     }
+
 
     public function cancelOtp(Request $request)
     {
@@ -288,83 +332,89 @@ class Authcontroller extends Controller
 
         if (!$userId) {
             return response()->json([
-                'message' => 'Session OTP tidak valid'
+                'success' => false,
+                'message' => 'Session OTP tidak valid.'
             ], 403);
         }
 
-        $user = User::find($userId);
+        $user = User::where('id', $userId)
+            ->where('status', 'unverified')
+            ->first();
 
-        // 🔒 Ambil OTP aktif terakhir
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun tidak ditemukan atau sudah terverifikasi.'
+            ], 404);
+        }
+
+        // Ambil OTP terakhir apa pun statusnya
         $verification = Verification::where('user_id', $user->id)
             ->where('type', 'register')
-            ->where('status', 'active')
             ->latest()
             ->first();
 
-        // 🔥 Kalau tidak ada OTP aktif → buat baru
-        if (!$verification) {
-            $code = rand(100000, 999999);
+        $now = now();
 
-            Verification::create([
-                'user_id'   => $user->id,
-                'unique_id' => Str::uuid(),
-                'otp'       => Hash::make($code),         // nanti bisa di-hash
-                'type'      => 'register',
-                'send_via'  => 'email',
-                'resend'    => 1,
-                'status'    => 'active',
-            ]);
-
-            Mail::to($user->email)->queue(new OtpMail($code));
-
-            // TAMBAHAN: Response untuk AJAX
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Kode OTP baru telah dikirim.'
-                ]);
-            }
-
-            return back()->with('success', 'Kode OTP baru telah dikirim.');
-        }
-
-        // 🔒 Batasi resend (anti spam)
-        if ($verification->resend >= 3) {
-            // TAMBAHAN: Response untuk AJAX
-            if ($request->expectsJson()) {
+        // Jika OTP diblokir karena attempts
+        if ($verification && $verification->status === 'blocked') {
+            if ($verification->expires_at && $now->lessThan($verification->expires_at)) {
+                // masih cooldown
                 return response()->json([
                     'success' => false,
-                    'message' => 'Batas kirim ulang OTP tercapai. Silakan tunggu beberapa saat.'
-                ], 400);
+                    'message' => 'OTP diblokir sementara. Coba lagi ' 
+                                . $verification->expires_at->diffForHumans()
+                ], 429);
             }
 
-            return back()->withErrors([
-                'otp' => 'Batas kirim ulang OTP tercapai. Silakan tunggu beberapa saat.'
+            // cooldown selesai → reset OTP
+            $verification->update([
+                'status'      => 'active',
+                'attempts'    => 0,
+                'resend'      => 0,
+                'expires_at'  => $now->addMinutes(5),
             ]);
         }
 
-        // 🔁 Generate OTP baru
-        $code = rand(100000, 999999);
+        // Batasi resend per OTP aktif, tapi jika blocked selesai → counter reset
+        if ($verification && $verification->status === 'active' && $verification->resend >= 3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Batas kirim ulang OTP tercapai. Tunggu beberapa menit.'
+            ], 429);
+        }
 
-        $verification->update([
-            'otp'    => Hash::make($code),
-            'resend' => $verification->resend + 1,
-            'attempts' => 0,
+        // Generate OTP baru
+        $code = random_int(100000, 999999);
+
+        // Nonaktifkan OTP lama
+        Verification::where('user_id', $user->id)
+            ->where('type', 'register')
+            ->where('status', 'active')
+            ->update(['status' => 'expired']);
+
+        // Buat OTP baru
+        Verification::create([
+            'user_id'    => $user->id,
+            'unique_id'  => Str::uuid(),
+            'otp'        => Hash::make($code),
+            'type'       => 'register',
+            'send_via'   => 'email',
+            'resend'     => 1, // reset resend tiap OTP baru
+            'attempts'   => 0,
             'expires_at' => now()->addMinutes(5),
+            'status'     => 'active',
         ]);
 
         Mail::to($user->email)->queue(new OtpMail($code));
 
-        // TAMBAHAN: Response untuk AJAX
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Kode OTP berhasil dikirim ulang.'
-            ]);
-        }
-
-        return back()->with('success', 'Kode OTP berhasil dikirim ulang.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP baru berhasil dikirim ke email Anda.'
+        ]);
     }
+
+
 
     public function forgotpass(Request $request)
     {

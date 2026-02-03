@@ -34,12 +34,15 @@ Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
 
 
+<<<<<<< HEAD
 
 Route::any('/login', fn () => abort(403));
 Route::any('/register', fn () => abort(403));
 Route::any('/forgot-pass', fn () => abort(403));
 Route::any('/otp', fn () => abort(403));
 Route::any('/otp/*', fn () => abort(403));
+=======
+>>>>>>> 0d8e52b (posts comit)
 Route::get('/', function () {
     return response()
         ->view('safe-home')
@@ -49,6 +52,7 @@ Route::get('/', function () {
 
 
 
+<<<<<<< HEAD
 //Route::get('/', function () {
    // return redirect()->route('login');
 //});
@@ -58,6 +62,21 @@ Route::get('/', function () {
 
    // Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
       //  ->name('register.form');
+=======
+    Route::get('/register', [Authcontroller::class, 'showRegisterForm'])
+      ->name('register.form');
+
+    Route::post('/register', [Authcontroller::class, 'register'])
+       ->middleware('throttle:5,10')
+      ->name('register');
+
+    Route::get('/login', [Authcontroller::class, 'showLoginForm'])
+       ->name('login');
+
+     Route::post('/login', [Authcontroller::class, 'login'])
+        ->middleware('throttle:5,1')
+->name('login.post');
+>>>>>>> 0d8e52b (posts comit)
 
    // Route::post('/register', [Authcontroller::class, 'register'])
        // ->middleware('throttle:5,10')
@@ -95,7 +114,11 @@ Route::get('/', function () {
 
 //});
 
+<<<<<<< HEAD
 //Route::middleware(['guest', 'otpsessions'])->group(function () {
+=======
+Route::middleware(['otpsessions'])->group(function () {
+>>>>>>> 0d8e52b (posts comit)
 
     //Route::post('/otp/verify', [Authcontroller::class, 'verify'])
         //->middleware('throttle:5,1')
@@ -218,7 +241,7 @@ Route::middleware(['auth','check.role:penguji'])->group(function () {
     Route::get('/Penguji/Nilai/Wawancara/{seleksiHash}/desa/{desaHash}', [WWNControl::class, 'shownilaiWWN'])->name('ShowWWN');
     Route::get('/Penguji/Tambah/Wawancara', [sidebar3control::class, 'showtambahWWNMain'])->name('tambahwawan');
     Route::get('/Penguji/AddSeleksi/WWN/desa/{desa}',[sidebar3control::class, 'resolveSeleksiByDesa6'])->name('praktik.resolve');
-    Route::post('/Penguji/Post/Add-Soal//WWN', [WWNControl::class, 'storeWawancara'])->name('exam-wawancara.import');
+    Route::post('/Penguji/Post/Add-Soal /WWN', [WWNControl::class, 'storeWawancara'])->name('exam-wawancara.import');
     Route::get('/Penguji/Add-Soal/WWN', [WWNControl::class, 'showtambahwawancara'])->name('addWWN');
     Route::get('/penguji/add-SOAL3/WWN',[WWNControl::class, 'create'])->name('createWWN');
     Route::post('/penguji/add-SOAL4/WWN',[WWNControl::class, 'store'])->name('WWN.store');

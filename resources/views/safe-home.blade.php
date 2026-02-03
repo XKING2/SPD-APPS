@@ -82,4 +82,8 @@
         </footer>
     </main>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> 0d8e52b (posts comit)
